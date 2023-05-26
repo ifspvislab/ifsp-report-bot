@@ -26,13 +26,22 @@ class MonthyReportForm(ui.Modal):
     """
 
     planned_activities = ui.TextInput(
-        label="Atividades planejadas", style=discord.TextStyle.paragraph
+        label="Atividades planejadas",
+        style=discord.TextStyle.paragraph,
+        min_length=200,
+        max_length=500,
     )
     performed_activities = ui.TextInput(
-        label="Atividades realizadas", style=discord.TextStyle.paragraph
+        label="Atividades realizadas",
+        style=discord.TextStyle.paragraph,
+        min_length=200,
+        max_length=500,
     )
     results = ui.TextInput(
-        label="Resultados obtidos", style=discord.TextStyle.paragraph
+        label="Resultados obtidos",
+        style=discord.TextStyle.paragraph,
+        min_length=200,
+        max_length=500,
     )
 
     def __init__(
