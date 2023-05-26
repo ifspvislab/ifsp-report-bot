@@ -10,7 +10,9 @@ Classes:
 
 """
 
+import locale
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from io import BytesIO
 
 from reportlab.lib import colors
@@ -26,6 +28,8 @@ from reportlab.platypus import (
 
 from . import styles
 
+locale.setlocale(locale.LC_TIME, "pt_BR.utf8")
+
 
 @dataclass
 class MonthlyReportData:
@@ -36,7 +40,6 @@ class MonthlyReportData:
         project_title (str): The title of the project.
         project_manager (str): The name of the project manager.
         student_name (str): The name of the student.
-        report_date (str): The date of the report.
         planned_activities (str): The planned activities for the month.
         performed_activities (str): The performed activities for the month.
         results (str): The results obtained.
@@ -46,10 +49,19 @@ class MonthlyReportData:
     project_title: str
     project_manager: str
     student_name: str
-    report_date: str
     planned_activities: str
     performed_activities: str
     results: str
+
+    def day_05_of_next_month(self) -> datetime:
+        """
+        Returns the date representing the 5th day of the next month.
+
+        Returns:
+            datetime: The date of the 5th day in the next month.
+        """
+        next_month = datetime.now() + timedelta(days=30)
+        return datetime(next_month.year, next_month.month, 5)
 
 
 class MonthlyReport:
@@ -152,7 +164,8 @@ class MonthlyReport:
         )
         student_name_par = Paragraph(self.data.student_name, styles.table_content_style)
         submission_date_par = Paragraph(
-            self.data.report_date, styles.table_content_style
+            self.data.day_05_of_next_month().strftime("%d/%m/%Y"),
+            styles.table_content_style,
         )
 
         report_table_data = [
@@ -191,8 +204,9 @@ class MonthlyReport:
         Sets up the activities section of the report.
 
         """
+        month_name = datetime.now().strftime("%B")
         activities_title = Paragraph(
-            "Resumo das atividades desenvolvidas no Mês de abril/2023",
+            f"Resumo das atividades desenvolvidas no mês de {month_name}/2023",
             styles.activities_title_style,
         )
         self.content.append(activities_title)

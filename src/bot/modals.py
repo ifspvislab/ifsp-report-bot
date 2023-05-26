@@ -80,7 +80,6 @@ class MonthyReportForm(ui.Modal):
                 project_title=student["project"]["title"],
                 project_manager=student["project"]["professor"],
                 student_name=student["name"],
-                report_date="05/06/2023",
                 planned_activities=self.planned_activities.value.strip(),
                 performed_activities=self.performed_activities.value.strip(),
                 results=self.results.value.strip(),

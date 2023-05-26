@@ -8,6 +8,8 @@ Functions:
 
 """
 
+from datetime import datetime
+
 import discord
 from discord.ext import commands
 
@@ -70,20 +72,47 @@ def start_bot(student_service: StudentService):
         :type interaction: discord.Interaction
 
         """
-        print(type(interaction.user.id))
+
+        def invalid_request_period():
+            """
+            Check if the request for generating the monthly report is within the allowed period.
+
+            :return: True if the request is outside the allowed period, False otherwise.
+            :rtype: bool
+            """
+            current_day = datetime.now().day
+            start_day = 23
+
+            if current_day < start_day:
+                return True
+
+            return False
+
+        errors = []
         student = student_service.find_student_by_discord_id(interaction.user.id)
 
         if student is None:
-            await interaction.response.send_message(
-                "Você não tem permissão para gerar relatório mensal"
-            )
+            errors.append("Você não tem permissão para gerar relatório mensal")
             logger.warning(
                 "User %s without permission tried to generate monthy report",
                 interaction.user.name,
             )
-        else:
+
+        if invalid_request_period():
+            errors.append("O período para gerar o relatório mensal inicia no dia 23")
+            logger.warning(
+                "User %s attempted to generate the monthly report outside the allowed period.",
+                interaction.user.name,
+            )
+
+        if not errors:
             logger.info("Monthy report user %s", interaction.user.name)
-            modal = MonthyReportForm(student_service)
-            await interaction.response.send_modal(modal)
+            await interaction.response.send_modal(MonthyReportForm(student_service))
+        else:
+            embed = discord.Embed(title=":cry: Problemas com a sua requisição")
+            for index, error in enumerate(errors):
+                embed.add_field(name=f"Erro {index+1}", value=error, inline=False)
+
+            await interaction.response.send_message(embed=embed)
 
     bot.run(settings.get_discord_bot_token())
