@@ -39,15 +39,15 @@ def _register_fonts():
     the font name and the corresponding font file path.
     """
     pdfmetrics.registerFont(
-        TTFont("Calibri", "assets/fonts/calibri/calibri-regular.ttf")
+        TTFont("Calibri", "./assets/fonts/calibri/calibri-regular.ttf")
     )
     pdfmetrics.registerFont(
-        TTFont("Calibri-Bold", "assets/fonts/calibri/calibri-bold.ttf")
+        TTFont("Calibri-Bold", "./assets/fonts/calibri/calibri-bold.ttf")
     )
     pdfmetrics.registerFont(
-        TTFont("Calibri-Italic", "assets/fonts/calibri/calibri-italic.ttf")
+        TTFont("Calibri-Italic", "./assets/fonts/calibri/calibri-italic.ttf")
     )
     pdfmetrics.registerFont(
-        TTFont("Calibri-Bold-Italic", "assets/fonts/calibri/calibri-bold-italic.ttf")
+        TTFont("Calibri-Bold-Italic", "./assets/fonts/calibri/calibri-bold-italic.ttf")
     )
     logger.info("register fonts executed")

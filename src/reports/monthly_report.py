@@ -112,7 +112,7 @@ class MonthlyReport:
         Sets up the header section of the report.
 
         """
-        logo = Image("assets/img/logo_federal.jpg", width=75, height=75)
+        logo = Image("./assets/img/logo_federal.jpg", width=75, height=75)
         logo.hAlign = "CENTER"
         self.content.append(logo)
 
