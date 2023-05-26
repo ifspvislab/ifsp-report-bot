@@ -1,6 +1,7 @@
 # IFSP Report Bot
 
 # How to run
+
 Make sure you have python 3.11 installed:
 
 ```bash
@@ -18,6 +19,13 @@ After project clone, run `pip install` to install project dependencies:
 pip install -r requirements.txt
 ```
 
+Before run, set the environment variable `DISCORD_BOT_TOKEN` with the value of the token available in the Discord Developer Portal.
+
+Run the project
+
+```bash
+python src/main.py
+```
 
 # Dev tasks
 
@@ -46,7 +54,7 @@ isort a Python library and command-line tool used to sort imports in Python code
 
 A line-by-line comparison of the proposed formatting changes without actually applying them.
 ```bash
-python -m isort src --diff --profile black
+python -m isort src --diff --check-only --profile black
 ```
 
 Format the Python code in the "src" directory using the black profile. This applies the import sorting and formatting changes. 
