@@ -27,19 +27,34 @@ Black is a Python code formatter for consistent and readable code.
 Check the problems:
 
 ```bash
-python -m black --check src
+python -m black src --check
 ```
 
 
 A line-by-line comparison of the proposed formatting changes without actually applying them.
 ```bash
-python -m black --diff src
+python -m black src --diff
 ```
 
 Formats Python code in the "src" directory using Black.
 ```bash
 python -m black src
 ```
+
+## isort
+isort a Python library and command-line tool used to sort imports in Python code.
+
+A line-by-line comparison of the proposed formatting changes without actually applying them.
+```bash
+python -m isort src --diff --profile black
+```
+
+Format the Python code in the "src" directory using the black profile. This applies the import sorting and formatting changes. 
+```bash
+python -m isort src --profile black
+```
+
+
 
 ## PyLint
 PyLint is a Python Linter for consistent and readable code.

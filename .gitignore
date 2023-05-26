@@ -311,3 +311,7 @@ fabric.properties
 
 # PDF files
 *.pdf
+
+assets/data/*.csv
+
+notes.txt
