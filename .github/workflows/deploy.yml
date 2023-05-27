@@ -1,0 +1,22 @@
+name: Deploy
+
+env:
+  SERVER_URL: ${{ secrets.SERVER_URL }}
+  PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+  PRIVATE_KEY_NAME: ${{ secrets.PRIVATE_KEY_NAME }}
+  ENV_VARS:  ${{ secrets.ENV_VARS }}
+  SCRIPT:  ${{ secrets.SCRIPT }}
+on:
+  push:
+    branches:
+      - feature/initial-monthly-report
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup key
+      run: |
+        echo "$PRIVATE_KEY" > ${PRIVATE_KEY_NAME}
+        chmod 600 ${PRIVATE_KEY_NAME}
+        ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR -i "$PRIVATE_KEY_NAME" ${SERVER_URL} "$SCRIPT feature/initial-monthly-report $ENV_VARS"

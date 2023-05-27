@@ -61,7 +61,7 @@ def start_bot(student_service: StudentService):
 
         """
         logger.info("Ping command user %s", interaction.user.name)
-        await interaction.response.send_message(f"pong {interaction.user.name}")
+        await interaction.response.send_message(f":ping_pong: {interaction.user.name}")
 
     @bot.tree.command(name="relatorio-mensal")
     async def open_monthy_report_form(interaction: discord.Interaction):
