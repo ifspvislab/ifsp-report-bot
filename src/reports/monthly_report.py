@@ -28,7 +28,7 @@ from reportlab.platypus import (
 
 from . import styles
 
-locale.setlocale(locale.LC_TIME, "pt_BR.utf8")
+locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
 
 
 @dataclass
