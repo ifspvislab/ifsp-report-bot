@@ -1,4 +1,4 @@
-name: Deploy
+name: deploy
 
 env:
   SERVER_URL: ${{ secrets.SERVER_URL }}
@@ -7,20 +7,26 @@ env:
   ENV_VARS:  ${{ secrets.ENV_VARS }}
   SCRIPT:  ${{ secrets.SCRIPT }}
 on:
-  push:
-    branches:
-      - feature/initial-monthly-report
   workflow_run:
-    workflows: ["Code Quality"]
-    types:
+    workflows: [code-quality]
+    types: 
       - completed
-
+    branches:
+      - "feature/initial-monthly-report"
+      - develop
 jobs:
-  deploy:
+  on-success:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
     - name: Setup key
       run: |
         echo "$PRIVATE_KEY" > ${PRIVATE_KEY_NAME}
         chmod 600 ${PRIVATE_KEY_NAME}
         ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR -i "$PRIVATE_KEY_NAME" ${SERVER_URL} "$SCRIPT feature/initial-monthly-report $ENV_VARS"
+  
+  on-failure:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    steps:
+      - run: echo 'The triggering workflow failed' && exit 1
