@@ -51,7 +51,7 @@ def start_bot(student_service: StudentService):
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
 
-    @bot.tree.command(name="ping")
+    @bot.tree.command(name="ping", description="Verifica se o bot está no ar")
     async def ping(interaction: discord.Interaction):
         """
         Command ping to 'send' a 'pong' response.
@@ -63,7 +63,10 @@ def start_bot(student_service: StudentService):
         logger.info("Ping command user %s", interaction.user.name)
         await interaction.response.send_message(f":ping_pong: {interaction.user.name}")
 
-    @bot.tree.command(name="relatorio-mensal")
+    @bot.tree.command(
+        name="relatorio-mensal",
+        description="Abre o formulário para gerar relatório mensal de ensino.",
+    )
     async def open_monthy_report_form(interaction: discord.Interaction):
         """
         Command 'relatorio-mensal' to open the monthly report form.
