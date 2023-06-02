@@ -2,7 +2,7 @@
 
 # How to run the project
 
-Make sure you have python 3.11 installed:
+Make sure you have Python 3.11 installed:
 
 ```bash
 python --version

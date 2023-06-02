@@ -26,8 +26,7 @@ class MonthyReportForm(ui.Modal):
     """
 
     planned_activities = ui.TextInput(
-        label="Atividades planejadas",
-        style=discord.TextStyle.paragraph,
+        label="Atividades planejadas", style=discord.TextStyle.paragraph,
         min_length=200,
         max_length=500,
     )
