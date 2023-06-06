@@ -10,3 +10,4 @@ Modules:
 """
 
 from .student_service import StudentService
+from .admin_service import AdminService

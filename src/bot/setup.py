@@ -14,7 +14,7 @@ import discord
 from discord.ext import commands
 
 import settings
-from services import StudentService
+from services import StudentService, AdminService
 
 from .modals import MonthyReportForm
 

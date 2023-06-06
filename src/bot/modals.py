@@ -9,12 +9,40 @@ Classes:
 """
 
 from io import BytesIO
+from typing import Optional
 
 import discord
 from discord import ui
+from discord.utils import MISSING
 
 from reports import MonthlyReport, MonthlyReportData
-from services import StudentService
+from services import StudentService, AdminService
+
+
+class AddCoordenatorModal(ui.Modal):
+
+    prontuario = ui.TextInput(label="Prontuário:", style=discord.TextStyle.short)
+    discord_id = ui.TextInput(label="Discord id:", style=discord.TextStyle.short)
+    name = ui.TextInput(label="Nome:", style=discord.TextStyle.short)
+    email = ui.TextInput(label="Email:", style=discord.TextStyle.short)
+
+    def __init__(
+        self,
+        admin_service: AdminService,
+    ) -> None:
+        super().__init__(title="Adicionar coordenador")
+        self.admin_service = admin_service
+
+    async def on_submit(self, interaction: discord.Interaction):
+
+        admin = ...
+
+        if admin is None:
+            await interaction.response.send_message(
+                "Você não tem permissão para gerar relatório mensal"
+            )
+        else:
+            ...
 
 
 class MonthyReportForm(ui.Modal):
