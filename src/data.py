@@ -7,8 +7,10 @@ This module provides functions for loading and processing data from CSV files.
 Functions:
     - _row_to_project(row: str) -> dict: Convert a row of project data to a dictionary.
     - _row_to_student(row: str) -> dict: Convert a row of student data to a dictionary.
+    - _row_to_members(row: str) -> dict: Convert a row of members data to a dictionary.
     - _load_projects() -> list[dict]: Load projects from the CSV file.
     - _load_students() -> list[dict]: Load students from the CSV file.
+    - _load_members() -> list[dict]: Load members from the CSV file.
     - load_students() -> list[dict]: Load students and associate them with their projects.
     
 """
@@ -52,6 +54,23 @@ def _row_to_student(row: str) -> dict:
         "project_id": fields[3],
     }
 
+def _row_to_member(row: str) -> dict:
+    """
+    Convert a row of member data to a dictionary.
+
+    :param row: The row of member data.
+    :type row: str
+    :return: A dictionary representing the member.
+    :rtype: dict
+    """
+    fields = [field.strip() for field in row.split(sep=",")]
+    return {
+        "prontuario": fields[0],
+        "discord_id": int(fields[1]),
+        "name": fields[2],
+        "email": fields[3],
+    }
+
 
 def _load_projects() -> list[dict]:
     """
@@ -79,6 +98,19 @@ def _load_students() -> list[dict]:
         for row in file:
             students.append(_row_to_student(row))
         return students
+    
+def load_members() -> list[dict]:
+    """
+    Load members from the CSV file.
+
+    :return: A list of member dictionaries.
+    :rtype: list[dict]
+    """
+    with open("assets/data/members.csv", "r", encoding="utf-8") as file:
+        members = []
+        for row in file:
+            members.append(_row_to_member(row))
+        return members
 
 
 def load_students() -> list[dict]:
