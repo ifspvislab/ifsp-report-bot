@@ -54,6 +54,7 @@ def _row_to_student(row: str) -> dict:
         "project_id": fields[3],
     }
 
+
 def _row_to_member(row: str) -> dict:
     """
     Convert a row of member data to a dictionary.
@@ -98,7 +99,8 @@ def _load_students() -> list[dict]:
         for row in file:
             students.append(_row_to_student(row))
         return students
-    
+
+
 def load_members() -> list[dict]:
     """
     Load members from the CSV file.
@@ -116,6 +118,7 @@ def load_members() -> list[dict]:
 def load_students() -> list[dict]:
     """
     Load students and associate them with their respective projects.
+
 
     :return: A list of student dictionaries with associated project information.
     :rtype: list[dict]
