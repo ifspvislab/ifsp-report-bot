@@ -16,7 +16,14 @@ from discord import ui
 from discord.utils import MISSING
 
 from reports import MonthlyReport, MonthlyReportData
+
+<<<<<<< HEAD
 from services import AdminService, StudentService
+
+=======
+from services import AdminService, StudentService
+
+>>>>>>> 9ce33cf6fcdce6cd1b75b355b398f174b3ce3a63
 
 
 class AddCoordenatorModal(ui.Modal):
