@@ -83,7 +83,7 @@ annex_text_style = ParagraphStyle(
     
 activities_text_style = ParagraphStyle(
     name = "HeaderText",
-    fontSize = 10,
+    fontSize = 12,
     fontName = "Calibri-Bold",
     textColor = colors.black,
     alignment = TA_CENTER,
@@ -92,7 +92,7 @@ activities_text_style = ParagraphStyle(
     
 observation_text_style = ParagraphStyle(
     name = "HeaderText",
-    fontSize = 10,
+    fontSize = 12,
     fontName = "Calibri",
     textColor = colors.black,
     leading = 12,
@@ -101,7 +101,7 @@ observation_text_style = ParagraphStyle(
     
 signatures_text_style = ParagraphStyle(
     name = "HeaderText",
-    fontSize = 10,
+    fontSize = 12,
     fontName = "Calibri",
     textColor = colors.black,
     leading = 12,
@@ -110,7 +110,7 @@ signatures_text_style = ParagraphStyle(
     
 participants_text_style = ParagraphStyle(
     name = "HeaderText",
-    fontSize = 10,
+    fontSize = 12,
     fontName = "Calibri",
     textColor = colors.black,
     leading = 12,
@@ -150,8 +150,8 @@ table_style = [
     ('GRID', (0, 0), (-1, -1), 1, 'black'),  # Grid lines
     ('BACKGROUND', (0, 0), (-1, -1), colors.white),  # Background color for all cells
     ('TEXTCOLOR', (0, 0), (-1, -1), 'black'),  # Text color for all cells
-    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),  # Font name for all cells (bold)
-    ('FONTSIZE', (0, 0), (-1, -1), 10),  # Font size for all cells
+    ('FONTNAME', (0, 0), (-1, -1), 'Calibri-Bold'),  # Font name for all cells (bold)
+    ('FONTSIZE', (0, 0), (-1, -1), 12),  # Font size for all cells
     ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Vertical alignment for all cells
     ('LEFTPADDING', (0, 0), (-1, -1), 4.72 * inch),  # Left padding for all cells
     ('RIGHTPADDING', (0, 0), (-1, -1), 3.16 * inch),  # Right padding for all cells
@@ -163,7 +163,7 @@ table = Table(table_data)
 table.setStyle(table_style)
 
 # Adiciona os elementos ao documento
-elements = [logo, spacer1, header_title, spacer1, information_paragraph, spacer2, public_notice_paragraph, spacer2, annex_paragraph, spacer2, activities_paragraph1, activities_paragraph2, table, observation_paragraph, spacer2, signatures_paragraph, spacer1, participants_paragraph1]
+elements = [logo, spacer1, header_title, spacer1, information_paragraph, spacer2, public_notice_paragraph, spacer2, annex_paragraph, spacer3, table, activities_paragraph1, activities_paragraph2, spacer1, observation_paragraph, spacer2, signatures_paragraph, spacer1, participants_paragraph1]
 
 # Cria o documento
 doc.build(elements)
