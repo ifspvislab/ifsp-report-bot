@@ -40,7 +40,12 @@ class AddMemberModal(ui.Modal, title="Adicionar Membro"):
         placeholder="O id do perfil do discord do membro sendo cadastrado.",
     )
 
-    async def on_submit(self, interaction: Interaction):
+    async def on_submit(self, interaction: Interaction, /):
+        """
+        Listen the modal submit event
+
+        :param interaction: The Discord interaction object
+        """
         print(f"prontuario: {self.prontuario}")
         print(f"prontuario: {self.name}")
         print(f"prontuario: {self.email}")
@@ -58,6 +63,9 @@ class SendModal(commands.Cog):
 
     @app_commands.command(name="send_modal", description="send modal")
     async def send_modal(self, interaction: discord.Interaction):
+        """
+        Sends the AddMemberModal as a modal in response to an interaction.
+        """
         await interaction.response.send_modal(AddMemberModal())
 
 

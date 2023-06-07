@@ -121,9 +121,11 @@ def start_bot(student_service: StudentService):
     @bot.command()
     async def sync(ctx):
         """
-        Command that sync all slashes commands in a guild
+        Command that updates the bot's command representation
+
+        :param ctx: Command context object
         """
-        fmt = await bot.tree.sync(guild=ctx.guild)
-        await ctx.send(f"Sync")
+        await bot.tree.sync(guild=ctx.guild)
+        await ctx.send("Sync")
 
     bot.run(settings.get_discord_bot_token())
