@@ -46,7 +46,7 @@ def start_bot(student_service: StudentService):
          the latest information about all available commands and their respective settings.
 
         """
-
+        await bot.load_extension("cogs.add_member")
         # updates the bot's command representation
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
@@ -117,5 +117,13 @@ def start_bot(student_service: StudentService):
                 embed.add_field(name=f"Erro {index+1}", value=error, inline=False)
 
             await interaction.response.send_message(embed=embed)
+
+    @bot.command()
+    async def sync(ctx):
+        """
+        Command that sync all slashes commands in a guild
+        """
+        fmt = await bot.tree.sync(guild=ctx.guild)
+        await ctx.send(f"Sync")
 
     bot.run(settings.get_discord_bot_token())
