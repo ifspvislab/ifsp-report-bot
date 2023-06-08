@@ -4,16 +4,24 @@ data
 
 This module provides functions for loading and processing data from CSV files.
 
+Classes:
+    - Attendances
+
 Functions:
     - _row_to_project(row: str) -> dict: Convert a row of project data to a dictionary.
     - _row_to_student(row: str) -> dict: Convert a row of student data to a dictionary.
     - _load_projects() -> list[dict]: Load projects from the CSV file.
     - _load_students() -> list[dict]: Load students from the CSV file.
     - load_students() -> list[dict]: Load students and associate them with their projects.
+    - _strtime_to_time(strtime: str) -> time: Converts from string type to time type.
+    - _row_to_attend(row: str) -> Attendance: Create a Attendance from a row string.
+    - _load_attend() -> list[Attendance]: Read the saved Attendances.
+    - load_attend() -> list[Attendance]: Returns all saved Attendences.
     
 """
 
-from datetime import datetime
+from dataclasses import dataclass
+from datetime import datetime, time
 
 
 def _row_to_project(row: str) -> dict:
@@ -98,3 +106,73 @@ def load_students() -> list[dict]:
                 break
 
     return students
+
+
+@dataclass
+class Attendance:
+    """
+    Data Class for attendances
+    """
+
+    attendance_id: int
+    student_id: int
+    day: int
+    start_time: time
+    exit_time: time
+
+
+def _strtime_to_time(strtime: str) -> time:
+    """
+    Converts from string type to time type
+
+    :param strtime: The string data to be converted
+    :type strtime: str
+    :return: A time in HH:MM format
+    :rtype: time
+    """
+    split_time = [int(part) for part in strtime.split(":")]
+    return time(hour=split_time[0], minute=split_time[1])
+
+
+def _row_to_attend(row: str) -> Attendance:
+    """
+    Create a new Attendance from a row of data in string type
+
+    :param row: The row of data to be made into an Attendance
+    :type row: str
+    :return: A Attendance instance
+    :rtype: Attendance
+    """
+    fields = [field.strip() for field in row.split(sep=",")]
+    return Attendance(
+        int(fields[0]),
+        int(fields[1]),
+        int(fields[2]),
+        _strtime_to_time(fields[3]),
+        _strtime_to_time(fields[4]),
+    )
+
+
+def _load_attend() -> list[Attendance]:
+    """
+    Read the assets/data/attendances.csv file and create a list of all saved Attendances
+
+    :return: The list of all saved Attendences
+    :rtype: list[Attendance]
+    """
+    with open("assets/data/attendances.csv", "r", encoding="utf-8") as file:
+        attendances = []
+        for row in file:
+            attendances.append(_row_to_attend(row))
+        return attendances
+
+
+def load_attend() -> list[Attendance]:
+    """
+    Calls _load_attendances() and send the data to the caller.
+
+    :return: The list of all saved Attendences
+    :rtype: list[Attendance]
+    """
+    attendances = _load_attend()
+    return attendances

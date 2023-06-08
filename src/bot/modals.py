@@ -5,6 +5,7 @@ This module defines classes for modal forms used in Discord bot interactions.
 
 Classes:
 - MonthyReportForm: Represents a monthly report form for generating monthly reports.
+- AttendanceSheetForm: A Class modal that represents a form for adding a new project attendance
 
 """
 
@@ -100,3 +101,13 @@ class MonthyReportForm(ui.Modal):
                     spoiler=False,
                 ),
             )
+
+
+class AttendanceSheetForm(ui.Modal):
+    """
+    A Class modal that represents a form for adding a new project attendance
+    """
+
+    day = ui.TextInput(label="Data da presença", placeholder="Dia do mês")
+    entry_time = ui.TextInput(label="Hora de entrada", placeholder="hh:mm")
+    exit_time = ui.TextInput(label="Hora de saída", placeholder="hh:mm")
