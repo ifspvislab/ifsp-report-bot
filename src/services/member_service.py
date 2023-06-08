@@ -8,7 +8,7 @@ Class:
     - MemberService: Service class for managing member data
 """
 
-from data import load_members, add_member
+from data import add_member, load_members
 
 
 class MemberService:
