@@ -16,6 +16,7 @@ import discord
 from discord import app_commands, ui
 from discord.ext import commands
 from discord.interactions import Interaction
+from services import MemberService
 
 
 class AddMemberModal(ui.Modal, title="Adicionar Membro"):
@@ -46,10 +47,13 @@ class AddMemberModal(ui.Modal, title="Adicionar Membro"):
 
         :param interaction: The Discord interaction object
         """
-        print(f"prontuario: {self.prontuario}")
-        print(f"prontuario: {self.name}")
-        print(f"prontuario: {self.email}")
-        print(f"prontuario: {self.discord_id}")
+        member = MemberService(
+            self.prontuario.value,
+            self.name.value,
+            self.email.value,
+            self.discord_id.value,
+        )
+        member.verify_standarts(self)
         await interaction.response.send_message("Processo completo!!!")
 
 

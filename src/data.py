@@ -10,8 +10,9 @@ Functions:
     - _row_to_members(row: str) -> dict: Convert a row of members data to a dictionary.
     - _load_projects() -> list[dict]: Load projects from the CSV file.
     - _load_students() -> list[dict]: Load students from the CSV file.
-    - _load_members() -> list[dict]: Load members from the CSV file.
+    - load_members() -> list[dict]: Load members from the CSV file.
     - load_students() -> list[dict]: Load students and associate them with their projects.
+    - add_member(): Add project member data to the CVS file
     
 """
 
@@ -133,3 +134,16 @@ def load_students() -> list[dict]:
                 break
 
     return students
+
+
+def add_member(prontuario, name, email, discord_id):
+    """
+    Add project member data to the CVS file
+
+    :param prontuario: member prontuario
+    :param prontuario: member name
+    :param prontuario: member email
+    :param prontuario: member discord_id
+    """
+    with open("assets/data/members.csv", "a", encoding="UTF-8") as member_data:
+        member_data.write(f"{prontuario}, {discord_id}, {name}, {email}\n")
