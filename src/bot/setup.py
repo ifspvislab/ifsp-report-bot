@@ -17,6 +17,7 @@ import settings
 from services import AttendanceService, StudentService
 
 from .modals import AttendanceSheetForm, MonthyReportForm
+from .utils import show_errors
 
 logger = settings.logging.getLogger(__name__)
 
@@ -135,12 +136,10 @@ def start_bot(student_service: StudentService, attendance_service: AttendanceSer
             )
         if not errors:
             logger.info("Attendance sheet user %s", interaction.user.name)
-            await interaction.response.send_modal(AttendanceSheetForm(attendance_service))
+            await interaction.response.send_modal(
+                AttendanceSheetForm(attendance_service)
+            )
         else:
-            embed = discord.Embed(title="Opa, parece que encontramos problemas!")
-            for index, error in enumerate(errors):
-                embed.add_field(name=f"Erro {index+1}", value=error, inline=False)
-
-            await interaction.response.send_message(embed=embed)
+            await interaction.response.send_message(embed=show_errors(errors))
 
     bot.run(settings.get_discord_bot_token())

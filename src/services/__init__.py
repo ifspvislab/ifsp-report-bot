@@ -9,5 +9,5 @@ Modules:
 
 """
 
-from .student_service import StudentService
 from .attendance_service import AttendanceService
+from .student_service import StudentService

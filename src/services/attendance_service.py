@@ -105,6 +105,16 @@ class AttendanceService:
         if test_time > time(hour=13, minute=0) and weekday == 5:
             return None
         return test_time
-    
+
     def is_entry_before(self, entry_time: time, exit_time: time) -> bool:
+        """
+        Tests if the exit time passed by the user is before the entry time
+
+        :param entry_time: The entry time passed by the user
+        :type entry_time: time
+        :param exit_time: The exit time passed by the user
+        :type exit_time: time
+        :return: True if the entry is before and false if it is not
+        :rtype: bool
+        """
         return entry_time < exit_time

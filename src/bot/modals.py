@@ -9,8 +9,7 @@ Classes:
 
 """
 
-from datetime import datetime, time
-
+from datetime import datetime
 from io import BytesIO
 
 import discord
@@ -18,6 +17,8 @@ from discord import ui
 
 from reports import MonthlyReport, MonthlyReportData
 from services import AttendanceService, StudentService
+
+from .utils import show_errors
 
 
 class MonthyReportForm(ui.Modal):
@@ -110,16 +111,34 @@ class AttendanceSheetForm(ui.Modal):
     A Class modal that represents a form for adding a new project attendance
     """
 
-    day_field = ui.TextInput(label="Data da presença", placeholder="Dia do mês", required=False)
+    day_field = ui.TextInput(
+        label="Data da presença", placeholder="Dia do mês", required=False
+    )
     entry_time_field = ui.TextInput(label="Hora de entrada", placeholder="hh:mm")
     exit_time_field = ui.TextInput(label="Hora de saída", placeholder="hh:mm")
 
-    def __init__(self, attendance_service: AttendanceService):
+    def __init__(self, attendance_service: AttendanceService, /):
+        """
+        Initialize the AttendanceSheetForm instance.
+
+        :param attendance_service: An instance of the AttendanceService class.
+        :type attendance_service: AttendanceService
+
+        """
         super().__init__(title="Folha de frequência")
         self.attendance_service = attendance_service
-    
 
-    async def on_submit(self, interaction: discord.Interaction) -> None:
+    async def on_submit(self, interaction: discord.Interaction, /) -> None:
+        """
+        Handle the submit event of the form.
+
+        This method is called when the user submits the form.
+        It tests the data sent by the user and if it is valid, creates a new attendance register
+
+        :param interaction: The Discord interaction object.
+        :type interaction: discord.Interaction
+
+        """
         errors = []
 
         if self.day_field.value is None:
@@ -128,22 +147,19 @@ class AttendanceSheetForm(ui.Modal):
             day = self.attendance_service.validate_day(self.day_field.value)
             if day is None:
                 # If the day is invalid, we can't get it's weekday, so the program
-                # returns just this error without appending it in the errors list
-                embed = discord.Embed(title="Opa, parece que encontramos problemas!")
-                embed.add_field(name="Erro 1", value="O dia passado é inválido", inline=False)
-                await interaction.response.send_message(embed=embed)
-                return  
-        
+                # shows this error and returns without testing other values
+                errors.append("O dia passado é inválido.")
+                await interaction.response.send_message(embed=show_errors(errors))
+                return
+
         entry_time = self.attendance_service.validate_time(
-            weekday=day.weekday(),
-            param_time=self.entry_time_field.value
+            weekday=day.weekday(), param_time=self.entry_time_field.value
         )
         if entry_time is None:
             errors.append("O horário de entrada é inválido.")
 
         exit_time = self.attendance_service.validate_time(
-            weekday=day.weekday(),
-            param_time=self.exit_time_field.value
+            weekday=day.weekday(), param_time=self.exit_time_field.value
         )
         if exit_time is None:
             errors.append("O horário de saída é inválido.")
@@ -155,9 +171,4 @@ class AttendanceSheetForm(ui.Modal):
         if not errors:
             await interaction.response.send_message("Dados válidos")
         else:
-            embed = discord.Embed(title="Opa, parece que encontramos problemas!")
-            for index, error in enumerate(errors):
-                embed.add_field(name=f"Erro {index+1}", value=error, inline=False)
-
-            await interaction.response.send_message(embed=embed)
-        
+            await interaction.response.send_message(embed=show_errors(errors))
