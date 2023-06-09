@@ -142,6 +142,7 @@ class AttendanceSheetForm(ui.Modal):
             day=self.day_field.value,
             entry_time=self.entry_time_field.value,
             exit_time=self.exit_time_field.value,
+            user=interaction.user.id,
         )
 
         if not errors:

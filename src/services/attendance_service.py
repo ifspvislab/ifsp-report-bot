@@ -7,9 +7,10 @@ This module provides the AttendanceService class for managing Attendance data.
 Classes:
     - AttendanceService: Service class for managing attendance data.
 """
+import uuid
 from datetime import datetime, time
 
-from data import Attendance, load_attend
+from data import Attendance, load_attend, save_attend
 
 
 class AttendanceService:
@@ -40,7 +41,7 @@ class AttendanceService:
 
         Sets up the initial state by creating an empty `database` list to store attendance data.
         """
-        self.database = []
+        self.database = load_attend()
 
     def find_attendances_by_discord_id(self, discord_id: int) -> list[Attendance]:
         """
@@ -51,8 +52,7 @@ class AttendanceService:
         :return: A list of all Attendances associated with a student's discord id
         :rtype: list[Attendance]
         """
-        if not self.database:
-            self.database = load_attend()
+
         student_attendances = []
         for attendance in self.database:
             if discord_id == attendance.student_id:
@@ -123,7 +123,9 @@ class AttendanceService:
         """
         return entry_time < exit_time
 
-    def validate_data(self, day: str, entry_time: str, exit_time: str) -> list[str]:
+    def validate_data(
+        self, day: str, entry_time: str, exit_time: str, user: int
+    ) -> list[str]:
         """
         Validates the day, entry time and exit time sent by the user and return the errors
 
@@ -139,7 +141,7 @@ class AttendanceService:
         test_day = day
         errors = []
 
-        if day is None:
+        if test_day is None:
             test_day = datetime.now()
         else:
             test_day = self._validate_day(day)
@@ -166,5 +168,22 @@ class AttendanceService:
                 entry_time=test_entry_time, exit_time=test_exit_time
             ):
                 errors.append("O horário de saída não pode ser anterior ao de entrada.")
+
+        # These "is not None" conditions are here just so pylance stops making my code red
+        # This is not needed since the errors list is appended if times are None
+        if not errors and test_entry_time is not None and test_exit_time is not None:
+            # For keeping the lazy loading technique, the attendances are appended in the
+            # database and are also saved in the attendances.csv file.
+            # By making this, the program can avoid input operations from the file,
+            # reading directly from the database list
+            new_attend = Attendance(
+                attendance_id=str(uuid.uuid4()),
+                student_id=user,
+                day=test_day,
+                entry_time=test_entry_time,
+                exit_time=test_exit_time,
+            )
+            self.database.append(new_attend)
+            save_attend(new_attend)
 
         return errors

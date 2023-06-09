@@ -114,10 +114,10 @@ class Attendance:
     Data Class for attendances
     """
 
-    attendance_id: int
+    attendance_id: str
     student_id: int
-    day: int
-    start_time: time
+    day: datetime
+    entry_time: time
     exit_time: time
 
 
@@ -134,6 +134,20 @@ def _strtime_to_time(strtime: str) -> time:
     return time(hour=split_time[0], minute=split_time[1])
 
 
+def _strdate_to_date(strdate: str) -> datetime:
+    """
+    Converts from string type to datetime type
+    Dates are saved in dd/mm/yyyy format
+
+    :param strdate: The string data to be converted
+    :type strdate: str
+    :return: A date
+    :rtype: datetime
+    """
+    split_date = [int(part) for part in strdate.split("/")]
+    return datetime(day=split_date[0], month=split_date[1], year=split_date[2])
+
+
 def _row_to_attend(row: str) -> Attendance:
     """
     Create a new Attendance from a row of data in string type
@@ -145,9 +159,9 @@ def _row_to_attend(row: str) -> Attendance:
     """
     fields = [field.strip() for field in row.split(sep=",")]
     return Attendance(
-        int(fields[0]),
+        fields[0],
         int(fields[1]),
-        int(fields[2]),
+        _strdate_to_date(fields[2]),
         _strtime_to_time(fields[3]),
         _strtime_to_time(fields[4]),
     )
@@ -176,3 +190,24 @@ def load_attend() -> list[Attendance]:
     """
     attendances = _load_attend()
     return attendances
+
+
+def save_attend(attend: Attendance) -> bool:
+    """
+    Saves the data sent by the student in attendances.csv
+
+    :returns: True if the operation was a success or False if something went wrong
+    :rtype: bool
+    """
+
+    line = ""
+    line += f"{attend.attendance_id}"
+    line += f",{attend.student_id}"
+    line += f",{attend.day.strftime('%d/%m/%Y')}"
+    line += f",{attend.entry_time.strftime('%H:%M')}"
+    line += f",{attend.exit_time.strftime('%H:%M')}\n"
+
+    with open("assets/data/attendances.csv", "a", encoding="utf-8") as file:
+        file.write(line)
+
+    return True
