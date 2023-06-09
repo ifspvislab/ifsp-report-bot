@@ -20,10 +20,14 @@ class AttendanceService:
         - __init__(): Initialize the AttendanceService object.
         - find_attendances_by_discord_id(self, discord_id: int) -> list[Attendance]:
         Find all attendances by Discord ID in the attendances database.
-        - is_valid_day(self, test_day: str) -> None | datetime:
+        - _is_valid_day(self, test_day: str) -> None | datetime:
         Verifies if the day passed by the user is valid.
-        - is_valid_time(self, weekday: int, param_time: str) -> None | time:
+        - _is_valid_time(self, weekday: int, param_time: str) -> None | time:
         Verifies if the time passed by the user is valid.
+        - _is_entry_before(self, entry_time: time, exit_time: time) -> bool:
+        Tests if the exit time passed by the user is before the entry time
+        - validate_data(self, day: str, entry_time: str, exit_time: str) -> list[str]:
+        Validates the day, entry time and exit time sent by the user and return the errors
 
 
     Attributes:
@@ -55,7 +59,7 @@ class AttendanceService:
                 student_attendances.append(attendance)
         return student_attendances
 
-    def validate_day(self, test_day: str) -> None | datetime:
+    def _validate_day(self, test_day: str) -> None | datetime:
         """
         Verifies if the day passed by the user is valid.
         Ex: Verifies if the day is a sunday or a existent date (based on the current month)
@@ -76,7 +80,7 @@ class AttendanceService:
             return None
         return date
 
-    def validate_time(self, weekday: int, param_time: str) -> None | time:
+    def _validate_time(self, weekday: int, param_time: str) -> None | time:
         """
         Verifies if the time passed by the user is valid.
         Ex: Verifies if the time is before 6:30 or after 23:30 (13h on saturdays)
@@ -106,7 +110,7 @@ class AttendanceService:
             return None
         return test_time
 
-    def is_entry_before(self, entry_time: time, exit_time: time) -> bool:
+    def _is_entry_before(self, entry_time: time, exit_time: time) -> bool:
         """
         Tests if the exit time passed by the user is before the entry time
 
@@ -118,3 +122,49 @@ class AttendanceService:
         :rtype: bool
         """
         return entry_time < exit_time
+
+    def validate_data(self, day: str, entry_time: str, exit_time: str) -> list[str]:
+        """
+        Validates the day, entry time and exit time sent by the user and return the errors
+
+        :param day: The day passed by the user
+        :type day: str
+        :param entry_time: The entry time passed by the user
+        :type entry_time: str
+        :param exit_time: The exit time passed by the user
+        :type exit_time: str
+        :return: A list of all the errors that happened during the execution
+        :rtype: list[str]
+        """
+        test_day = day
+        errors = []
+
+        if day is None:
+            test_day = datetime.now()
+        else:
+            test_day = self._validate_day(day)
+            if test_day is None:
+                # If the day is invalid, we can't get it's weekday, so the program
+                # shows this error and returns without testing other values
+                errors.append("O dia passado é inválido.")
+                return errors
+
+        test_entry_time = self._validate_time(
+            weekday=test_day.weekday(), param_time=entry_time
+        )
+        if test_entry_time is None:
+            errors.append("O horário de entrada é inválido.")
+
+        test_exit_time = self._validate_time(
+            weekday=test_day.weekday(), param_time=exit_time
+        )
+        if test_exit_time is None:
+            errors.append("O horário de saída é inválido.")
+
+        if test_entry_time is not None and test_exit_time is not None:
+            if not self._is_entry_before(
+                entry_time=test_entry_time, exit_time=test_exit_time
+            ):
+                errors.append("O horário de saída não pode ser anterior ao de entrada.")
+
+        return errors

@@ -314,4 +314,7 @@ fabric.properties
 
 assets/data/*.csv
 
+format.sh
+problems.sh
+
 notes.txt

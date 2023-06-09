@@ -9,7 +9,6 @@ Classes:
 
 """
 
-from datetime import datetime
 from io import BytesIO
 
 import discord
@@ -139,34 +138,11 @@ class AttendanceSheetForm(ui.Modal):
         :type interaction: discord.Interaction
 
         """
-        errors = []
-
-        if self.day_field.value is None:
-            day = datetime.now()
-        else:
-            day = self.attendance_service.validate_day(self.day_field.value)
-            if day is None:
-                # If the day is invalid, we can't get it's weekday, so the program
-                # shows this error and returns without testing other values
-                errors.append("O dia passado é inválido.")
-                await interaction.response.send_message(embed=show_errors(errors))
-                return
-
-        entry_time = self.attendance_service.validate_time(
-            weekday=day.weekday(), param_time=self.entry_time_field.value
+        errors = self.attendance_service.validate_data(
+            day=self.day_field.value,
+            entry_time=self.entry_time_field.value,
+            exit_time=self.exit_time_field.value,
         )
-        if entry_time is None:
-            errors.append("O horário de entrada é inválido.")
-
-        exit_time = self.attendance_service.validate_time(
-            weekday=day.weekday(), param_time=self.exit_time_field.value
-        )
-        if exit_time is None:
-            errors.append("O horário de saída é inválido.")
-
-        if entry_time is not None and exit_time is not None:
-            if self.attendance_service.is_entry_before(entry_time, exit_time):
-                errors.append("O horário de saída não pode ser anterior ao de entrada.")
 
         if not errors:
             await interaction.response.send_message("Dados válidos")
