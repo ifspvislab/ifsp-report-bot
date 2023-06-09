@@ -9,13 +9,15 @@ Classes:
 
 """
 
+from datetime import datetime, time
+
 from io import BytesIO
 
 import discord
 from discord import ui
 
 from reports import MonthlyReport, MonthlyReportData
-from services import StudentService
+from services import AttendanceService, StudentService
 
 
 class MonthyReportForm(ui.Modal):
@@ -108,6 +110,54 @@ class AttendanceSheetForm(ui.Modal):
     A Class modal that represents a form for adding a new project attendance
     """
 
-    day = ui.TextInput(label="Data da presença", placeholder="Dia do mês")
-    entry_time = ui.TextInput(label="Hora de entrada", placeholder="hh:mm")
-    exit_time = ui.TextInput(label="Hora de saída", placeholder="hh:mm")
+    day_field = ui.TextInput(label="Data da presença", placeholder="Dia do mês", required=False)
+    entry_time_field = ui.TextInput(label="Hora de entrada", placeholder="hh:mm")
+    exit_time_field = ui.TextInput(label="Hora de saída", placeholder="hh:mm")
+
+    def __init__(self, attendance_service: AttendanceService):
+        super().__init__(title="Folha de frequência")
+        self.attendance_service = attendance_service
+    
+
+    async def on_submit(self, interaction: discord.Interaction) -> None:
+        errors = []
+
+        if self.day_field.value is None:
+            day = datetime.now()
+        else:
+            day = self.attendance_service.validate_day(self.day_field.value)
+            if day is None:
+                # If the day is invalid, we can't get it's weekday, so the program
+                # returns just this error without appending it in the errors list
+                embed = discord.Embed(title="Opa, parece que encontramos problemas!")
+                embed.add_field(name="Erro 1", value="O dia passado é inválido", inline=False)
+                await interaction.response.send_message(embed=embed)
+                return  
+        
+        entry_time = self.attendance_service.validate_time(
+            weekday=day.weekday(),
+            param_time=self.entry_time_field.value
+        )
+        if entry_time is None:
+            errors.append("O horário de entrada é inválido.")
+
+        exit_time = self.attendance_service.validate_time(
+            weekday=day.weekday(),
+            param_time=self.exit_time_field.value
+        )
+        if exit_time is None:
+            errors.append("O horário de saída é inválido.")
+
+        if entry_time is not None and exit_time is not None:
+            if self.attendance_service.is_entry_before(entry_time, exit_time):
+                errors.append("O horário de saída não pode ser anterior ao de entrada.")
+
+        if not errors:
+            await interaction.response.send_message("Dados válidos")
+        else:
+            embed = discord.Embed(title="Opa, parece que encontramos problemas!")
+            for index, error in enumerate(errors):
+                embed.add_field(name=f"Erro {index+1}", value=error, inline=False)
+
+            await interaction.response.send_message(embed=embed)
+        

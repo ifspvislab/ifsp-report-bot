@@ -14,14 +14,14 @@ import discord
 from discord.ext import commands
 
 import settings
-from services import StudentService
+from services import AttendanceService, StudentService
 
 from .modals import AttendanceSheetForm, MonthyReportForm
 
 logger = settings.logging.getLogger(__name__)
 
 
-def start_bot(student_service: StudentService):
+def start_bot(student_service: StudentService, attendance_service: AttendanceService):
     """
     Start bot.
 
@@ -128,14 +128,14 @@ def start_bot(student_service: StudentService):
         student = student_service.find_student_by_discord_id(interaction.user.id)
 
         if student is None:
-            errors.append("Você não tem permissão para gerar relatório mensal")
+            errors.append("Você não tem permissão para gerenciar a folha de presença")
             logger.warning(
-                "User %s without permission tried to generate monthy report",
+                "User %s without permission tried to add new data into attendance sheet",
                 interaction.user.name,
             )
         if not errors:
             logger.info("Attendance sheet user %s", interaction.user.name)
-            await interaction.response.send_modal(AttendanceSheetForm())
+            await interaction.response.send_modal(AttendanceSheetForm(attendance_service))
         else:
             embed = discord.Embed(title="Opa, parece que encontramos problemas!")
             for index, error in enumerate(errors):
