@@ -5,7 +5,7 @@ add_member
 This module display a modal that support project member data
     
 Classes:
-    - AddMemberModal: Class which represent the modal that support project member data
+    - ModalAddMember: Class which represent the modal that support project member data
     - SendModal: Command to display the AddMemberModal
 Function:
     - setup: Add SendModal class to list of cogs to be able to use.
@@ -19,13 +19,15 @@ from discord.interactions import Interaction
 
 from services import MemberService
 
+from data import add_member
 
-class AddMemberModal(ui.Modal, title="Adicionar Membro"):
+
+class ModalAddMember(ui.Modal, title="Adicionar Membro"):
     """
-    Class which represent the modal that support project member data
+    Class which represent the modal that support project member data and add members
 
     Methods:
-        - on_submit: Listen the modal submit event
+        - on_submit: Listen the modal submit event to add members
 
     Attributes:
         - prontuario: Represente the field prontuário
@@ -54,8 +56,13 @@ class AddMemberModal(ui.Modal, title="Adicionar Membro"):
             self.email.value,
             self.discord_id.value,
         )
-        member.verify_standarts(self)
-        await interaction.response.send_message("Processo completo!!!")
+
+        results = ""
+        for stats in member.verify_standarts(self):
+            results += f"{stats}\n"
+        if len(member.verify_standarts(self)) == 1:
+            add_member(self.prontuario, self.name, self.email, self.discord_id)
+        await interaction.response.send_message(results)
 
 
 class SendModal(commands.Cog):
@@ -71,7 +78,7 @@ class SendModal(commands.Cog):
         """
         Sends the AddMemberModal as a modal in response to an interaction.
         """
-        await interaction.response.send_modal(AddMemberModal())
+        await interaction.response.send_modal(ModalAddMember())
 
 
 async def setup(bot):

@@ -8,7 +8,8 @@ Class:
     - MemberService: Service class for managing member data
 """
 
-from data import add_member, load_members
+from data import load_members
+from validate_email_address import validate_email
 
 
 class MemberService:
@@ -30,7 +31,7 @@ class MemberService:
             The email property of the member.
         discord_id:
             The Discord ID property of the member.
-        check_ocurrance:
+        _check_ocurrance:
             Checks if the member already exists in the system.
         verify_standarts:
             Verifies the standards of the member's properties and adds the member to the system.
@@ -50,6 +51,7 @@ class MemberService:
         self._name = name
         self._email = email
         self._discord_id = discord_id
+        self._stats = []
 
     @property
     def prontuario(self):
@@ -78,8 +80,7 @@ class MemberService:
             and value[-1].isalnum()
             and len(value) == 9
         ):
-            raise ValueError("Prontuario incorreto")
-        print("Prontuario correto")
+            self._stats.append("Prontuario incorreto")
         self._prontuario = value
 
     @property
@@ -103,9 +104,8 @@ class MemberService:
         Raises:
             ValueError: If the provided email is invalid.
         """
-        if value.count("@") != 1:
-            raise ValueError("Email inválido")
-        print("email correto")
+        if not validate_email(value):
+            self._stats.append("email inválido")
         self._email = value
 
     @property
@@ -130,11 +130,10 @@ class MemberService:
             ValueError: If the provided Discord ID is invalid.
         """
         if not value.isnumeric():
-            raise ValueError("discord_id inválido")
-        print("discord_id correto")
+            self._stats.append("discord_id inválido")
         self._discord_id = value
 
-    def check_ocurrance(self):
+    def _check_ocurrance(self) -> str:
         """
         Checks if the member already exists in the system.
 
@@ -142,13 +141,12 @@ class MemberService:
             ValueError: If the member already exists.
         """
         for members in load_members():
-            if self.prontuario == members["prontuario"]:
-                raise ValueError("Já existe esse membro")
-        print("Novo membro")
+            if self._prontuario == members["prontuario"]:
+                return "Já existe esse membro"
 
-    def verify_standarts(self, member):
+    def verify_standarts(self, member) -> str:
         """
-        Verifies the standards of the member's properties and adds the member to the system.
+        Verifies the standards of the member's properties.
 
         Args:
             member: The member containing member properties.
@@ -156,8 +154,15 @@ class MemberService:
         Raises:
             ValueError: If any of the member properties are invalid or the member already exists.
         """
+        self._stats = []
         self.prontuario = member.prontuario.value
         self.email = member.email.value
         self.discord_id = member.discord_id.value
-        self.check_ocurrance()
-        add_member(self.prontuario, self._name, self.email, self.discord_id)
+        if self._check_ocurrance() != None:
+            self._stats.append(self._check_ocurrance())
+        if self._stats == []:
+            self._stats.append("Membro cadastrado com sucesso.")
+        else:
+            self._stats.append("Infelismente não foi possivel cadastrar.")
+
+        return self._stats
