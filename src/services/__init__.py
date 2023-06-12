@@ -9,5 +9,5 @@ Modules:
 
 """
 
-from .member_service import MemberService
+from .member_service import verify_standards
 from .student_service import StudentService

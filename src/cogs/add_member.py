@@ -17,7 +17,7 @@ from discord import app_commands, ui
 from discord.ext import commands
 from discord.interactions import Interaction
 
-from services import MemberService
+from services import verify_standards
 
 from data import add_member
 
@@ -50,18 +50,20 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
 
         :param interaction: The Discord interaction object
         """
-        member = MemberService(
+        standards_stats = verify_standards(
             self.prontuario.value,
-            self.name.value,
             self.email.value,
             self.discord_id.value,
         )
 
-        results = ""
-        for stats in member.verify_standarts(self):
-            results += f"{stats}\n"
-        if len(member.verify_standarts(self)) == 1:
-            add_member(self.prontuario, self.name, self.email, self.discord_id)
+        results = "\n".join(standards_stats)
+        if len(standards_stats) == 1:
+            add_member(
+                self.prontuario.value.upper(),
+                self.name.value,
+                self.email.value,
+                self.discord_id.value,
+            )
         await interaction.response.send_message(results)
 
 
