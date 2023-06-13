@@ -15,41 +15,69 @@ import discord
 from discord import ui
 from discord.utils import MISSING
 
+from data import add_coordinator
 from reports import MonthlyReport, MonthlyReportData
+from services import (
+    Coordinator,
+    CoordinatorAlreadyExists,
+    CoordinatorService,
+    DiscordIdError,
+    EmailError,
+    ProntuarioError,
+    StudentService,
+)
 
-<<<<<<< HEAD
-from services import AdminService, StudentService
 
-=======
-from services import AdminService, StudentService
-
->>>>>>> 9ce33cf6fcdce6cd1b75b355b398f174b3ce3a63
-
-
-class AddCoordenatorModal(ui.Modal):
+class AddCoordinatorModal(ui.Modal):
 
     prontuario = ui.TextInput(label="Prontuário:", style=discord.TextStyle.short)
     discord_id = ui.TextInput(label="Discord id:", style=discord.TextStyle.short)
     name = ui.TextInput(label="Nome:", style=discord.TextStyle.short)
     email = ui.TextInput(label="Email:", style=discord.TextStyle.short)
 
-    def __init__(
-        self,
-        admin_service: AdminService,
-    ) -> None:
+    def __init__(self) -> None:
         super().__init__(title="Adicionar coordenador")
-        self.admin_service = admin_service
+        # self.coordinator_service = coordinator_service
 
     async def on_submit(self, interaction: discord.Interaction):
+        coordinator = Coordinator(
+            self.prontuario.value,
+            self.discord_id.value,
+            self.name.value,
+            self.email.value,
+        )
 
-        admin = ...
+        # Criar uma instância da classe CoordinatorService
+        coordinator_service = CoordinatorService(coordinator)
 
-        if admin is None:
+        try:
+            # Chamar o método verify_standards para verificar e cadastrar o coordenador
+            coordinator_service.verify_standards(coordinator)
+
+            # Se não houver exceção, significa que o coordenador foi cadastrado com sucesso
             await interaction.response.send_message(
-                "Você não tem permissão para gerar relatório mensal"
+                "Coordenador cadastrado com sucesso!"
             )
-        else:
-            ...
+
+        except ValueError as e:
+            # Capturar exceção de valor inválido (por exemplo, prontuário, email, discord id inválido)
+            await interaction.response.send_message(str(e))
+
+        except CoordinatorAlreadyExists as e:
+            # Capturar exceção de coordenador já existente
+            await interaction.response.send_message(str(e))
+
+        except ProntuarioError as e:
+            # Capturar exceção de coordenador já existente
+            await interaction.response.send_message(str(e))
+
+        except DiscordIdError as e:
+            # Capturar exceção de coordenador já existente
+            await interaction.response.send_message(str(e))
+
+        except EmailError as e:
+            # Capturar exceção de coordenador já existente
+            await interaction.response.send_message(str(e))
 
 
 class MonthyReportForm(ui.Modal):

@@ -8,24 +8,22 @@ Functions:
 
 """
 
+import os
 from datetime import datetime
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 
 import settings
-
-<<<<<<< HEAD
-from services import AdminService, StudentService
-
-=======
-from services import AdminService, StudentService
-
->>>>>>> 9ce33cf6fcdce6cd1b75b355b398f174b3ce3a63
-
-from .modals import MonthyReportForm
+from bot.modals import AddCoordinatorModal, MonthyReportForm
+from services import AdminService, CoordinatorService, StudentService
 
 logger = settings.logging.getLogger(__name__)
+
+
+def teste(interaction: discord.Interaction):
+    return False
 
 
 def start_bot(student_service: StudentService):
@@ -54,12 +52,32 @@ def start_bot(student_service: StudentService):
 
         """
 
+        # await bot.load_extension("cogs.add_coordinator")
+
         # updates the bot's command representation
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
 
+    @bot.tree.command(
+        name="cadastrar-coordenador", description="registrar coordenador via modal"
+    )
+    @app_commands.check(AdminService.is_admin)
+    async def add_coordinator(interaction: discord.Interaction):
+        """Verification and call for pop up the modal"""
+        await interaction.response.send_modal(AddCoordinatorModal())
+
+        logger.info("cadastrar-coordenador command user %s", interaction.user.name)
+
+    @add_coordinator.error
+    async def add_coordinator_error(interaction: discord.Interaction, error):
+        """Treating error if it's not the admin"""
+        await interaction.response.send_message(
+            "Peça ao administrador para executar este comando, você não está autorizado!"
+        )
+
     @bot.tree.command(name="ping", description="Verifica se o bot está no ar")
     async def ping(interaction: discord.Interaction):
+        await bot.tree.sync(guild=interaction.guild)
         """
         Command ping to 'send' a 'pong' response.
 

@@ -98,3 +98,50 @@ def load_students() -> list[dict]:
                 break
 
     return students
+
+
+def _row_to_coordinator(row: str) -> dict:
+    """
+    Convert a row of member data to a dictionary.
+
+    :param row: The row of member data.
+    :type row: str
+    :return: A dictionary representing the member.
+    :rtype: dict
+    """
+    fields = [field.strip() for field in row.split(sep=",")]
+    return {
+        "prontuario": fields[0],
+        "discord_id": int(fields[1]),
+        "name": fields[2],
+        "email": fields[3],
+    }
+
+
+def load_coordinators() -> list[dict]:
+    """
+    Load members from the CSV file.
+
+    :return: A list of member dictionaries.
+    :rtype: list[dict]
+    """
+    with open("assets/data/coordinators.csv", "r", encoding="utf-8") as file:
+        coordinators = []
+        for row in file:
+            coordinators.append(_row_to_coordinator(row))
+        return coordinators
+
+
+def add_coordinator(prontuario, name, email, discord_id):
+    """
+    Add project member data to the CVS file
+
+    :param prontuario: member prontuario
+    :param prontuario: member name
+    :param prontuario: member email
+    :param prontuario: member discord_id
+    """
+    with open(
+        "assets/data/coordinators.csv", "a", encoding="UTF-8"
+    ) as coordinator_data:
+        coordinator_data.write(f"{prontuario}, {discord_id}, {name}, {email}\n")

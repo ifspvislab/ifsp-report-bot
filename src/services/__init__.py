@@ -10,4 +10,12 @@ Modules:
 """
 
 from .admin_service import AdminService
+from .coordinator_service import (
+    Coordinator,
+    CoordinatorAlreadyExists,
+    CoordinatorService,
+    DiscordIdError,
+    EmailError,
+    ProntuarioError,
+)
 from .student_service import StudentService
