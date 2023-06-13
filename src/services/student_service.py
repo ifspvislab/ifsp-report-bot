@@ -9,7 +9,7 @@ Classes:
 
 """
 
-from data import load_students
+from reports.data import load_students
 
 
 # pylint: disable-next=too-few-public-methods
