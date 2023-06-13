@@ -15,6 +15,21 @@ Functions:
 
 from datetime import datetime
 
+MONTHS = [
+    "janeiro",
+    "fevereiro",
+    "marco",
+    "abril",
+    "maio",
+    "junho",
+    "julho",
+    "agosto",
+    "setembro",
+    "outubro",
+    "novembro",
+    "dezembro",
+]
+
 
 def _row_to_project(row: str) -> dict:
     """

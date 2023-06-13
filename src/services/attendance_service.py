@@ -225,7 +225,11 @@ class AttendanceService:
         return all_students
 
     def create_sheet(
-        self, student_id: int, student_name: str, project_name: str
+        self,
+        student_id: int,
+        student_name: str,
+        student_registration: str,
+        project_name: str,
     ) -> bytes:
         """
         Create the current month's Attendance sheet for a student
@@ -250,6 +254,7 @@ class AttendanceService:
         return AttendanceSheet(
             AttendanceSheetData(
                 student_name=student_name,
+                student_registration=student_registration,
                 current_date=datetime.now(),
                 project_name=project_name,
                 attendances=current_month_attends,

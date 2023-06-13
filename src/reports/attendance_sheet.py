@@ -23,6 +23,7 @@ from reportlab.lib.units import cm
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 from attendances_data import Attendance
+from data import MONTHS
 
 from . import styles
 from .commons import setup_header
@@ -41,6 +42,7 @@ class AttendanceSheetData:
     """
 
     student_name: str
+    student_registration: str
     current_date: datetime
     project_name: str
     attendances: list[Attendance]
@@ -96,6 +98,15 @@ class AttendanceSheet:
         :return: The pdf bytes created by the function
         :rtype: bytes
         """
+
+        month = MONTHS[self.data.current_date.month - 1]
+        student_name = self.data.student_name
+        proj_name = self.data.project_name
+
+        # Breaking line to not exceed 100 characters
+        subject = "Este documento é a folha de frequência do mês"
+        subject += f"{month} do aluno {student_name} do projeto {proj_name}"
+
         buffer = BytesIO()
         doc = SimpleDocTemplate(
             buffer,
@@ -105,6 +116,8 @@ class AttendanceSheet:
             topMargin=cm * 1.5,
             bottomMargin=cm * 2,
             pageCompression=True,
+            subject=subject,
+            title=f"folha-de-frequencia-{month}-{student_name}-{self.data.student_registration}",
         )
 
         self.content += self.generate_header()

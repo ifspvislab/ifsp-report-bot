@@ -20,6 +20,7 @@ from discord import File, app_commands
 from discord.ext import commands, tasks
 
 import settings
+from data import MONTHS
 from services import AttendanceService, StudentService
 
 from .bot_utils import show_errors
@@ -27,20 +28,6 @@ from .modals import AttendanceSheetForm
 
 logger = settings.logging.getLogger(__name__)
 
-months = [
-    "janeiro",
-    "fevereiro",
-    "marco",
-    "abril",
-    "maio",
-    "junho",
-    "julho",
-    "agosto",
-    "setembro",
-    "outubro",
-    "novembro",
-    "dezembro",
-]
 
 # Brasília timezone
 current_timezone = timezone(offset=timedelta(hours=-3))
@@ -126,12 +113,13 @@ class AttendanceCog(commands.Cog):
 
             file = self.attendance_service.create_sheet(
                 student_id=student_id,
+                student_registration=student["registration"],
                 student_name=student["name"],
                 project_name=student["project"]["title"],
             )
 
             first_name = student["name"].split()[0]
-            month_str = months[datetime.now().month + 1]
+            month_str = MONTHS[datetime.now().month - 1]
 
             # Breaking line to not exceed 100 characters
             sheet_name = "folha-de-frequencia-"
