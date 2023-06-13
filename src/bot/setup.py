@@ -14,15 +14,15 @@ import discord
 from discord.ext import commands
 
 import settings
-from services import AttendanceService, StudentService
+from services import StudentService
 
-from .modals import AttendanceSheetForm, MonthyReportForm
-from .utils import show_errors
+from .attendance_cog import AttendanceCog
+from .modals import MonthyReportForm
 
 logger = settings.logging.getLogger(__name__)
 
 
-def start_bot(student_service: StudentService, attendance_service: AttendanceService):
+def start_bot(student_service: StudentService):
     """
     Start bot.
 
@@ -47,6 +47,8 @@ def start_bot(student_service: StudentService, attendance_service: AttendanceSer
          the latest information about all available commands and their respective settings.
 
         """
+
+        await bot.add_cog(AttendanceCog(bot, student_service))
 
         # updates the bot's command representation
         await bot.tree.sync()
@@ -118,28 +120,5 @@ def start_bot(student_service: StudentService, attendance_service: AttendanceSer
                 embed.add_field(name=f"Erro {index+1}", value=error, inline=False)
 
             await interaction.response.send_message(embed=embed)
-
-    @bot.tree.command(
-        name="adicionar-presenca",
-        description="Adiciona uma nova presença na folha de frequência",
-    )
-    async def add_student_attendance(interaction: discord.Interaction) -> None:
-
-        errors = []
-        student = student_service.find_student_by_discord_id(interaction.user.id)
-
-        if student is None:
-            errors.append("Você não tem permissão para gerenciar a folha de presença")
-            logger.warning(
-                "User %s without permission tried to add new data into attendance sheet",
-                interaction.user.name,
-            )
-        if not errors:
-            logger.info("Attendance sheet user %s", interaction.user.name)
-            await interaction.response.send_modal(
-                AttendanceSheetForm(attendance_service)
-            )
-        else:
-            await interaction.response.send_message(embed=show_errors(errors))
 
     bot.run(settings.get_discord_bot_token())

@@ -10,7 +10,8 @@ Classes:
 import uuid
 from datetime import datetime, time
 
-from data import Attendance, load_attend, save_attend
+from attendances_data import Attendance, load_attend, save_attend
+from reports import AttendanceSheet, AttendanceSheetData
 
 
 class AttendanceService:
@@ -53,7 +54,7 @@ class AttendanceService:
         :rtype: list[Attendance]
         """
 
-        student_attendances = []
+        student_attendances: list[Attendance] = []
         for attendance in self.database:
             if discord_id == attendance.student_id:
                 student_attendances.append(attendance)
@@ -123,6 +124,24 @@ class AttendanceService:
         """
         return entry_time < exit_time
 
+    def _get_date_already_saved(self, new_attendance: Attendance) -> int | None:
+        """
+        Verifies if an attendance is already saved in the database
+        If the function finds an already saved attendance with the same student_id and date,
+        returns the index of the saved attendance
+
+        :param new_attendance: The attendance to be verified
+        :type new_attendance: Attendance
+        :return: The index of the already saved attendance
+        :rtype: int
+        """
+        for index, attendance in enumerate(self.database):
+            if attendance.student_id == new_attendance.student_id:
+                if attendance.day.day == new_attendance.day.day:
+                    return index
+
+        return None
+
     def validate_data(
         self, day: str, entry_time: str, exit_time: str, user: int
     ) -> list[str]:
@@ -183,7 +202,56 @@ class AttendanceService:
                 entry_time=test_entry_time,
                 exit_time=test_exit_time,
             )
-            self.database.append(new_attend)
+            index = self._get_date_already_saved(new_attend)
+            if index is None:
+                self.database.append(new_attend)
+            else:
+                self.database[index] = new_attend
             save_attend(new_attend)
 
         return errors
+
+    def get_all_students_id(self) -> set[int]:
+        """
+        Iterates over the database and gets all students_id without repetition
+
+        :return: A set with all student_ids
+        :rtype: set[int]
+        """
+        all_students = set()
+        for attendance in self.database:
+            all_students.add(attendance.student_id)
+
+        return all_students
+
+    def create_sheet(
+        self, student_id: int, student_name: str, project_name: str
+    ) -> bytes:
+        """
+        Create the current month's Attendance sheet for a student
+
+        :param student_id: The student id
+        :type student_id: int
+        :param student_name: The name of the student
+        :type student_name: str
+        :param project_name: The attendance sheet's project name
+        :type project_name: str
+        :return: The bytes of the created sheet
+        :rtype: bytes
+        """
+
+        student_attendances = self.find_attendances_by_discord_id(student_id)
+
+        current_month_attends = []
+        for attendance in student_attendances:
+            if attendance.day.month == datetime.now().month:
+                current_month_attends.append(attendance)
+
+        return AttendanceSheet(
+            AttendanceSheetData(
+                student_name=student_name,
+                current_date=datetime.now(),
+                project_name=project_name,
+                attendances=current_month_attends,
+            )
+        ).generate()

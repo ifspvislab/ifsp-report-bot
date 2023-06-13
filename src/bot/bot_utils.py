@@ -23,7 +23,7 @@ def show_errors(errors: list[str]) -> Embed:
     :type errors: list[str]
     :return: Embed
     """
-    embed = Embed(title="Opa, parece que encontramos problemas!")
+    embed = Embed(title=":cry: Problemas com a sua requisição")
     for index, error in enumerate(errors):
         embed.add_field(name=f"Erro {index+1}", value=error, inline=False)
     return embed

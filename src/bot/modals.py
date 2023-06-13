@@ -17,7 +17,7 @@ from discord import ui
 from reports import MonthlyReport, MonthlyReportData
 from services import AttendanceService, StudentService
 
-from .utils import show_errors
+from .bot_utils import show_errors
 
 
 class MonthyReportForm(ui.Modal):
@@ -146,6 +146,6 @@ class AttendanceSheetForm(ui.Modal):
         )
 
         if not errors:
-            await interaction.response.send_message("Dados válidos")
+            await interaction.response.send_message("Tudo certo! Presença cadastrada")
         else:
             await interaction.response.send_message(embed=show_errors(errors))
