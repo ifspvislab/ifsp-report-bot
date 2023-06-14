@@ -14,7 +14,9 @@ Functions:
     - _load_professors() -> list[dict]: Load professors from the CSV file.
     - _load_participations() -> list[dict]: Load participations from the CSV file.
     - load_students() -> list[dict]: Load students and associate them with their projects.
-    - add_participation(chosen_project, chosen_member, pday, pmonth, pyear): Add participations to the CSV file.
+    - add_participation(
+    chosen_project, chosen_member, pday, pmonth, pyear
+    ): Add participations to the CSV file.
     
 """
 
@@ -141,7 +143,7 @@ def load_students() -> list[dict]:
     return students
 
 
-def add_participation(chosen_project, chosen_member, pday, pmonth, pyear):
+def add_participation(p_project, member, day, month, year):
     """
     Add participation to the CSV file.
 
@@ -149,18 +151,18 @@ def add_participation(chosen_project, chosen_member, pday, pmonth, pyear):
     :param chosen_member: student to be registered
     :param pday, pmonth, pyear: date that the student started at the project"""
 
-    start_date = datetime.date(pyear, pmonth, pday)
+    start_date = datetime.date(year, month, day)
     start_date = datetime.strftime("%d/%m/%y")
-    student = str(chosen_member)
-    p_project = str(chosen_project)
+    student = str(member)
+    _project = str(p_project)
 
     projects = _load_projects()
     for project in projects:
         if p_project == project["title"]:
-            id = project["id"]
+            p_id = project["id"]
             break
 
     uuid = uuid4()
 
     with open("assets/data/participations.csv", "a", "utf-8") as participation_data:
-        participation_data.write(f"{student},{p_project},{id},{start_date},{uuid}\n")
+        participation_data.write(f"{student},{_project},{p_id},{start_date},{uuid}\n")

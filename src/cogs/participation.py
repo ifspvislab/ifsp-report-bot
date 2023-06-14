@@ -1,3 +1,8 @@
+"""
+Receives the inputs of the participation, verify and validates, and then create the participation
+in a doc.
+"""
+
 from datetime import date
 
 import discord
@@ -16,7 +21,7 @@ class Participation(discord.ui.View):
 
     chosen_project = ui.TextInput(
         label="Projeto:",
-        style=discord.InputStyle.singleline,
+        style=discord.InputTextStyle.singleline,
         min_lenght=10,
         max_lenght=80,
         row=3,
@@ -24,7 +29,7 @@ class Participation(discord.ui.View):
 
     chosen_member = ui.TextInput(
         label="Prontuário do aluno:",
-        style=discord.InputStyle.singleline,
+        style=discord.InputTextStyle.singleline,
         min_lenght=1,
         max_lenght=9,
         placeholder="SPXXXXXXX",
@@ -33,7 +38,7 @@ class Participation(discord.ui.View):
 
     pday = ui.TextInput(
         label="Dia:",
-        style=discord.InputStyle.singleline,
+        style=discord.InputTextStyle.singleline,
         min_length=1,
         max_length=2,
         placeholder="DD",
@@ -41,7 +46,7 @@ class Participation(discord.ui.View):
     )  # Receives the day of the participation.
     pmonth = ui.TextInput(
         label="Mês:",
-        style=discord.InputStyle.singleline,
+        style=discord.InputTextStyle.singleline,
         min_length=1,
         max_length=2,
         placeholder="MM",
@@ -49,7 +54,7 @@ class Participation(discord.ui.View):
     )  # receives the month of the participation.
     pyear = ui.TextInput(
         label="Ano:",
-        style=discord.InputStyle.singleline,
+        style=discord.InputTextStyle.singleline,
         min_length=4,
         max_length=4,
         placeholder="YYYY",
@@ -75,10 +80,6 @@ class Participation(discord.ui.View):
                 "Você não tem permissão para registrar uma participação."
             )  # Verifies if the command was activated by a professor.
         else:
-            """
-            Verifies if the information inputed in the modal is valid.
-            """
-
             projects = _load_projects()
             students = _load_students()
             referencial_date = projects["start_date"]
@@ -107,7 +108,7 @@ class Participation(discord.ui.View):
                     "O aluno inserido inexiste nos registros."
                 )
 
-            participations = _load_participations
+            participations = _load_participations()
 
             for participation in participations:
                 if (
@@ -123,4 +124,10 @@ class Participation(discord.ui.View):
                 and str(self.chosen_project) == projects["title"]
                 and str(self.chosen_member) == students["registration"]
             ):
-                add_participation()
+                add_participation(
+                    p_project=self.chosen_project,
+                    member=self.chosen_member,
+                    day=self.pday,
+                    month=self.pmonth,
+                    year=self.pyear,
+                )

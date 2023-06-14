@@ -7,7 +7,7 @@ Classes:
 - MonthyReportForm: Represents a monthly report form for generating monthly reports.
 """
 
-from datetime import date
+
 from io import BytesIO
 
 import discord
