@@ -16,15 +16,14 @@ from datetime import datetime, time, timedelta, timezone
 from io import BytesIO
 
 import discord
-from discord import File, app_commands
+from discord import File, app_commands, ui
 from discord.ext import commands, tasks
 
 import settings
-from data import MONTHS
+from attendances_data import MONTHS
 from services import AttendanceService, StudentService
 
 from .bot_utils import show_errors
-from .modals import AttendanceSheetForm
 
 logger = settings.logging.getLogger(__name__)
 
@@ -133,3 +132,49 @@ class AttendanceCog(commands.Cog):
                     spoiler=False,
                 ),
             )
+
+
+class AttendanceSheetForm(ui.Modal):
+    """
+    A Class modal that represents a form for adding a new project attendance
+    """
+
+    day_field = ui.TextInput(
+        label="Data da presença", placeholder="Dia do mês", required=False
+    )
+    entry_time_field = ui.TextInput(label="Hora de entrada", placeholder="hh:mm")
+    exit_time_field = ui.TextInput(label="Hora de saída", placeholder="hh:mm")
+
+    def __init__(self, attendance_service: AttendanceService, /):
+        """
+        Initialize the AttendanceSheetForm instance.
+
+        :param attendance_service: An instance of the AttendanceService class.
+        :type attendance_service: AttendanceService
+
+        """
+        super().__init__(title="Folha de frequência")
+        self.attendance_service = attendance_service
+
+    async def on_submit(self, interaction: discord.Interaction, /) -> None:
+        """
+        Handle the submit event of the form.
+
+        This method is called when the user submits the form.
+        It tests the data sent by the user and if it is valid, creates a new attendance register
+
+        :param interaction: The Discord interaction object.
+        :type interaction: discord.Interaction
+
+        """
+        errors = self.attendance_service.validate_data(
+            day=self.day_field.value,
+            entry_time=self.entry_time_field.value,
+            exit_time=self.exit_time_field.value,
+            user=interaction.user.id,
+        )
+
+        if not errors:
+            await interaction.response.send_message("Tudo certo! Presença cadastrada")
+        else:
+            await interaction.response.send_message(embed=show_errors(errors))

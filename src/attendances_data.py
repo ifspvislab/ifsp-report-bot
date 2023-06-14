@@ -22,6 +22,21 @@ Functions:
 from dataclasses import dataclass
 from datetime import datetime, time
 
+MONTHS = [
+    "janeiro",
+    "fevereiro",
+    "marco",
+    "abril",
+    "maio",
+    "junho",
+    "julho",
+    "agosto",
+    "setembro",
+    "outubro",
+    "novembro",
+    "dezembro",
+]
+
 
 @dataclass
 class Attendance:
