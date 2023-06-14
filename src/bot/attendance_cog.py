@@ -20,10 +20,15 @@ from discord import File, app_commands, ui
 from discord.ext import commands, tasks
 
 import settings
-from attendances_data import MONTHS
+from data.attendances_data import MONTHS
 from services import AttendanceService, StudentService
-
-from .bot_utils import show_errors
+from services.attendance_service import (
+    DayOutOfRange,
+    EntryTimeAfterExitTime,
+    InvalidDate,
+    InvalidTime,
+    TimeOutOfRange,
+)
 
 logger = settings.logging.getLogger(__name__)
 
@@ -63,22 +68,22 @@ class AttendanceCog(commands.Cog):
         Only exibits said modal if the user is allowed.
         Calls attendance_service for data validation
         """
-        errors = []
         student = self.student_service.find_student_by_discord_id(interaction.user.id)
 
         if student is None:
-            errors.append("Você não tem permissão para gerenciar a folha de presença")
             logger.warning(
                 "User %s without permission tried to add new data into attendance sheet",
                 interaction.user.name,
             )
-        if not errors:
+            await interaction.response.send_message(
+                "Você não tem permissão para adicionar novas presenças"
+            )
+
+        else:
             logger.info("Attendance sheet user %s", interaction.user.name)
             await interaction.response.send_modal(
                 AttendanceSheetForm(self.attendance_service)
             )
-        else:
-            await interaction.response.send_message(embed=show_errors(errors))
 
     @tasks.loop(time=time(hour=12, minute=0, tzinfo=current_timezone))
     async def is_last_day(self):
@@ -103,11 +108,17 @@ class AttendanceCog(commands.Cog):
         for student_id in all_students_id:
             student = self.student_service.find_student_by_discord_id(student_id)
             if student is None:
+                log_msg = f"Student with id {student_id}"
+                log_msg += "in attendances database not inside the students database"
+                logger.info(log_msg)
                 continue
 
             # If the user saved doesn't exist, it won't create the sheet
             user = self.bot.get_user(student_id)
             if user is None:
+                log_msg = f"Student with id {student_id}"
+                log_msg += "in attendances database couldn't be found by discord bot"
+                logger.info(log_msg)
                 continue
 
             file = self.attendance_service.create_sheet(
@@ -123,6 +134,10 @@ class AttendanceCog(commands.Cog):
             # Breaking line to not exceed 100 characters
             sheet_name = "folha-de-frequencia-"
             sheet_name += f"{month_str}-{first_name}-{student['registration']}.pdf"
+
+            log_msg = f"Attendance data for the student with id {student_id}"
+            log_msg += "was successfuly created. Sending..."
+            logger.info(log_msg)
 
             await user.send(
                 content=f"{first_name}, aqui está a sua folha de presença em formato PDF:",
@@ -167,14 +182,22 @@ class AttendanceSheetForm(ui.Modal):
         :type interaction: discord.Interaction
 
         """
-        errors = self.attendance_service.validate_data(
-            day=self.day_field.value,
-            entry_time=self.entry_time_field.value,
-            exit_time=self.exit_time_field.value,
-            user=interaction.user.id,
-        )
 
-        if not errors:
+        try:
+            self.attendance_service.create(
+                day=self.day_field.value,
+                entry_time=self.entry_time_field.value,
+                exit_time=self.exit_time_field.value,
+                user=interaction.user.id,
+            )
+
             await interaction.response.send_message("Tudo certo! Presença cadastrada")
-        else:
-            await interaction.response.send_message(embed=show_errors(errors))
+
+        except (
+            InvalidDate,
+            InvalidTime,
+            DayOutOfRange,
+            TimeOutOfRange,
+            EntryTimeAfterExitTime,
+        ) as exception:
+            await interaction.response.send_message(exception.args[0])

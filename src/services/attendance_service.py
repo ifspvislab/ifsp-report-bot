@@ -10,8 +10,38 @@ Classes:
 import uuid
 from datetime import datetime, time
 
-from attendances_data import Attendance, load_attend, save_attend
+from data.attendances_data import Attendance, load_attend, save_attend
 from reports import AttendanceSheet, AttendanceSheetData
+
+
+class InvalidDate(Exception):
+    """
+    Custom exception for invalid dates, such as 60/15/-133 or "abc"
+    """
+
+
+class InvalidTime(Exception):
+    """
+    Custom exception for invalid times, such as 28:75 or "idk"
+    """
+
+
+class DayOutOfRange(Exception):
+    """
+    Custom exception for sundays, since IFSP is closed these weekdays
+    """
+
+
+class TimeOutOfRange(Exception):
+    """
+    Custom exception for times outside of the IFSP's buiseness hours
+    """
+
+
+class EntryTimeAfterExitTime(Exception):
+    """
+    Custom exception for when the entry time is after the exit time
+    """
 
 
 class AttendanceService:
@@ -60,7 +90,7 @@ class AttendanceService:
                 student_attendances.append(attendance)
         return student_attendances
 
-    def _validate_day(self, test_day: str) -> None | datetime:
+    def _validate_day(self, test_day: str) -> datetime:
         """
         Verifies if the day passed by the user is valid.
         Ex: Verifies if the day is a sunday or a existent date (based on the current month)
@@ -73,15 +103,16 @@ class AttendanceService:
         curr_day = datetime.now()
         try:
             date = datetime(year=curr_day.year, month=curr_day.month, day=int(test_day))
-        except ValueError:  # if the day is out of range, it will raise a ValueError
-            return None
-        except Exception as ex:
-            raise ex
+        except ValueError as exc:
+            raise InvalidDate(
+                "A data passada não é válida (precisa ser um número entre os dias do mês)."
+            ) from exc
+
         if date.weekday() == 6:  # The campus is closed at sundays
-            return None
+            raise DayOutOfRange("O campus não está aberto de domingo.")
         return date
 
-    def _validate_time(self, weekday: int, param_time: str) -> None | time:
+    def _validate_time(self, weekday: int, param_time: str) -> time:
         """
         Verifies if the time passed by the user is valid.
         Ex: Verifies if the time is before 6:30 or after 23:30 (13h on saturdays)
@@ -96,22 +127,25 @@ class AttendanceService:
         try:
             split_time = [int(part) for part in param_time.split(":")]
             test_time = time(hour=split_time[0], minute=split_time[1])
-        except ValueError:  # if the time is invalid (ex: hour > 23), it will raise a ValueError
-            return None
+        # if the time is invalid (ex: hour > 23), it will raise a ValueError
+        except ValueError as exc:
+            raise InvalidTime(
+                "Tempo inválido (passe no formato HH:MM de 24 horas)"
+            ) from exc
         except Exception as ex:
             raise ex
         # The campus opens at 6:30
         if test_time < time(hour=6, minute=30):
-            return None
+            raise TimeOutOfRange("O campus só abre às 6:30 de segunda-feira à sábado")
         # The campus closes at 23:30 between Monday and Friday
         if test_time > time(hour=23, minute=30) and 0 <= weekday <= 4:
-            return None
+            raise TimeOutOfRange("O campus fecha às 23:30 de segunda à sexta-feira")
         # The campus closes at 13:00 at Saturdays
         if test_time > time(hour=13, minute=0) and weekday == 5:
-            return None
+            raise TimeOutOfRange("O campus fecha às 13:00 de sábado")
         return test_time
 
-    def _is_entry_before(self, entry_time: time, exit_time: time) -> bool:
+    def _is_entry_before(self, entry_time: time, exit_time: time) -> None:
         """
         Tests if the exit time passed by the user is before the entry time
 
@@ -122,7 +156,10 @@ class AttendanceService:
         :return: True if the entry is before and false if it is not
         :rtype: bool
         """
-        return entry_time < exit_time
+        if entry_time < exit_time:
+            raise EntryTimeAfterExitTime(
+                "O horário de saída não pode ser anterior à entrada"
+            )
 
     def _get_date_already_saved(self, new_attendance: Attendance) -> int | None:
         """
@@ -142,11 +179,10 @@ class AttendanceService:
 
         return None
 
-    def validate_data(
-        self, day: str, entry_time: str, exit_time: str, user: int
-    ) -> list[str]:
+    def create(self, day: str, entry_time: str, exit_time: str, user: int) -> None:
         """
-        Validates the day, entry time and exit time sent by the user and return the errors
+        Validates the day, entry time and exit time sent by the user and creates a new attendance.
+        If the user didn't sent a date, selects the current date
 
         :param day: The day passed by the user
         :type day: str
@@ -154,62 +190,39 @@ class AttendanceService:
         :type entry_time: str
         :param exit_time: The exit time passed by the user
         :type exit_time: str
-        :return: A list of all the errors that happened during the execution
-        :rtype: list[str]
         """
+
         test_day = day
-        errors = []
+        test_entry_time = entry_time
+        test_exit_time = exit_time
 
         if test_day is None:
             test_day = datetime.now()
         else:
-            test_day = self._validate_day(day)
-            if test_day is None:
-                # If the day is invalid, we can't get it's weekday, so the program
-                # shows this error and returns without testing other values
-                errors.append("O dia passado é inválido.")
-                return errors
+            test_day = self._validate_day(test_day)
 
         test_entry_time = self._validate_time(
             weekday=test_day.weekday(), param_time=entry_time
         )
-        if test_entry_time is None:
-            errors.append("O horário de entrada é inválido.")
-
         test_exit_time = self._validate_time(
             weekday=test_day.weekday(), param_time=exit_time
         )
-        if test_exit_time is None:
-            errors.append("O horário de saída é inválido.")
+        self._is_entry_before(entry_time=test_entry_time, exit_time=test_exit_time)
 
-        if test_entry_time is not None and test_exit_time is not None:
-            if not self._is_entry_before(
-                entry_time=test_entry_time, exit_time=test_exit_time
-            ):
-                errors.append("O horário de saída não pode ser anterior ao de entrada.")
+        new_attend = Attendance(
+            attendance_id=str(uuid.uuid4()),
+            student_id=user,
+            day=test_day,
+            entry_time=test_entry_time,
+            exit_time=test_exit_time,
+        )
 
-        # These "is not None" conditions are here just so pylance stops making my code red
-        # This is not needed since the errors list is appended if times are None
-        if not errors and test_entry_time is not None and test_exit_time is not None:
-            # For keeping the lazy loading technique, the attendances are appended in the
-            # database and are also saved in the attendances.csv file.
-            # By making this, the program can avoid input operations from the file,
-            # reading directly from the database list
-            new_attend = Attendance(
-                attendance_id=str(uuid.uuid4()),
-                student_id=user,
-                day=test_day,
-                entry_time=test_entry_time,
-                exit_time=test_exit_time,
-            )
-            index = self._get_date_already_saved(new_attend)
-            if index is None:
-                self.database.append(new_attend)
-            else:
-                self.database[index] = new_attend
-            save_attend(new_attend)
-
-        return errors
+        index = self._get_date_already_saved(new_attend)
+        if index is None:
+            self.database.append(new_attend)
+        else:
+            self.database[index] = new_attend
+        save_attend(new_attend)
 
     def get_all_students_id(self) -> set[int]:
         """

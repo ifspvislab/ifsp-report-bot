@@ -22,7 +22,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
-from attendances_data import MONTHS, Attendance
+from data.attendances_data import MONTHS, Attendance
 
 from . import styles
 from .commons import setup_header
