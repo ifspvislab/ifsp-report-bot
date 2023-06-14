@@ -21,6 +21,10 @@ from .modals import MonthyReportForm
 logger = settings.logging.getLogger(__name__)
 
 
+async def load_cogs(bot):
+    await bot.load_extension("cog.log")
+
+
 def start_bot(student_service: StudentService):
     """
     Start bot.
@@ -48,6 +52,7 @@ def start_bot(student_service: StudentService):
         """
 
         # updates the bot's command representation
+        await bot.load_extension("cogs.log")
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
 

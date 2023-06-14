@@ -11,6 +11,9 @@ Functions:
 import logging
 import os
 
+# from decouple import config
+# DISCORD_BOT_TOKEN = config("DISCORD_BOT_TOKEN")
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s --- [%(filename)s | %(funcName)s] : %(message)s",
