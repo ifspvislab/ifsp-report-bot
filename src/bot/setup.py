@@ -48,7 +48,6 @@ def start_bot(student_service: StudentService):
         """
         await bot.load_extension("cogs.add_member")
         # updates the bot's command representation
-        await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
 
     @bot.tree.command(name="ping", description="Verifica se o bot está no ar")
@@ -125,7 +124,7 @@ def start_bot(student_service: StudentService):
 
         :param ctx: Command context object
         """
-        await bot.tree.sync(guild=ctx.guild)
+        await bot.tree.sync()
         await ctx.send("Sync")
 
     bot.run(settings.get_discord_bot_token())

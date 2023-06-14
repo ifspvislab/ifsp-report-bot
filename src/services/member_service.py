@@ -6,10 +6,11 @@ This module provides a function for managing member data
 
 Function:
     - MemberService: Service class for managing member data
-    - _check_campus: Verify fields standards
+    - _check_fields: Verify fields standards
 """
 
 from validate_email_address import validate_email
+
 from data import load_members
 
 
@@ -42,7 +43,7 @@ def _check_fields(prontuario, email, discord_id):
     _stats = []
     if not (
         prontuario[:1].isalpha()
-        and prontuario[2:-2].isnumeric()
+        and prontuario[2:-1].isnumeric()
         and prontuario[-1].isalnum()
         and len(prontuario) == 9
     ):

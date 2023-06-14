@@ -13,13 +13,12 @@ Function:
 """
 
 import discord
-from discord import app_commands, ui
+from discord import Member, app_commands, ui
 from discord.ext import commands
 from discord.interactions import Interaction
 
+from data import add_member, load_coordinator
 from services import verify_standards
-
-from data import add_member
 
 
 class ModalAddMember(ui.Modal, title="Adicionar Membro"):
@@ -37,12 +36,9 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
     """
 
     prontuario = ui.TextInput(label="prontuario", placeholder="SPXXXXX")
-    name = ui.TextInput(label="name", min_length=5, max_length=100)
+    name = ui.TextInput(label="name", placeholder="nome", min_length=5, max_length=100)
     email = ui.TextInput(label="email", placeholder="nome@email.com")
-    discord_id = ui.TextInput(
-        label="discord id",
-        placeholder="O id do perfil do discord do membro sendo cadastrado.",
-    )
+    discord_id = ui.TextInput(label="discord id", placeholder="discord id")
 
     async def on_submit(self, interaction: Interaction, /):
         """
@@ -50,6 +46,7 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
 
         :param interaction: The Discord interaction object
         """
+
         standards_stats = verify_standards(
             self.prontuario.value,
             self.email.value,
@@ -75,12 +72,25 @@ class SendModal(commands.Cog):
         - send_modal: Sends the AddMemberModal as a modal in response to an interaction.
     """
 
-    @app_commands.command(name="send_modal", description="send modal")
-    async def send_modal(self, interaction: discord.Interaction):
+    @app_commands.command(
+        name="adicionar_membro",
+        description="manda um modal para adicionar o membro",
+    )
+    @app_commands.describe(
+        member="Usuário do servidor que deseja adicionar como membro"
+    )
+    async def send_modal(self, interaction: discord.Interaction, member: Member = None):
         """
         Sends the AddMemberModal as a modal in response to an interaction.
         """
-        await interaction.response.send_modal(ModalAddMember())
+
+        for coord in load_coordinator():
+            if interaction.user.id == coord["discord_id"]:
+                modal = ModalAddMember()
+                modal.discord_id.default = str(member.id)
+                await interaction.response.send_modal(modal)
+                return
+        await interaction.response.send_message("Você não tem permissão para isso.")
 
 
 async def setup(bot):
