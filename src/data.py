@@ -27,11 +27,11 @@ def _row_to_project(row: str) -> dict:
     """
     fields = [field.strip() for field in row.split(sep=",")]
     return {
-        "id": fields[0],
-        "title": fields[1],
-        "professor": fields[2],
-        "start_date": datetime.strptime(fields[3], "%d/%m/%Y").date(),
-        "end_date": datetime.strptime(fields[4], "%d/%m/%Y").date(),
+        "coordenador": fields[0],
+        "discord_server_id": fields[1],
+        "titulo": fields[2],
+        "data_inicio": datetime.strptime(fields[3], "%d/%m/%Y").date(),
+        "data_fim": datetime.strptime(fields[4], "%d/%m/%Y").date(),
     }
 
 
@@ -98,3 +98,10 @@ def load_students() -> list[dict]:
                 break
 
     return students
+
+
+def add_projects(coordenador, discord_server_id, titulo, data_inicio, data_fim):
+    with open("assets/data/projects.csv", "a", enconding="UTF-8") as project_data:
+        project_data.write(
+            f"{coordenador}, {discord_server_id}, {titulo}, {data_inicio}, {data_fim}\n"
+        )

@@ -8,15 +8,16 @@ Functions:
 
 """
 
+import os
 from datetime import datetime
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 
 import settings
-from services import StudentService
-
-from .modals import MonthyReportForm
+from bot.modals import AddProjects, MonthyReportForm
+from services import AdminService, ProjectService, StudentService
 
 logger = settings.logging.getLogger(__name__)
 
@@ -50,6 +51,21 @@ def start_bot(student_service: StudentService):
         # updates the bot's command representation
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
+
+    @bot.tree.command(
+        name="adicionar-projeto", description="adicionar projeto via modal"
+    )
+    @app_commands.check(AdminService.is_admin)
+    async def add_projects(interaction: discord.Interaction):
+        await interaction.response.send_modal(AddProjects())
+
+        logger.info("adicionar-projeto command user %s", interaction.user.name)
+
+    @add_coordinator.error
+    async def add_coordinator_error(interaction: discord.Interaction, error):
+        await interaction.response.send_message(
+            "Apenas o admin pode executar esse comando!"
+        )
 
     @bot.tree.command(name="ping", description="Verifica se o bot está no ar")
     async def ping(interaction: discord.Interaction):
