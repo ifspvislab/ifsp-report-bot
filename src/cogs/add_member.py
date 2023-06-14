@@ -87,7 +87,8 @@ class SendModal(commands.Cog):
         for coord in load_coordinator():
             if interaction.user.id == coord["discord_id"]:
                 modal = ModalAddMember()
-                modal.discord_id.default = str(member.id)
+                if member != None:
+                    modal.discord_id.default = str(member.id)
                 await interaction.response.send_modal(modal)
                 return
         await interaction.response.send_message("Você não tem permissão para isso.")
