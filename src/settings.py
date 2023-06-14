@@ -11,8 +11,6 @@ Functions:
 import logging
 import os
 
-DISCORD_BOT_TOKEN = 'MTExNjA5NDgwMDM5NjAyNTkzOA.GBPUeB.8DrJmW2gsL_SGp-sykU8RvX7JCPuH5DRvrDYnk'
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s --- [%(filename)s | %(funcName)s] : %(message)s",
@@ -28,7 +26,7 @@ def get_discord_bot_token() -> str:
 
     :raises KeyError: If the 'DISCORD_BOT_TOKEN' environment variable does not exist.
     """
-    discord_bot_token = DISCORD_BOT_TOKEN
+    discord_bot_token = os.getenv("DISCORD_BOT_TOKEN")
     if discord_bot_token is None:
         raise KeyError(
             "The requested environment variable 'DISCORD_BOT_TOKEN' does not exist"

@@ -5,18 +5,17 @@ This module defines classes for modal forms used in Discord bot interactions.
 
 Classes:
 - MonthyReportForm: Represents a monthly report form for generating monthly reports.
-- Participation: Facilitate the assignement of a participation to an determinated project.
 """
 
+from datetime import date
 from io import BytesIO
 
 import discord
 from discord import ui
 
-from datetime import date
-
 from reports import MonthlyReport, MonthlyReportData
 from services import StudentService
+
 
 class MonthyReportForm(ui.Modal):
     """
@@ -101,4 +100,3 @@ class MonthyReportForm(ui.Modal):
                     spoiler=False,
                 ),
             )
-    

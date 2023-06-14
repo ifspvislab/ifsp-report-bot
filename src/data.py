@@ -1,4 +1,3 @@
-
 """
 data
 ====
@@ -21,6 +20,7 @@ Functions:
 
 from datetime import datetime
 from uuid import uuid4
+
 
 def _row_to_project(row: str) -> dict:
     """
@@ -61,10 +61,7 @@ def _row_to_student(row: str) -> dict:
 
 def _row_to_professor(row: str) -> dict:
     fields = [field.strip() for field in row.split(sep=",")]
-    return {
-            "discord_id": int(fields[0]), 
-            "professor_name": fields[1]
-            }
+    return {"discord_id": int(fields[0]), "professor_name": fields[1]}
 
 
 def row_to_participation(row: str) -> list[dict]:
@@ -77,7 +74,7 @@ def row_to_participation(row: str) -> list[dict]:
         "project": fields[1],
         "project_id": fields[2],
         "start_date": fields[3],
-        "uuid": fields[4]
+        "uuid": fields[4],
     }
 
 
@@ -162,7 +159,7 @@ def add_participation(chosen_project, chosen_member, pday, pmonth, pyear):
         if p_project == project["title"]:
             id = project["id"]
             break
-    
+
     uuid = uuid4()
 
     with open("assets/data/participations.csv", "a", "utf-8") as participation_data:

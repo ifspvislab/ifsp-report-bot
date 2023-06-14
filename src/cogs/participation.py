@@ -1,9 +1,9 @@
+from datetime import date
+
 import discord
 from discord import ui
 
-from datetime import date
-
-from data import add_participation, _load_students, _load_participations, _load_projects
+from data import _load_participations, _load_projects, _load_students, add_participation
 from services import ProfessorService
 
 
