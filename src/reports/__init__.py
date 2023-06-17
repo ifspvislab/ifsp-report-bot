@@ -19,6 +19,7 @@ Classes:
 
 from . import styles
 from .monthly_report import MonthlyReport, MonthlyReportData
+from .semester_report import SemesterReport, SemesterReportData
 from .setup import setup_reports_module
 
 setup_reports_module()

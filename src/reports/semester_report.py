@@ -1,25 +1,22 @@
 """
-semester_report
+monthly_report
 ==============
 
-This module provides classes for generating the semester report.
+This module provides classes for generating a monthly report.
 
 Classes:
-    - SemesterReportData: Dataclass representing the data for a semester report.
-    - SemesterReport: Class for generating a semester report.
+    - MonthlyReportData: Dataclass representing the data for a monthly report.
+    - MonthlyReport: Class for generating a monthly report.
 
 """
 
 import locale
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from io import BytesIO
 
-import styles
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     Image,
     Paragraph,
@@ -29,18 +26,9 @@ from reportlab.platypus import (
     TableStyle,
 )
 
-locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
+from . import styles
 
-pdfmetrics.registerFont(TTFont("Calibri", "./assets/fonts/calibri/calibri-regular.ttf"))
-pdfmetrics.registerFont(
-    TTFont("Calibri-Bold", "./assets/fonts/calibri/calibri-bold.ttf")
-)
-pdfmetrics.registerFont(
-    TTFont("Calibri-Italic", "./assets/fonts/calibri/calibri-italic.ttf")
-)
-pdfmetrics.registerFont(
-    TTFont("Calibri-Bold-Italic", "./assets/fonts/calibri/calibri-bold-italic.ttf")
-)
+locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
 
 
 @dataclass
@@ -52,40 +40,52 @@ class SemesterReportData:
         project_title (str): The title of the project.
         project_manager (str): The name of the project manager.
         student_name (str): The name of the student.
-        planned_activities (str): The planned activities for the month/semester.
-        performed_activities (str): The performed activities for the month/semester.
+        planned_activities (str): The planned activities for the month.
+        performed_activities (str): The performed activities for the month.
         results (str): The results obtained.
 
     """
 
-    # project_title: str
-    # project_manager: str
-    # student_name: str
+    project_title: str
+    project_manager: str
+    student_name: str
     planned_activities: str
     performed_activities: str
     results: str
 
-    def day_05_of_next_month(self) -> datetime:
+    # def day_05_of_next_month(self) -> datetime:
+    #     """
+    #     Returns the date representing the 5th day of the next month.
+
+    #     Returns:
+    #         datetime: The date of the 5th day in the next month.
+    #     """
+    #     next_month = datetime.now() + timedelta(days=30)
+    #     return datetime(next_month.year, next_month.month, 5)
+
+    def current_date(self) -> datetime:
         """
-        Returns the date representing the 5th day of the next month.
+        Returns the current date of submission
 
         Returns:
-            datetime: The date of the 5th day in the next month.
+            datetime: The current date of submission
         """
-        next_month = datetime.now() + timedelta(days=30)
-        return datetime(next_month.year, next_month.month, 5)
+        submission_date = datetime.now()
+        return datetime(
+            submission_date.year, submission_date.month, submission_date.day
+        )
 
 
 class SemesterReport:
     """
-    Class for generating a semester report.
+    Class for generating a monthly report.
 
     Attributes:
-        data (SemesterReportData): The data for the semester report.
+        data (MonthlyReportData): The data for the monthly report.
         content (list): List to store the content of the report.
 
     Methods:
-        generate(): Generates the semester report.
+        generate(): Generates the monthly report.
         setup_header(): Sets up the header section of the report.
         setup_report_table(): Sets up the report table section of the report.
         setup_activities_section(): Sets up the activities section of the report.
@@ -95,25 +95,39 @@ class SemesterReport:
 
     def __init__(self, data: SemesterReportData) -> None:
         """
-        Initialize the SemesterReport object.
+        Initialize the MonthlyReport object.
 
         Args:
-            data (SemesterReportData): The data for the semester report.
+            data (MonthlyReportData): The data for the monthly report.
 
         """
 
         self.data = data
         self.content = []
 
+    def current_semester(self) -> datetime:
+        """
+        Returns the current semester of submission, 1st or 2nd
+
+        Returns:
+            datetime: The current semester of submission, 1st or 2nd
+        """
+        current_month = datetime.now().month
+        if current_month <= 6:
+            semester = "1º"
+            return semester
+        semester = "2º"
+        return semester
+
     def generate(self):
         """
-        Generates the semester report.
+        Generates the monthly report.
 
         Returns:
             bytes: The generated report in bytes format.
 
         """
-        month_name = datetime.now().strftime("%B")
+
         buffer = BytesIO()
         doc = SimpleDocTemplate(
             buffer,
@@ -123,10 +137,10 @@ class SemesterReport:
             topMargin=57,
             bottomMargin=57,
             pageCompression=True,
-            subject=f"Este documento é o relatório semestral do mês {month_name}",
-            title=f"Relatorio-Semestral-{month_name}",
+            title=f"relatorio-semestral-{datetime.now().strftime('%B')}",
+            subject=f"Este documento é o relatório semestral do mês \
+                  {datetime.now().strftime('%B')}",
         )
-
         self.setup_header()
         self.setup_report_table()
         self.setup_activities_section()
@@ -170,31 +184,30 @@ class SemesterReport:
         """
         Sets up the report table section of the report.
 
-        #"""
-        # project_title_par = Paragraph(
-        #     self.data.project_title, styles.table_content_style
-        # )
-        # project_manager_name_par = Paragraph(
-        #     self.data.project_manager, styles.table_content_style
-        # )
-        # student_name_par = Paragraph(self.data.student_name, styles.table_content_style)
+        """
+        project_title_par = Paragraph(
+            self.data.project_title, styles.table_content_style
+        )
+        project_manager_name_par = Paragraph(
+            self.data.project_manager, styles.table_content_style
+        )
+        student_name_par = Paragraph(self.data.student_name, styles.table_content_style)
         submission_date_par = Paragraph(
-            self.data.day_05_of_next_month().strftime("%d/%m/%Y"),
+            self.data.current_date().strftime("%d/%m/%Y"),
+            # self.data.day_05_of_next_month().strftime("%d/%m/%Y"),
             styles.table_content_style,
         )
 
         report_table_data = [
             [
                 Paragraph("Título do Projeto", styles.table_label_style),
-                # project_title_par,
+                project_title_par,
             ],
             [
                 Paragraph("Professor(a) Responsável", styles.table_label_style),
-                # project_manager_name_par,
+                project_manager_name_par,
             ],
-            [
-                Paragraph("Voluntário(a)", styles.table_label_style)
-            ],  # , student_name_par],
+            [Paragraph("Voluntário(a)", styles.table_label_style), student_name_par],
             [
                 Paragraph("Data de entrega", styles.table_label_style),
                 submission_date_par,
@@ -221,14 +234,12 @@ class SemesterReport:
         Sets up the activities section of the report.
 
         """
-
-        now = datetime.now()
+        # now = datetime.now()
         month_name = datetime.now().strftime("%B")
-        current_month = now.month
-        if current_month <= 6:
-            semester = "1º"
-        else:
-            semester = "2º"
+        # current_month = now.month
+        semester = self.current_semester()
+
+        month_name = datetime.now().strftime("%B")
         activities_title = Paragraph(
             f"Resumo das atividades desenvolvidas no {semester} semestre /2023",
             styles.activities_title_style,
@@ -236,7 +247,8 @@ class SemesterReport:
         self.content.append(activities_title)
 
         activities_title2 = Paragraph(
-            f"Este relatório inclui as atividades desenvolvidas no mês de {month_name}/ 2023 e o relatório de desempenho do(a) voluntário(a)",
+            f"Este relatório inclui as atividades desenvolvidas no mês de {month_name}/ 2023 \
+                e o relatório de desempenho do(a) voluntário(a)",
             styles.activities_title_style,
         )
         self.content.append(activities_title2)

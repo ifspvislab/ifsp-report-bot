@@ -16,7 +16,7 @@ from discord.ext import commands
 import settings
 from services import StudentService
 
-from .modals import MonthyReportForm
+from .modals import MonthyReportForm, SemesterReportForm
 
 logger = settings.logging.getLogger(__name__)
 
@@ -117,5 +117,48 @@ def start_bot(student_service: StudentService):
                 embed.add_field(name=f"Erro {index+1}", value=error, inline=False)
 
             await interaction.response.send_message(embed=embed)
+
+    @bot.tree.command(
+        name="relatorio_semestral",
+        description="Gera um relatório de ensino semestral",
+    )
+    async def open_semester_report_form(interaction: discord.Interaction):
+        def invalid_request_period():
+
+            current_day = datetime.now().day
+            current_month = datetime.now().month
+            start_month = 7
+            end_month = 12
+            start_day = 23
+            end_day = 31
+            if current_day < start_day or current_day != end_day:
+                return True
+
+            if current_month < end_month or current_month != start_month:
+                return True
+
+            return False
+
+        errors = []
+
+        if invalid_request_period():
+            errors.append(
+                "O período de submissões ocorre entre os dias 23 a 31 \
+                    de julho e 01 a 10 de dezembro."
+            )
+            logger.warning(
+                "User %s attempted to generate the semester report outside \
+                    the allowed period.",
+                interaction.user.name,
+            )
+
+        if not errors:
+            logger.info(
+                "Semester report user %s",
+                interaction.user.name,
+            )
+            await interaction.response.send_modal(SemesterReportForm(student_service))
+        else:
+            await interaction.response.send_message(errors)
 
     bot.run(settings.get_discord_bot_token())
