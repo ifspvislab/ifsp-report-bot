@@ -46,7 +46,7 @@ def start_bot(student_service: StudentService):
          the latest information about all available commands and their respective settings.
 
         """
-        await bot.load_extension("cogs.add_member")
+        await bot.load_extension("bot.cogs.add_member")
         # updates the bot's command representation
         logger.info("Bot %s is ready", bot.user)
 

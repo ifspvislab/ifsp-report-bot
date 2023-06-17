@@ -17,8 +17,8 @@ from discord import Member, app_commands, ui
 from discord.ext import commands
 from discord.interactions import Interaction
 
-from data import add_member, load_coordinator
-from services import verify_standards
+from data import CoordinatorData, MemberData
+from services import MemberService
 
 
 class ModalAddMember(ui.Modal, title="Adicionar Membro"):
@@ -47,21 +47,18 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
         :param interaction: The Discord interaction object
         """
 
-        standards_stats = verify_standards(
+        member_data = MemberData()
+        member_service = MemberService(member_data)
+        member_service.add_member(
             self.prontuario.value,
-            self.email.value,
             self.discord_id.value,
+            self.name.value,
+            self.email.value,
         )
+        await interaction.response.send_message("Membro cadastrado com sucesso.")
 
-        results = "\n".join(standards_stats)
-        if len(standards_stats) == 1:
-            add_member(
-                self.prontuario.value.upper(),
-                self.name.value,
-                self.email.value,
-                self.discord_id.value,
-            )
-        await interaction.response.send_message(results)
+    async def on_error(self, interaction: Interaction, error: Exception, /):
+        await interaction.response.send_message(error)
 
 
 class SendModal(commands.Cog):
@@ -83,15 +80,17 @@ class SendModal(commands.Cog):
         """
         Sends the AddMemberModal as a modal in response to an interaction.
         """
-
-        for coord in load_coordinator():
+        coordinator_data = CoordinatorData()
+        for coord in coordinator_data.load_coordinator():
             if interaction.user.id == coord["discord_id"]:
                 modal = ModalAddMember()
-                if member != None:
+                if member is not None:
                     modal.discord_id.default = str(member.id)
                 await interaction.response.send_modal(modal)
                 return
+
         await interaction.response.send_message("Você não tem permissão para isso.")
+        raise ValueError("Você não tem permissão para isso.")
 
 
 async def setup(bot):

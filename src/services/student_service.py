@@ -9,7 +9,7 @@ Classes:
 
 """
 
-from data import load_students
+from data import StudentData
 
 
 # pylint: disable-next=too-few-public-methods
@@ -49,7 +49,8 @@ class StudentService:
         :rtype: dict | None
         """
         if not self.database:
-            self.database = load_students()
+            student_data = StudentData()
+            self.database = student_data.load_students()
 
         for student in self.database:
             if student["discord_id"] == discord_id:
