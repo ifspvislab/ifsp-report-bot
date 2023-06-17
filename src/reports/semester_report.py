@@ -1,12 +1,12 @@
 """
-monthly_report
+semester_report
 ==============
 
-This module provides classes for generating a monthly report.
+This module provides classes for generating a semester report.
 
 Classes:
-    - MonthlyReportData: Dataclass representing the data for a monthly report.
-    - MonthlyReport: Class for generating a monthly report.
+    - SemesterReportData: Dataclass representing the data for a semester report.
+    - SemesterReport: Class for generating a semester report.
 
 """
 
@@ -41,7 +41,7 @@ class SemesterReportData:
         project_manager (str): The name of the project manager.
         student_name (str): The name of the student.
         planned_activities (str): The planned activities for the month.
-        performed_activities (str): The performed activities for the month.
+        performed_activities (str): The performed activities for the month and semester.
         results (str): The results obtained.
 
     """
@@ -78,14 +78,14 @@ class SemesterReportData:
 
 class SemesterReport:
     """
-    Class for generating a monthly report.
+    Class for generating a semester report.
 
     Attributes:
-        data (MonthlyReportData): The data for the monthly report.
+        data (MonthlyReportData): The data for the semester report.
         content (list): List to store the content of the report.
 
     Methods:
-        generate(): Generates the monthly report.
+        generate(): Generates the semester report.
         setup_header(): Sets up the header section of the report.
         setup_report_table(): Sets up the report table section of the report.
         setup_activities_section(): Sets up the activities section of the report.
@@ -95,10 +95,10 @@ class SemesterReport:
 
     def __init__(self, data: SemesterReportData) -> None:
         """
-        Initialize the MonthlyReport object.
+        Initialize the SemesterReport object.
 
         Args:
-            data (MonthlyReportData): The data for the monthly report.
+            data (SemesterReportData): The data for the semester report.
 
         """
 
@@ -121,7 +121,7 @@ class SemesterReport:
 
     def generate(self):
         """
-        Generates the monthly report.
+        Generates the semester report.
 
         Returns:
             bytes: The generated report in bytes format.
