@@ -315,5 +315,5 @@ fabric.properties
 assets/data/*.csv
 
 notes.txt
-nano.save
-semester_report.py.save
+/bot-trabalho/
+
