@@ -119,10 +119,24 @@ def start_bot(student_service: StudentService):
             await interaction.response.send_message(embed=embed)
 
     @bot.tree.command(
-        name="relatorio_semestral", description="Gera um relatório de ensino semestral"
+        name="relatorio_semestral", description="Gera um relatório semestral de ensino"
     )
     async def open_semester_report_form(interaction: discord.Interaction):
+        """
+        Command 'relatorio-semestral' to open the semester report form.
+
+        :param interaction: The Discord interaction object.
+        :type interaction: discord.Interaction
+
+        """
+
         def invalid_request_period():
+            """
+            Check if the request for generating the semester report is within the allowed period.
+
+            :return: True if the request is outside the allowed period, False otherwise.
+            :rtype: bool
+            """
             current_day = datetime.now().day
             current_month = datetime.now().month
             start_month = 7
@@ -139,6 +153,14 @@ def start_bot(student_service: StudentService):
             return True
 
         errors = []
+        student = student_service.find_student_by_discord_id(interaction.user.id)
+
+        if student is None:
+            errors.append("Você não tem permissão para gerar relatório semestral")
+            logger.warning(
+                "User %s without permission tried to generate monthly report",
+                interaction.user.name,
+            )
 
         if invalid_request_period():
             errors.append(
@@ -154,19 +176,10 @@ def start_bot(student_service: StudentService):
             logger.info("Semester report user %s", interaction.user.name)
             await interaction.response.send_modal(SemesterReportForm(student_service))
         else:
-            await interaction.response.send_message(errors)
+            embed = discord.Embed(title=":sob: Problemas com a sua requisição")
+            for index, error in enumerate(errors):
+                embed.add_field(name=f"Erro {index+1}", value=error, inline=False)
 
-        # try:
-        #     student = student_service.find_student_by_discord_id(interaction.user.id)
-        # except Exception:
-        #     student = None
-
-        # if student is None:
-        #     errors.append("Você não tem permissão para gerar relatório mensal")
-        #     logger.warning(
-        #         "User %s without permission tried to generate monthly report",
-        #         interaction.user.name,
-        #     )
-        #     await interaction.response.send_message(errors)
+            await interaction.response.send_message(embed=embed)
 
     bot.run(settings.get_discord_bot_token())
