@@ -176,8 +176,8 @@ class SemesterReportForm(ui.Modal):
             report_name = f"Relatorio-Semestral-{student_first_name}-{student['registration']}.pdf"
 
             await interaction.response.send_message(
-                content=f"Sucesso, {student_first_name}! Aqui está o relatório \
-                    semestral em formato PDF:",
+                content=f"Sucesso, {student_first_name}!\
+                        Aqui está o relatório semestral em formato PDF:",
                 file=discord.File(
                     BytesIO(report.generate()),
                     filename=report_name,
