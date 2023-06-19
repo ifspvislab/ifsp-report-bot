@@ -1,5 +1,4 @@
 from datetime import datetime
-
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -9,6 +8,19 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph, SimpleDocTemplate
 
 logs = []
+users_list = {""}
+
+
+async def add_logs(user, data, action) -> None:
+    log_list = [user, data, action]
+    logs.append(log_list)
+
+
+async def add_ids(id):
+    for ids in users_list:
+        if id == ids:
+            return
+    users_list.add(id)
 
 
 class Events(commands.Cog):
@@ -21,18 +33,22 @@ class Events(commands.Cog):
         if not message.guild or message.author.bot:
             return
 
+        await add_ids(str(message.author))
+
         formatted_date = message.created_at.strftime("%d/%m/%Y %H:%M")
-        on_message = f"{formatted_date} - {message.author} - {message.channel} - {message.content}"
-        logs.append(on_message)
+        action = f"{formatted_date} - {message.author} - {message.channel} - {message.content}"
+        await add_logs(str(message.author), formatted_date, action)
 
     @Cog.listener()
     async def on_message_delete(self, message: discord.Message) -> None:
         if not message.guild or message.author.bot:
             return
 
+        await add_ids(str(message.author))
+
         formatted_date = message.created_at.strftime("%d/%m/%Y %H:%M")
-        on_message_delete = f"{formatted_date} - {message.author} - {message.channel} - Deleted message: {message.content}"
-        logs.append(on_message_delete)
+        action = f"{formatted_date} - {message.author} - {message.channel} - Deleted message: {message.content}"
+        await add_logs(str(message.author), formatted_date, action)
 
     @Cog.listener()
     async def on_message_edit(
@@ -41,38 +57,11 @@ class Events(commands.Cog):
         if before.author.bot or before.content == after.content:
             return
 
-        formatted_date = before.created_at.strftime("%d/%m/%Y %H:%M")
-        on_message_delete = f"{formatted_date} - {before.author} - {before.channel} - Before message: {before.content} - After message:{after.content}"
-        logs.append(on_message_delete)
-
-    @Cog.listener()
-    async def on_member_join(self, member: discord.Member) -> None:
-        if not member.guild or member.bot:
-            return
-
-        formatted_date = member.created_at.strftime("%d/%m/%Y %H:%M")
-        on_member_join = f"{formatted_date} - Member Join: {member}"
-        logs.append(on_member_join)
-
-    @Cog.listener()
-    async def on_member_update(
-        self, before: discord.Member, after: discord.Member
-    ) -> None:
-        if before == after or before.bot:
-            return
+        await add_ids(str(before.author))
 
         formatted_date = before.created_at.strftime("%d/%m/%Y %H:%M")
-        on_member_update = f"{formatted_date} - Before nickname: {before.nick} - Update nick: {after.nick}"
-        logs.append(on_member_update)
-
-    @Cog.listener()
-    async def on_member_remove(self, member: discord.Member) -> None:
-        if not member.guild or member.bot:
-            return
-
-        formatted_date = member.created_at.strftime("%d/%m/%Y %H:%M")
-        on_member_remove = f"{formatted_date} - Removed member: {member}"
-        logs.append(on_member_remove)
+        action = f"{formatted_date} - {before.author} - {before.channel} - Before message: {before.content} - After message:{after.content}"
+        await add_logs(str(before.author), formatted_date, action)
 
     @app_commands.command(name="log", description="Create the log file")
     async def log_file(self, interaction: discord.Interaction):
@@ -90,14 +79,21 @@ async def create_pdf(logs):
     )
     styles = getSampleStyleSheet()
     text_style = styles["Normal"]
+    title_style = styles["Heading1"]
+
     content = []
 
-    title = Paragraph("Log file", styles["Heading1"])
+    title = Paragraph("Log file", title_style)
     content.append(title)
 
-    for arq in logs:
-        log_message = Paragraph(arq, text_style)
-        content.append(log_message)
+    for users in users_list:
+        user_title = Paragraph(users, title_style)
+        content.append(user_title)
+        for events in logs:
+            for author_events in events:
+                if author_events == users:
+                    log_event = Paragraph(events[-1], text_style)
+                    content.append(log_event)
 
     doc.build(content)
 
