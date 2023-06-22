@@ -7,7 +7,7 @@ Classes:
 - MonthyReportForm: Represents a monthly report form for generating monthly reports.
 
 """
-
+from datetime import datetime
 from io import BytesIO
 
 import discord
@@ -86,11 +86,10 @@ class MonthyReportForm(ui.Modal):
             )
 
             report = MonthlyReport(data)
+            registration = student["registration"]
 
             student_first_name = student["name"].split()[0]
-            report_name = (
-                f"Relatorio-Mensal-{student_first_name}-{student['registration']}.pdf"
-            )
+            report_name = f"Relatorio-Mensal-{student_first_name}-{registration}.pdf"
 
             await interaction.response.send_message(
                 content=f"{student_first_name}, aqui está o relatório mensal em formato PDF:",
@@ -171,13 +170,17 @@ class SemesterReportForm(ui.Modal):
             )
 
             report = SemesterReport(data)
+            month = datetime.now().strftime("%B")
+
+            name_of_report = (f"RelatorioSemestral_Ensino_{month}").upper()
+            name_of_report += (f"_{student['name']}").upper() + ".pdf"
 
             student_first_name = student["name"].split()[0]
-            report_name = f"Relatorio-Semestral-{student_first_name}-{student['registration']}.pdf"
-
+            report_name = name_of_report
+            content = f"Sucesso, {student_first_name}! Aqui está"
+            content += " o relatório semestral em formato PDF:"
             await interaction.response.send_message(
-                content=f"Sucesso, {student_first_name}!\
-                        Aqui está o relatório semestral em formato PDF:",
+                content=content,
                 file=discord.File(
                     BytesIO(report.generate()),
                     filename=report_name,

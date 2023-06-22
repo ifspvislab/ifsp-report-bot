@@ -9,7 +9,6 @@ Classes:
     - SemesterReport: Class for generating a semester report.
 
 """
-
 import locale
 from dataclasses import dataclass
 from datetime import datetime
@@ -25,6 +24,8 @@ from reportlab.platypus import (
     Table,
     TableStyle,
 )
+
+from data import student_registration
 
 from . import styles
 
@@ -105,7 +106,8 @@ class SemesterReport:
         self.data = data
         self.content = []
 
-    def current_semester(self) -> datetime:
+    @staticmethod
+    def current_semester() -> datetime:
         """
         Returns the current semester of submission, 1st or 2nd
 
@@ -127,6 +129,16 @@ class SemesterReport:
             bytes: The generated report in bytes format.
 
         """
+        student_name = self.data.student_name
+        proj_name = self.data.project_title
+        semester = self.current_semester()
+        student_register = student_registration(student_name)
+
+        month = datetime.now().strftime("%B")
+        subject = f"Este documento é o relatório semestral do {semester} semestre"
+        subject += f" do aluno {student_name} do projeto {proj_name}"
+
+        title = f"relatório-semestral-{month}-{student_name}-{student_register}"
 
         buffer = BytesIO()
         doc = SimpleDocTemplate(
@@ -137,9 +149,8 @@ class SemesterReport:
             topMargin=57,
             bottomMargin=57,
             pageCompression=True,
-            title=f"relatorio-semestral-{datetime.now().strftime('%B')}",
-            subject=f"Este documento é o relatório semestral do mês \
-                  {datetime.now().strftime('%B')}",
+            title=title,
+            subject=subject,
         )
         self.setup_header()
         self.setup_report_table()

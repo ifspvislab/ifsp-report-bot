@@ -137,17 +137,14 @@ def start_bot(student_service: StudentService):
             :return: True if the request is outside the allowed period, False otherwise.
             :rtype: bool
             """
-            current_day = datetime.now().day
-            current_month = datetime.now().month
-            start_month = 7
-            end_month = 12
-            start_day = 23
-            end_day = 31
+            current_date = datetime.now().date()
+            current_month = current_date.month
+            current_day = current_date.day
 
-            if current_month == start_month and current_day >= start_day:
+            if current_month == 7 and 23 <= current_day <= 31:
                 return False
 
-            if current_month == end_month and current_day <= end_day:
+            if current_month == 12 and 1 <= current_day <= 10:
                 return False
 
             return True
