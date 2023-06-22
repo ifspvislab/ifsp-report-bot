@@ -11,6 +11,24 @@ Classes:
     - :class:`MemberData`: Class for managing member data.
 
 """
+from dataclasses import dataclass
+
+
+@dataclass
+class Member:
+    """Class representing a member.
+
+    Attributes:
+        prontuario (str): The prontuario of the member.
+        discord_id (int): The Discord ID of the member.
+        name (str): The name of the member.
+        email (str): The email address of the member.
+    """
+
+    prontuario: str
+    discord_id: int
+    name: str
+    email: str
 
 
 class MemberData:
@@ -30,7 +48,7 @@ class MemberData:
     """
 
     # pylint: disable=duplicate-code
-    def _row_to_member(self, row: str) -> dict:
+    def _row_to_member(self, row: str) -> Member:
         """
         .. method:: _row_to_member(row: str) -> dict
 
@@ -42,15 +60,10 @@ class MemberData:
         :rtype: dict
         """
         fields = [field.strip() for field in row.split(sep=",")]
+        member = Member(fields[0], fields[1], fields[2], fields[3])
+        return member
 
-        return {
-            "prontuario": fields[0],
-            "discord_id": int(fields[1]),
-            "name": fields[2],
-            "email": fields[3],
-        }
-
-    def add_member(self, member):
+    def add_member(self, member: Member):
         """
         .. method:: add_member(member)
 
@@ -65,7 +78,7 @@ class MemberData:
                 f"{member.prontuario}, {member.discord_id}, {member.name}, {member.email}\n"
             )
 
-    def load_members(self) -> list[dict]:
+    def load_members(self) -> list[Member]:
         """
         .. method:: load_members() -> list[dict]
 

@@ -25,11 +25,9 @@ Use the imported modules to manage student data.
 
 """
 
-from dataclasses import dataclass
-
 from validate_email_address import validate_email
 
-from data import MemberData
+from data import Member, MemberData
 
 
 class MemberAlreadyExists(Exception):
@@ -60,23 +58,6 @@ class OccurrenceError(Exception):
     """Exception raised when there is a duplicate occurrence of a member."""
 
     print(Exception)
-
-
-@dataclass
-class Member:
-    """Class representing a member.
-
-    Attributes:
-        prontuario (str): The prontuario of the member.
-        discord_id (int): The Discord ID of the member.
-        name (str): The name of the member.
-        email (str): The email address of the member.
-    """
-
-    prontuario: str
-    discord_id: int
-    name: str
-    email: str
 
 
 class MemberService:
@@ -150,7 +131,7 @@ class MemberService:
         """
 
         for member in self.member_data.load_members():
-            if value == member["prontuario"]:
+            if value == member.prontuario:
                 raise OccurrenceError("Já existe esse membro")
 
         print("Novo membro")

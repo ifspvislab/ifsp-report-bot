@@ -58,6 +58,7 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
         await interaction.response.send_message("Membro cadastrado com sucesso.")
 
     async def on_error(self, interaction: Interaction, error: Exception, /):
+        print(error)
         await interaction.response.send_message(error)
 
 
