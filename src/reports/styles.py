@@ -84,3 +84,21 @@ signature_content_style = ParagraphStyle(
     leading=12,
     fontName="Calibri",
 )
+
+events_text_style = ParagraphStyle(
+    name="EventsText",
+    fontSize=12,
+    leading=10,
+    spaceAfter=3,
+    fontName="Calibri",
+    textColor=colors.black,
+)
+
+events_header_style = ParagraphStyle(
+    name="EventsText",
+    fontSize=16,
+    leading=12,
+    fontName="Calibri-Bold",
+    spaceAfter=3,
+    textColor=colors.black,
+)
