@@ -9,7 +9,7 @@ Modules:
 
 """
 
-from .admin_service import AdminService
+from .admin_service import is_admin
 from .coordinator_service import (
     Coordinator,
     CoordinatorAlreadyExists,

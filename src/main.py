@@ -5,7 +5,7 @@ This module contains the main function to start the IFSP Report Bot.
 """
 
 from bot import start_bot
-from services import CoordinatorService, StudentService
+from services import StudentService
 
 
 def main():
