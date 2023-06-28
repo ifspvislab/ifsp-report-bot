@@ -47,7 +47,7 @@ def start_bot(student_service: StudentService):
 
         """
 
-        # updates the bot's command representation
+        await bot.load_extension("bot.cogs.participation")
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
 
