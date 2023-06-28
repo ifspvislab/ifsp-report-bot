@@ -1,3 +1,7 @@
+"""
+    data for students
+"""
+
 from .project_data import ProjectData
 
 
@@ -26,7 +30,7 @@ class StudentData:
         """
         self.project_data = ProjectData()
 
-    def _row_to_student(self, row: str) -> dict:
+    def row_to_student(self, row: str) -> dict:
         """
         Convert a row of student data to a dictionary.
 
@@ -53,7 +57,7 @@ class StudentData:
         with open("assets/data/students.csv", "r", encoding="utf-8") as file:
             students = []
             for row in file:
-                students.append(self._row_to_student(row))
+                students.append(self.row_to_student(row))
             return students
 
     def load_students(self) -> list[dict]:
@@ -63,7 +67,7 @@ class StudentData:
         :return: A list of student dictionaries with associated project information.
         :rtype: list[dict]
         """
-        projects = self.project_data._load_projects()
+        projects = self.project_data.load_projects()
         students = self._load_students()
 
         for student in students:

@@ -20,7 +20,7 @@ class ProjectData:
             Load projects from the CSV file.
     """
 
-    def _row_to_project(self, row: str) -> dict:
+    def row_to_project(self, row: str) -> dict:
         """
         Convert a row of project data to a dictionary.
 
@@ -38,7 +38,7 @@ class ProjectData:
             "end_date": datetime.strptime(fields[4], "%d/%m/%Y").date(),
         }
 
-    def _load_projects(self) -> list[dict]:
+    def load_projects(self) -> list[dict]:
         """
         Load projects from the CSV file.
 
@@ -48,5 +48,5 @@ class ProjectData:
         with open("assets/data/projects.csv", "r", encoding="utf-8") as file:
             projects = []
             for row in file:
-                projects.append(self._row_to_project(row))
+                projects.append(self.row_to_project(row))
             return projects

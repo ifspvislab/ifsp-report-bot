@@ -23,6 +23,7 @@ class Coordinator:
         email (str): The coordinator's email.
     """
 
+    coord_id: str
     prontuario: str
     discord_id: int
     name: str
@@ -57,7 +58,7 @@ class CoordinatorData:
         """
 
         fields = [field.strip() for field in row.split(sep=",")]
-        coordinator = Coordinator(fields[0], fields[1], fields[2], fields[3])
+        coordinator = Coordinator(fields[0], fields[1], fields[2], fields[3], fields)
         return coordinator
 
     def load_coordinators(self) -> list[Coordinator]:
@@ -74,7 +75,7 @@ class CoordinatorData:
                 coordinators.append(self._row_to_coordinator(row))
             return coordinators
 
-    def add_coordinator(self, coordinator: Coordinator) -> None:
+    def add_coordinator(self, coord: Coordinator) -> None:
         """
         Add a new coordinator to the coordinators.csv file.
 
@@ -94,5 +95,6 @@ class CoordinatorData:
             "assets/data/coordinators.csv", "a", encoding="UTF-8"
         ) as coordinator_data:
             coordinator_data.write(
-                f"{coordinator.prontuario}, {coordinator.discord_id}, {coordinator.name}, {coordinator.email}\n"
+                f"{coord.coord_id},{coord.prontuario},"
+                + f"{coord.discord_id},{coord.name},{coord.email}\n"
             )

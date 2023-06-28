@@ -14,6 +14,7 @@ import discord
 from discord.ext import commands
 
 import settings
+from bot.cogs.add_coordinator import CoordinatorCog
 from bot.modals import MonthyReportForm
 from services import StudentService
 
@@ -45,14 +46,12 @@ def start_bot(student_service: StudentService):
          the latest information about all available commands and their respective settings.
 
         """
-
-        await bot.load_extension("bot.cogs.add_coordinator")
+        await bot.add_cog(CoordinatorCog(bot))
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
 
     @bot.tree.command(name="ping", description="Verifica se o bot está no ar")
     async def ping(interaction: discord.Interaction):
-        await bot.tree.sync(guild=interaction.guild)
         """
         Command ping to 'send' a 'pong' response.
 
@@ -60,6 +59,7 @@ def start_bot(student_service: StudentService):
         :type interaction: discord.Interaction
 
         """
+        await bot.tree.sync(guild=interaction.guild)
         logger.info("Ping command user %s", interaction.user.name)
         await interaction.response.send_message(f":ping_pong: {interaction.user.name}")
 

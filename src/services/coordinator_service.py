@@ -20,15 +20,11 @@ class CoordinatorAlreadyExists(Exception):
     Exception raised when a coordinator already exists.
     """
 
-    print(Exception)
-
 
 class ProntuarioError(Exception):
     """
     Exception raised when an incorrect prontuario is encountered.
     """
-
-    print(Exception)
 
 
 class EmailError(Exception):
@@ -36,15 +32,11 @@ class EmailError(Exception):
     Exception raised when an invalid email is encountered.
     """
 
-    print(Exception)
-
 
 class DiscordIdError(Exception):
     """
     Exception raised when an invalid Discord ID is encountered.
     """
-
-    print(Exception)
 
 
 class CoordinatorService:
@@ -73,7 +65,7 @@ class CoordinatorService:
             and value[-1].isalnum()
             and len(value) == 9
         ):
-            raise ProntuarioError("Prontuario incorreto")
+            raise ProntuarioError("ERRO: Prontuario incorreto")
 
         print("Prontuario correto")
 
@@ -85,7 +77,7 @@ class CoordinatorService:
         :raises EmailError: If the email address is invalid.
         """
         if not validate_email(value, check_mx=True):
-            raise EmailError("Email inválido")
+            raise EmailError("ERRO: Email inválido")
 
         print("Email correto")
 
@@ -97,7 +89,7 @@ class CoordinatorService:
         :raises DiscordIdError: If the Discord ID is invalid.
         """
         if not value.isnumeric():
-            raise DiscordIdError("Discord ID inválido")
+            raise DiscordIdError("ERRO: Discord ID inválido")
 
         print("Discord ID correto")
 
@@ -110,7 +102,9 @@ class CoordinatorService:
         """
         for coordinator in self.coordinator_data.load_coordinators():
             if prontuario == coordinator.prontuario:
-                raise ValueError("Já existe esse membro")
+                raise CoordinatorAlreadyExists(
+                    "ERRO: Já há um coordenador com este prontuário!"
+                )
 
     def create(self, coordenador: Coordinator):
         """
@@ -127,6 +121,7 @@ class CoordinatorService:
         self.verify_discord_id(coordenador.discord_id)
         self.check_ocurrance(coordenador.prontuario)
         coordinator = Coordinator(
+            coordenador.coord_id,
             coordenador.prontuario,
             coordenador.discord_id,
             coordenador.name,

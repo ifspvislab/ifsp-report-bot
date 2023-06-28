@@ -8,6 +8,8 @@ Classes:
     AddCoordinatorModal: Um modal para adicionar um coordenador.
 """
 
+from uuid import uuid4
+
 import discord
 from discord import app_commands, ui
 from discord.ext import commands
@@ -79,7 +81,7 @@ class AddCoordinatorModal(ui.Modal):
         """
         super().__init__(title="Adicionar coordenador")
 
-    async def on_submit(self, interaction: discord.Interaction):
+    async def on_submit(self, interaction: discord.Interaction, /):
         """
         Handles the submit event when adding a coordinator.
 
@@ -90,6 +92,7 @@ class AddCoordinatorModal(ui.Modal):
         coordinator_data = CoordinatorData()
         coordinator_service = CoordinatorService(coordinator_data)
         coordinator = Coordinator(
+            str(uuid4()),
             self.prontuario.value,
             self.discord_id.value,
             self.name.value,
@@ -108,8 +111,9 @@ class AddCoordinatorModal(ui.Modal):
             DiscordIdError,
             EmailError,
             ProntuarioError,
-        ) as e:
-            await interaction.response.send_message(str(e))
+        ) as exception:
+            await interaction.response.send_message(str(exception))
+            logger.warning("An error occurred while creating a new coordinator")
 
 
 class CoordinatorCog(commands.Cog):
@@ -139,10 +143,3 @@ class CoordinatorCog(commands.Cog):
         )
 
         print(error)
-
-
-async def setup(bot):
-    """
-    Add SendModal class to list of cogs to be able to use.
-    """
-    await bot.add_cog(CoordinatorCog(bot))
