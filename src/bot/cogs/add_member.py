@@ -12,13 +12,19 @@ Function:
 
 """
 
+from uuid import uuid4
+
 import discord
 from discord import Member, app_commands, ui
 from discord.ext import commands
 from discord.interactions import Interaction
 
+import data
+import settings
 from data import CoordinatorData, MemberData
 from services import MemberService
+
+logger = settings.logging.getLogger(__name__)
 
 
 class ModalAddMember(ui.Modal, title="Adicionar Membro"):
@@ -50,19 +56,25 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
         member_data = MemberData()
         member_service = MemberService(member_data)
         member_service.add_member(
-            self.prontuario.value,
-            self.discord_id.value,
-            self.name.value,
-            self.email.value,
+            data.Member(
+                str(uuid4()),
+                self.prontuario.value,
+                self.discord_id.value,
+                self.name.value,
+                self.email.value,
+            )
         )
         await interaction.response.send_message("Membro cadastrado com sucesso.")
 
     async def on_error(self, interaction: Interaction, error: Exception, /):
-        print(error)
+        logger.warning(
+            f"Erro: {error}, na tentativa do usuário"
+            + f" {interaction.user} de adicionar membro"
+        )
         await interaction.response.send_message(error)
 
 
-class SendModal(commands.Cog):
+class MemberCog(commands.Cog):
     """
     Command to display the AddMemberModal
 
@@ -82,20 +94,19 @@ class SendModal(commands.Cog):
         Sends the AddMemberModal as a modal in response to an interaction.
         """
         coordinator_data = CoordinatorData()
-        for coord in coordinator_data.load_coordinator():
-            if interaction.user.id == coord["discord_id"]:
+        for coord in coordinator_data.load_coordinators():
+            if interaction.user.id == coord.discord_id:
                 modal = ModalAddMember()
                 if member is not None:
                     modal.discord_id.default = str(member.id)
                 await interaction.response.send_modal(modal)
                 return
 
-        await interaction.response.send_message("Você não tem permissão para isso.")
-        raise ValueError("Você não tem permissão para isso.")
-
-
-async def setup(bot):
-    """
-    Add SendModal class to list of cogs to be able to use.
-    """
-    await bot.add_cog(SendModal(bot))
+        await interaction.response.send_message(
+            "Você não tem permissão para adicionar membro."
+        )
+        logger.warning(
+            "Usuário (dicord_id: %s)"
+            + "tentou adicionar membro, porém não possui permissão.",
+            interaction.user,
+        )

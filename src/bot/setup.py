@@ -16,6 +16,7 @@ from discord.ext import commands
 import settings
 from services import StudentService
 
+from .cogs import MemberCog
 from .modals import MonthyReportForm
 
 logger = settings.logging.getLogger(__name__)
@@ -46,7 +47,7 @@ def start_bot(student_service: StudentService):
          the latest information about all available commands and their respective settings.
 
         """
-        await bot.load_extension("bot.cogs.add_member")
+        await bot.add_cog(MemberCog(bot))
         # updates the bot's command representation
         logger.info("Bot %s is ready", bot.user)
 

@@ -19,12 +19,14 @@ class Member:
     """Class representing a member.
 
     Attributes:
+        member_id(str): The ID of the member.
         prontuario (str): The prontuario of the member.
         discord_id (int): The Discord ID of the member.
         name (str): The name of the member.
         email (str): The email address of the member.
     """
 
+    member_id: str
     prontuario: str
     discord_id: int
     name: str
@@ -60,7 +62,7 @@ class MemberData:
         :rtype: dict
         """
         fields = [field.strip() for field in row.split(sep=",")]
-        member = Member(fields[0], fields[1], fields[2], fields[3])
+        member = Member(fields[0], fields[1], int(fields[2]), fields[3], fields[4])
         return member
 
     def add_member(self, member: Member):
@@ -75,7 +77,8 @@ class MemberData:
         """
         with open("assets/data/members.csv", "a", encoding="UTF-8") as member_data:
             member_data.write(
-                f"{member.prontuario}, {member.discord_id}, {member.name}, {member.email}\n"
+                f"{member.member_id},{member.prontuario},"
+                + f"{member.discord_id}, {member.name}, {member.email}\n"
             )
 
     def load_members(self) -> list[Member]:

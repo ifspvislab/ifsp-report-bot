@@ -136,18 +136,21 @@ class MemberService:
 
         print("Novo membro")
 
-    def add_member(self, prontuario, discord_id, name, email):
+    def add_member(self, member):
         """Add a new member.
 
         Args:
-            prontuario (str): The prontuario of the member.
-            discord_id (int): The Discord ID of the member.
-            name (str): The name of the member.
-            email (str): The email address of the member.
+            member (Member): Member object.
         """
-        self.verify_prontuario(prontuario)
-        self.verify_email(email)
-        self.verify_discord_id(discord_id)
-        self.check_ocurrance(prontuario)
-        member = Member(prontuario, discord_id, name, email)
+        self.verify_prontuario(member.prontuario)
+        self.verify_email(member.email)
+        self.verify_discord_id(member.discord_id)
+        self.check_ocurrance(member.prontuario)
+        member = Member(
+            member.member_id,
+            member.prontuario,
+            member.discord_id,
+            member.name,
+            member.email,
+        )
         self.member_data.add_member(member)

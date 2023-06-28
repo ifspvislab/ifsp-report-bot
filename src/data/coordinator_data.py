@@ -1,79 +1,102 @@
 """
-:mod: coordinator_data
-======================
 
-Module for managing coordinator data stored in a CSV file.
-
-Module Dependencies:
-    - ``csv``: A module for working with CSV files.
+This module contains the definition of the `Coordinator` and `CoordinatorData` classes, 
+which are used for managing coordinator data.
 
 Classes:
-    - :class:`CoordinatorData`: Class for managing coordinator data.
+    Coordinator: A class that represents a coordinator.
+    CoordinatorData: A class for managing coordinator data.
 
-Usage:
-    1. Import the module:
-
-        .. code-block:: python
-
-            import coordinator_data
-
-    2. Create an instance of the CoordinatorData class:
-
-        .. code-block:: python
-
-            coordinator = coordinator_data.CoordinatorData()
-
-    3. Use the methods of the CoordinatorData class to manage coordinator data.
 """
-# pylint: disable=too-few-public-methods
+from dataclasses import dataclass
+
+
+@dataclass
+class Coordinator:
+    """
+    A class that represents a coordinator.
+
+    Attributes:
+        prontuario (str): The coordinator's prontuario.
+        discord_id (int): The coordinator's Discord ID.
+        name (str): The coordinator's name.
+        email (str): The coordinator's email.
+    """
+
+    coord_id: str
+    prontuario: str
+    discord_id: int
+    name: str
+    email: str
+
+
 class CoordinatorData:
     """
-    :class: CoordinatorData
-    ======================
+    A class for managing coordinator data.
 
-    Class for managing coordinator data stored in a CSV file.
+    Methods
+    -------
+    _row_to_coordinator(row: str) -> dict
+        Converts a row of data from the coordinators.csv file into a dictionary format.
 
-    Module Dependencies:
-        - ``csv``: A module for working with CSV files.
+    load_coordinators() -> list[dict]
+        Loads coordinator data from the coordinators.csv file and returns a list of dictionaries.
 
-    Methods:
-        - ``__init__()``: Initialize the CoordinatorData class.
-        - ``_row_to_coordinator(row: str) -> dict``: Convert a row of
-        coordinator data to a dictionary.
-        - ``load_coordinator() -> list[dict]``: Load coordinator from the CSV file.
+    add_coordinator(prontuario, name, email, discord_id)
+        Adds a new coordinator to the coordinators.csv file.
 
     """
 
     def _row_to_coordinator(self, row: str) -> dict:
         """
-        .. method:: _row_to_coordinator(row: str) -> dict
+        Converts a row of data from the coordinators.csv file into a dictionary format.
 
-        Convert a row of coordinator data to a dictionary.
-
-        :param row: The row of coordinator data.
+        :param row: A row of data representing a coordinator.
         :type row: str
-        :return: A dictionary representing the coordinator.
+        :return: A dictionary containing the coordinator's prontuario, discord_id, name, and email.
         :rtype: dict
         """
+
         fields = [field.strip() for field in row.split(sep=",")]
-        return {
-            "prontuario": fields[0],
-            "discord_id": int(fields[1]),
-            "name": fields[2],
-            "email": fields[3],
-        }
+        coordinator = Coordinator(
+            fields[0], fields[1], int(fields[2]), fields[3], fields[4]
+        )
+        return coordinator
 
-    def load_coordinator(self) -> list[dict]:
+    def load_coordinators(self) -> list[Coordinator]:
         """
-        .. method:: load_coordinator() -> list[dict]
+        Loads coordinator data from the coordinators.csv file and returns a list of dictionaries.
 
-        Load coordinator from the CSV file.
-
-        :return: A list of coordinator dictionaries.
+        :return: A list of dictionaries, where each dictionary represents a coordinator.
         :rtype: list[dict]
         """
+
         with open("assets/data/coordinators.csv", "r", encoding="utf-8") as file:
-            coordinator = []
+            coordinators = []
             for row in file:
-                coordinator.append(self._row_to_coordinator(row))
-            return coordinator
+                coordinators.append(self._row_to_coordinator(row))
+            return coordinators
+
+    def add_coordinator(self, coord: Coordinator) -> None:
+        """
+        Add a new coordinator to the coordinators.csv file.
+
+        :param prontuario: The prontuario of the coordinator.
+        :type prontuario: str
+        :param name: The name of the coordinator.
+        :type name: str
+        :param email: The email of the coordinator.
+        :type email: str
+        :param discord_id: The Discord ID of the coordinator.
+        :type discord_id: int
+        :return: None
+        :rtype: None
+        """
+
+        with open(
+            "assets/data/coordinators.csv", "a", encoding="UTF-8"
+        ) as coordinator_data:
+            coordinator_data.write(
+                f"{coord.coord_id},{coord.prontuario},"
+                + f"{coord.discord_id},{coord.name},{coord.email}\n"
+            )
