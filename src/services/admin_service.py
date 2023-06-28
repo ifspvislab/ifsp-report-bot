@@ -3,7 +3,7 @@ import discord
 
 from settings import get_admin_id
 
-ID_ADMIN = get_admin_id
+ID_ADMIN = get_admin_id()
 
 
 class AdminService:

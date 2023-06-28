@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 
-from data import _load_projects, add_projects
+from data import ProjectData
+
+# from data import _load_projects, add_projects
 
 
 class ProjectAlreadyExists(Excpetion):
@@ -11,8 +13,13 @@ class DiscordServerIdError(Exception):
     print(Exception)
 
 
+class EqualOrSmallerDataError(Exception):
+    print(Exception)
+
+
 @dataclass
 class Project:
+    id: str
     coordenador: str
     discord_server_id: int
     titulo: str
@@ -21,16 +28,31 @@ class Project:
 
 
 class ProjectService:
-    def __init__(self, data: Project):
+    def __init__(self, coordinator_data = CoordinatorData, project_data: ProjectData):
+        self._id = data.id
         self._coordenador = data.coordenador
         self._discord_server_id = data.discord_server_id
         self._titulo = data.titulo
         self._data_inicio = data.data_inicio
         self._data_fim = data.data_fim
+        self.project_data: project_data
 
     # def verify_coordenador(self, value):
 
     # def verify_titulo(self, value):
+
+    def verify_data(self):
+        if self.data_inicio >= self.data_fim:
+            raise EqualOrSmallerDataError("A data de fim é menor ou igual a data de início!")
+
+    # def verify_intervalo_data(self):
+    #     if self.data_inicio 
+
+    def verify_data_atual(self):
+        #utilizar datetime
+
+    def verify_data_e_titulo_projeto(self):
+        
 
     def verify_discord_server_id(self, value):
         if not value.isnumeric():
@@ -48,19 +70,22 @@ class ProjectService:
                 ):
                     raise ProjectAlreadyExists("Esse projeto já existe!")
 
-            print("Novo projeto")
+            projects_dataprint("Novo projeto")
 
-    def verify_standards(self, projeto):
+    def create(self, projeto):
         # self.verify_coordenador(projeto.coordenador) // pensar .conferir se o coordenador existe //
         self.verify_discord_server_id(projeto.discord_server_id)
         self.verify_titulo(projeto.titulo)
         self.verify_data_inicio(projeto.data_inicio)
         self.verify_data_fim(projeto.data_fim)
         self.check_ocurrance()
-        add_projects(
+        ProjectData.add_projects(
             projeto.coordenador,
             projeto.discord_server_id,
             projeto.titulo,
             projeto.data_inicio,
             projeto.data_fim,
         )
+
+
+

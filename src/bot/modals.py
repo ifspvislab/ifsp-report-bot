@@ -9,59 +9,12 @@ Classes:
 """
 
 from io import BytesIO
-from typing import Optional
 
 import discord
 from discord import ui
-from discord.utils import MISSING
 
-from data import add_projects
 from reports import MonthlyReport, MonthlyReportData
-from services import DiscordServerIdError, Project, ProjectAlreadyExists
-
-
-class AddProjects(ui.modal):
-
-    coordenador = ui.TextInput(label="Coordenador", style=discord.TextStyle.short)
-    discord_server_id = ui.TextInput(
-        label="Discord Server Id", style=discord.TextStyle.short
-    )
-    titulo = ui.TextInput(
-        label="Título", style=discord.TextStyle.short, min_length=5, max_length=150
-    )
-    data_inicio = ui.TextInput(
-        label="Data do Início", placeholder="dia/mês/ano", style=discord.TextStyle.short
-    )
-    data_fim = ui.TextInput(
-        label="Data do Fim", placeholder="dia/mês/ano", style=discord.TextStyle.short
-    )
-
-    def __init__(self) -> None:
-        super().__init__(title="Adicionar Projeto")
-
-    async def on_submit(self, interaction: discord.Interaction):
-        projeto = Project(
-            self.coordenador.value,
-            self.discord_server_id.value,
-            self.titulo.value,
-            self.data_inicio.value,
-            self.data_fim.value,
-        )
-
-        project_service = ProjectService(projeto)
-
-        try:
-            project_service.verify_standards(projeto)
-
-            await interaction.response.send_message(
-                f"O projeto {self.titulo.value} foi adicionado!"
-            )
-
-        except ProjectAlreadyExists as e:
-            await interaction.response.send_message(str(e))
-
-        except DiscordServerIdError as e:
-            await interaction.response.send_message(str(e))
+from services import StudentService
 
 
 class MonthyReportForm(ui.Modal):
