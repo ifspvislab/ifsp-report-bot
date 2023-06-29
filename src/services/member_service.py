@@ -150,7 +150,7 @@ class MemberService:
         Raises:
             OccurrenceError: If a member with the same prontuario already exists.
         """
-        # for member in self.database:
+
         if self.find_member_by_type("prontuario", prontuario):
             raise OccurrenceError("Já existe esse membro")
 

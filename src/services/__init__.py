@@ -10,5 +10,6 @@ Modules:
 
 """
 
+from .coordinator_service import CoordinatorService
 from .member_service import MemberService
 from .student_service import StudentService

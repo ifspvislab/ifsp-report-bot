@@ -21,8 +21,7 @@ from discord.interactions import Interaction
 
 import data
 import settings
-from data import CoordinatorData
-from services import MemberService
+from services import CoordinatorService, MemberService
 
 logger = settings.logging.getLogger(__name__)
 
@@ -84,9 +83,12 @@ class MemberCog(commands.Cog):
         - send_modal: Sends the AddMemberModal as a modal in response to an interaction.
     """
 
-    def __init__(self, member_service: MemberService):
+    def __init__(
+        self, member_service: MemberService, coordinator_service: CoordinatorService
+    ):
         super().__init__()
         self.member_service = member_service
+        self.coordinator_service = coordinator_service
 
     @app_commands.command(
         name="adicionar_membro",
@@ -100,14 +102,14 @@ class MemberCog(commands.Cog):
         Sends the AddMemberModal as a modal in response to an interaction.
         """
 
-        coordinator_data = CoordinatorData()
-        for coord in coordinator_data.load_coordinators():
-            if interaction.user.id == coord.discord_id:
-                modal = ModalAddMember(self.member_service)
-                if member is not None:
-                    modal.discord_id.default = str(member.id)
-                await interaction.response.send_modal(modal)
-                return
+        if self.coordinator_service.find_coordinator_by_type(
+            "discord_id", interaction.user.id
+        ):
+            modal = ModalAddMember(self.member_service)
+            if member is not None:
+                modal.discord_id.default = str(member.id)
+            await interaction.response.send_modal(modal)
+            return
 
         await interaction.response.send_message(
             "Você não tem permissão para adicionar membro."
