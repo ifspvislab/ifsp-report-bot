@@ -78,7 +78,7 @@ class MemberData:
         with open("assets/data/members.csv", "a", encoding="UTF-8") as member_data:
             member_data.write(
                 f"{member.member_id},{member.prontuario},"
-                + f"{member.discord_id}, {member.name}, {member.email}\n"
+                + f"{member.discord_id},{member.name},{member.email}\n"
             )
 
     def load_members(self) -> list[Member]:

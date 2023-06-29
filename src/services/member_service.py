@@ -77,18 +77,19 @@ class MemberService:
         self.member_data = member_data
         self.database = self.member_data.load_members()
 
-    def find_member_by_discord_id(self, discord_id):
-        """Method to find a member by discord ID.
+    def find_member_by_type(self, attr_type, value):
+        """
+        Find a member in the database based on the specified attribute type and value.
 
         Args:
-            discord_id (int): The discord ID of the member to find.
+            attr_type (str): The attribute type to be checked.
+            value: The value of the attribute to be matched.
 
         Returns:
-            Member or None: The member object if found, or None if not found.
+            The member object if found, None otherwise.
         """
-
         for member in self.database:
-            if member.discord_id == discord_id:
+            if getattr(member, attr_type) == value:
                 return member
 
         return None
@@ -140,7 +141,7 @@ class MemberService:
 
         print("Discord ID correto")
 
-    def check_ocurrance(self, value):
+    def check_ocurrance(self, prontuario):
         """Check if a member with the given prontuario already exists.
 
         Args:
@@ -149,9 +150,9 @@ class MemberService:
         Raises:
             OccurrenceError: If a member with the same prontuario already exists.
         """
-        for member in self.database:
-            if member.prontuario == value:
-                raise OccurrenceError("Já existe esse membro")
+        # for member in self.database:
+        if self.find_member_by_type("prontuario", prontuario):
+            raise OccurrenceError("Já existe esse membro")
 
         print("Novo membro")
 
