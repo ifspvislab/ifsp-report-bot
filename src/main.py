@@ -16,10 +16,10 @@ def main():
     It initializes the StudentService and starts the bot by calling the start_bot function.
     """
 
+    student_service = StudentService()
     project_data = ProjectData()
     project_service = ProjectService(project_data)
-    student_service = StudentService()
-    start_bot(student_service)
+    start_bot(student_service, project_service)
 
 
 if __name__ == "__main__":

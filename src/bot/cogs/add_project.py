@@ -24,6 +24,7 @@ from services import (
     InvalidEndDate,
     InvalidTimeInterval,
     ProjectAlreadyExists,
+    ProjectService,
     is_admin,
 )
 
@@ -86,7 +87,7 @@ class AddProjectModal(ui.Modal):
     def __init__(self) -> None:
         super().__init__(title="Adicionar Projeto")
 
-    async def on_submit(self, interaction: discord.Interaction):
+    async def on_submit(self, interaction: discord.Interaction, /):
         project_data = ProjectData()
         project_service = ProjectService(project_data)
         project = Project(
@@ -112,7 +113,6 @@ class AddProjectModal(ui.Modal):
             InvalidEndDate,
             DiscordServerIdError,
             ProjectAlreadyExists,
-            is_admin,
         ) as exception:
             await interaction.response.send_message(str(exception))
 
@@ -124,6 +124,10 @@ class ProjectCog(commands.Cog):
     Methods:
         - send_modal: sends the AddProjectModal as a modal in response to an interaction.
     """
+
+    def __init__(self, project_service: ProjectService):
+        super().__init__()
+        self.project_service = project_service
 
     @app_commands.command(
         name="adicionar-projeto", description="adicionar projeto via modal"
