@@ -9,13 +9,23 @@ Classes:
     - AddProjectModal: a modal that add a project.
 """
 
+from uuid import uuid4
+
 import discord
 from discord import app_commands, ui
 from discord.ext import commands
 
 import settings
 from data import Project, ProjectData
-from services import DiscordServerIdError, ProjectAlreadyExists
+from services import (
+    DiscordServerIdError,
+    EqualOrSmallerDateError,
+    InvalidCoordinator,
+    InvalidEndDate,
+    InvalidTimeInterval,
+    ProjectAlreadyExists,
+    is_admin,
+)
 
 logger = settings.logging.getLogger(__name__)
 
@@ -80,6 +90,7 @@ class AddProjectModal(ui.Modal):
         project_data = ProjectData()
         project_service = ProjectService(project_data)
         project = Project(
+            str(uuid4()),
             self.coordenador.value,
             self.discord_server_id.value,
             self.titulo.value,
@@ -88,17 +99,22 @@ class AddProjectModal(ui.Modal):
         )
 
         try:
-            self.project_service.create(project)
+            project_service.create(project)
 
             await interaction.response.send_message(
                 f"O projeto {self.titulo.value} foi adicionado!"
             )
 
         except (
-            ProjectAlreadyExists,
+            InvalidCoordinator,
+            EqualOrSmallerDateError,
+            InvalidTimeInterval,
+            InvalidEndDate,
             DiscordServerIdError,
-        ) as e:
-            await interaction.response.send_message(str(e))
+            ProjectAlreadyExists,
+            is_admin,
+        ) as exception:
+            await interaction.response.send_message(str(exception))
 
 
 class ProjectCog(commands.Cog):
@@ -125,7 +141,3 @@ class ProjectCog(commands.Cog):
         )
 
         print(error)
-
-
-async def setup(bot):
-    await bot.add_cog(ProjectCog(bot))

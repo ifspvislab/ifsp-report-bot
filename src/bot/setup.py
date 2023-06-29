@@ -8,13 +8,13 @@ Functions:
 
 """
 
-import os
 from datetime import datetime
 
 import discord
 from discord.ext import commands
 
 import settings
+from bot.cogs.add_project import ProjectCog
 from bot.modals import MonthyReportForm
 from services import StudentService
 
@@ -47,7 +47,7 @@ def start_bot(student_service: StudentService):
 
         """
 
-        await bot.load_extension("bot.cogs.add_projects")
+        await bot.add_cog(ProjectCog(bot))
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
 
@@ -60,6 +60,7 @@ def start_bot(student_service: StudentService):
         :type interaction: discord.Interaction
 
         """
+        await bot.tree.sync(guild=interaction.guild)
         logger.info("Ping command user %s", interaction.user.name)
         await interaction.response.send_message(f":ping_pong: {interaction.user.name}")
 

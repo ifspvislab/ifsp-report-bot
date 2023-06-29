@@ -1,4 +1,10 @@
-""" Services for admin """
+"""
+admin_service
+=======================
+
+This module provides the function for managing the admin verification.
+
+"""
 import discord
 
 from settings import get_admin_id
@@ -6,8 +12,7 @@ from settings import get_admin_id
 ID_ADMIN = get_admin_id()
 
 
-class AdminService:
-    def is_admin(interaction: discord.Interaction):
-        if interaction.user.id == ID_ADMIN:
-            return True
+def is_admin(interaction: discord.Interaction):
+    if interaction.user.id == int(ID_ADMIN):
         return True
+    return False
