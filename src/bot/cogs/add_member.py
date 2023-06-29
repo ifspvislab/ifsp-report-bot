@@ -21,7 +21,7 @@ from discord.interactions import Interaction
 
 import data
 import settings
-from data import CoordinatorData, MemberData
+from data import CoordinatorData
 from services import MemberService
 
 logger = settings.logging.getLogger(__name__)
@@ -41,6 +41,10 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
         - discord_id: Represente the field discord id
     """
 
+    def __init__(self, member_service: MemberService):
+        super().__init__()
+        self.member_service = member_service
+
     prontuario = ui.TextInput(label="prontuario", placeholder="SPXXXXX")
     name = ui.TextInput(label="name", placeholder="nome", min_length=5, max_length=100)
     email = ui.TextInput(label="email", placeholder="nome@email.com")
@@ -53,9 +57,7 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
         :param interaction: The Discord interaction object
         """
 
-        member_data = MemberData()
-        member_service = MemberService(member_data)
-        member_service.add_member(
+        self.member_service.add_member(
             data.Member(
                 str(uuid4()),
                 self.prontuario.value,
@@ -82,6 +84,10 @@ class MemberCog(commands.Cog):
         - send_modal: Sends the AddMemberModal as a modal in response to an interaction.
     """
 
+    def __init__(self, member_service: MemberService):
+        super().__init__()
+        self.member_service = member_service
+
     @app_commands.command(
         name="adicionar_membro",
         description="manda um modal para adicionar o membro",
@@ -93,10 +99,11 @@ class MemberCog(commands.Cog):
         """
         Sends the AddMemberModal as a modal in response to an interaction.
         """
+
         coordinator_data = CoordinatorData()
         for coord in coordinator_data.load_coordinators():
             if interaction.user.id == coord.discord_id:
-                modal = ModalAddMember()
+                modal = ModalAddMember(self.member_service)
                 if member is not None:
                     modal.discord_id.default = str(member.id)
                 await interaction.response.send_modal(modal)

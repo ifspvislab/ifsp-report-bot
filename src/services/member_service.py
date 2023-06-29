@@ -27,7 +27,10 @@ Use the imported modules to manage student data.
 
 from validate_email_address import validate_email
 
+import settings
 from data import Member, MemberData
+
+logger = settings.logging.getLogger(__name__)
 
 
 class MemberAlreadyExists(Exception):
@@ -72,6 +75,23 @@ class MemberService:
 
     def __init__(self, member_data: MemberData):
         self.member_data = member_data
+        self.database = self.member_data.load_members()
+
+    def find_member_by_user(self, member_id):
+        """Method to find a member by user ID.
+
+        Args:
+            member_id (int): The user ID of the member to find.
+
+        Returns:
+            Member or None: The member object if found, or None if not found.
+        """
+
+        for member in self.database:
+            if member.member_id == member_id:
+                return member
+
+        return None
 
     def verify_prontuario(self, value):
         """Verify the correctness of the prontuario.
@@ -129,9 +149,8 @@ class MemberService:
         Raises:
             OccurrenceError: If a member with the same prontuario already exists.
         """
-
-        for member in self.member_data.load_members():
-            if value == member.prontuario:
+        for member in self.database:
+            if member.prontuario == value:
                 raise OccurrenceError("Já existe esse membro")
 
         print("Novo membro")
@@ -154,3 +173,4 @@ class MemberService:
             member.email,
         )
         self.member_data.add_member(member)
+        self.database.append(member)
