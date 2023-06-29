@@ -87,7 +87,7 @@ class ParticipationModal(discord.ui.Modal):
         super().__init__(title="Participação")
         self.participation_service = ParticipationService
 
-        #pylint: disable=unused-variable
+        # pylint: disable=unused-variable
         async def on_submit(self, interaction=discord.Interaction, /):
             """
             Handles the submit event when creating a participation.
