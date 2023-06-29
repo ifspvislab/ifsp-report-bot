@@ -52,7 +52,7 @@ class CoordinatorService:
         """
         self.coordinator_data = coordinator_data
         self.database = self.coordinator_data.load_coordinators()
-    
+
     def find_coordinator_by_type(self, attr_type, value):
         """
         Find a coordinator in the database based on the specified attribute type and value.
@@ -69,7 +69,6 @@ class CoordinatorService:
                 return coordinator
 
         return None
-
 
     def verify_prontuario(self, value):
         """

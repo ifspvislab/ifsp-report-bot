@@ -15,7 +15,7 @@ from discord import app_commands, ui
 from discord.ext import commands
 
 import settings
-from data import Coordinator, CoordinatorData
+from data import Coordinator
 from services import (
     CoordinatorAlreadyExists,
     CoordinatorService,
@@ -75,11 +75,12 @@ class AddCoordinatorModal(ui.Modal):
         max_length=50,
     )
 
-    def __init__(self) -> None:
+    def __init__(self, coordinator_service: CoordinatorService) -> None:
         """
         Initializes the AddCoordinatorModal.
         """
         super().__init__(title="Adicionar coordenador")
+        self.coordinator_service = coordinator_service
 
     async def on_submit(self, interaction: discord.Interaction, /):
         """
@@ -89,18 +90,17 @@ class AddCoordinatorModal(ui.Modal):
             interaction (discord.Interaction): The interaction object representing the submit event.
 
         """
-        coordinator_data = CoordinatorData()
-        coordinator_service = CoordinatorService(coordinator_data)
-        coordinator = Coordinator(
-            str(uuid4()),
-            self.prontuario.value,
-            self.discord_id.value,
-            self.name.value,
-            self.email.value,
-        )
 
         try:
-            coordinator_service.create(coordinator)
+            self.coordinator_service.create(
+                Coordinator(
+                    str(uuid4()),
+                    self.prontuario.value,
+                    self.discord_id.value,
+                    self.name.value,
+                    self.email.value,
+                )
+            )
 
             await interaction.response.send_message(
                 "Coordenador cadastrado com sucesso!"
@@ -124,13 +124,17 @@ class CoordinatorCog(commands.Cog):
         - send_modal: Sends the AddMemberModal as a modal in response to an interaction.
     """
 
+    def __init__(self, coordinator_service: CoordinatorService):
+        super().__init__()
+        self.coordinator_service = coordinator_service
+
     @app_commands.command(
         name="cadastrar-coordenador", description="registrar coordenador via modal"
     )
     @app_commands.check(is_admin)
     async def add_coordinator(self, interaction: discord.Interaction):
         """Verification and call for pop up the modal"""
-        modal = AddCoordinatorModal()
+        modal = AddCoordinatorModal(self.coordinator_service)
         await interaction.response.send_modal(modal)
 
         logger.info("cadastrar-coordenador command user %s", interaction.user.name)
