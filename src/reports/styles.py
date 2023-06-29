@@ -90,12 +90,12 @@ events_text_style = ParagraphStyle(
     fontSize=12,
     leading=10,
     spaceAfter=3,
-    fontName="Calibri",
+    fontName="Segoe",
     textColor=colors.black,
 )
 
 events_header_style = ParagraphStyle(
-    name="EventsText",
+    name="EventsHeader",
     fontSize=16,
     leading=12,
     fontName="Calibri-Bold",

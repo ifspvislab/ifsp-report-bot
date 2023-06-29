@@ -10,9 +10,9 @@ from services import StudentService
 
 def main():
     """
-    Main function to start the IFSP Report Bot.
-
-    It initializes the StudentService and starts the bot by calling the start_bot function.
+        Main function to start the IFSP Report Bot.
+    ´=
+        It initializes the StudentService and starts the bot by calling the start_bot function.
     """
 
     student_service = StudentService()

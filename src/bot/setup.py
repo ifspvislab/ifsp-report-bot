@@ -22,8 +22,8 @@ logger = settings.logging.getLogger(__name__)
 
 
 async def load_cogs(bot):
-    await bot.load_extension("cogs.log_command")
-    await bot.load_extension("cogs.events")
+    await bot.load_extension("bot.cogs.log_command")
+    await bot.load_extension("bot.cogs.events")
 
 
 def start_bot(student_service: StudentService):

@@ -1,95 +1,142 @@
-"""Services for log command"""
+"""
+Services for log command.
+"""
+import os
 from datetime import datetime
-from reports.styles import events_text_style, events_header_style
+
 import discord
+
 import settings
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import Paragraph, SimpleDocTemplate
+from data.coordinator_data import CoordinatorData
+from data.log_data import LogData
+from data.student_data import StudentData
 
 zone = settings.get_time_zone()
-
-logs = []
-users_list = {""}
+students_data = StudentData()
+students = students_data.load_students()
 
 
 class LogService:
-    def add_logs(user, data, action) -> None:
-        log_list = [user, data, action]
-        logs.append(log_list)
+    """
+    Service class for log command.
+    """
 
-    def add_ids(id):
-        for ids in users_list:
-            if id == ids:
-                return
-        users_list.add(id)
+    def add_logs(self, project_id:int, student_id: int, date: str, action: str) -> None:
+        """
+        Adds logs to the log file.
 
-    def date_validation(date: str, expression: str):
-        date_list = date.split(" ")
-        correct_date = datetime.strptime(date_list[0], "%d/%m/%Y")
-        list_date = expression.split("-")
+        Parameters:
+            - member_id: ID of the member associated with the log.
+            - date: Date of the log entry.
+            - action: Action performed for the log.
 
-        start_date = datetime.strptime(list_date[0], "%d/%m/%Y")
-        end_date = datetime.strptime(list_date[1], "%d/%m/%Y")
+        Returns:
+            None
+        """
+        log_list = [project_id,student_id, date, action]
+        LogData.create_logs(self=LogData, data_list=log_list)
 
-        if start_date <= correct_date and correct_date <= end_date:
+    def check_student_in_project(self, student_id: int, students: list[dict]=students) -> bool:
+        """
+        Checks if the given student ID is associated with a project.
+
+        Parameters:
+            - student_id: The student ID to be checked.
+            - students: The list of student dictionaries.
+
+        Returns:
+            - True if the student ID is associated with a project.
+            - False otherwise.
+        """
+        for student in students:
+            if student["discord_id"] == student_id:
+                return True
+        return False
+
+    def get_project_id_by_student_id(self, student_id: int, students: list[dict]=students) -> int:
+        """
+        Get the project ID associated with the given student ID.
+
+        Parameters:
+            - student_id: The student ID.
+            - students: The list of student dictionaries.
+
+        Returns:
+            - The project ID associated with the student ID.
+            Returns None if the student is not associated with any project.
+        """
+        for student in students:
+            if student["discord_id"] == student_id:
+                if "project" in student and "id" in student["project"]:
+                    return student["project"]["id"]
+
+        return None
+
+    # def coordenator_id_validation(self):
+    #     pass
+
+    def date_validation(self, date: str, start_date: str, end_date: str) -> bool:
+        """
+        Validates a date within a specified range.
+
+        Parameters:
+            - date: Date to be validated.
+            - start_date: Start date of the range.
+            - end_date: End date of the range.
+
+        Returns:
+            - True if the date is within the range.
+            - False otherwise.
+        """
+        split_date = date.split(" ")
+        correct_date = datetime.strptime(split_date[0], "%d/%m/%Y")
+
+        formatted_start_date = datetime.strptime(start_date, "%d/%m/%Y")
+        split_end_date = end_date.split(" ")
+        formatted_end_date = datetime.strptime(split_end_date[0], "%d/%m/%Y")
+
+        if formatted_start_date <= correct_date <= formatted_end_date:
             return True
-        else:
-            return False
+        return False
 
-    def create_pdf(logs, value, expression=""):
-        doc = SimpleDocTemplate(
-            "D:/Faculdade/VisLab/ifsp-report-bot/src/cogs/log.pdf", pagesize=letter
-        )
+    # def file_validation(
+    #     self,
+    #     file="D:/Faculdade/VisLab/ifsp-report-bot/src/cogs/log.pdf",
+    #     limit_in_bytes=25 * 1024 * 1024,
+    # ) -> bool:
+    #     """
+    #     Validates the size of a file.
 
-        content = []
-        title = Paragraph("Log file", events_header_style)
-        content.append(title)
+    #     Parameters:
+    #         - file: File to be validated.
+    #         - limit_in_bytes: Maximum file size in bytes.
 
-        if value == 1:
-            for users in users_list:
-                user_title = Paragraph(users, events_header_style)
-                content.append(user_title)
-
-                for events in logs:
-                    for author_events in events:
-                        if author_events == users:
-                            log_event = Paragraph(events[-1], events_text_style)
-                            content.append(log_event)
-
-        if value == 2:
-            for users in users_list:
-                if users != "":
-                    user_title = Paragraph(users, events_header_style)
-                    content.append(user_title)
-
-                    for events in logs:
-                        for author_events in events:
-                            validation = LogService.date_validation(
-                                events[1], expression
-                            )
-                            if validation and author_events == users:
-                                log_event = Paragraph(events[-1], events_text_style)
-                                content.append(log_event)
-
-        # if value == 3:
-        #     for users in users_list:
-        #         if(users == expression):
-        #             user_title = Paragraph(expression, title_style)
-        #             content.append(user_title)
-
-        #     for events in logs:
-        #         for author_events in events:
-        #             if author_events == expression:
-        #                 log_event = Paragraph(events[-1], text_style)
-        #                 content.append(log_event)
-
-        doc.build(content)
+    #     Returns:
+    #         - True if the file size exceeds the limit.
+    #         - False otherwise.
+    #     """
+    #     file_size = os.path.getsize(file)
+    #     if file_size > limit_in_bytes:
+    #         return True
+    #     return False
 
     def get_date(
+        self,
         message: discord.Message = None,
         before: discord.Message = None,
         interaction: discord.Interaction = None,
     ) -> str:
+        """
+        Retrieves the formatted date based on the provided message, before message, or interaction.
+
+        Parameters:
+            - message: Discord message object.
+            - before: Discord message object before the edit.
+            - interaction: Discord interaction object.
+
+        Returns:
+            - Formatted date as a string.
+        """
         if message is not None:
             formatted_date = message.created_at.astimezone(zone).strftime(
                 "%d/%m/%Y %H:%M"
@@ -98,14 +145,11 @@ class LogService:
             formatted_date = before.created_at.astimezone(zone).strftime(
                 "%d/%m/%Y %H:%M"
             )
-        else:
+        elif interaction is not None:
             formatted_date = interaction.created_at.astimezone(zone).strftime(
                 "%d/%m/%Y %H:%M"
             )
+        else:
+            formatted_date = datetime.now(zone).strftime("%d/%m/%Y %H:%M")
+
         return str(formatted_date)
-
-    def get_logs() -> list:
-        return logs
-
-    def get_users() -> set:
-        return users_list

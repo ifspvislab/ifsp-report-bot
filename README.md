@@ -46,7 +46,7 @@ python -m black src --diff
 
 Formats Python code in the "src" directory using Black.
 ```bash
-python -m black src
+python -m pylint src
 ```
 
 ## isort
