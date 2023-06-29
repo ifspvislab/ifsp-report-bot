@@ -109,21 +109,32 @@ class SemesterReportForm(ui.Modal):
 
     """
 
+    placeholder1 = "Aqui, você deve inserir as atividades"
+    placeholder1 += " planejadas até o presente momento."
+
+    placeholder2 = "Aqui, você deve inserir quais as atividades"
+    placeholder2 += " foram realizadas até o presente momento."
+
+    placeholder3 = "Aqui, você deve discorrer sobre quais foram"
+    placeholder3 += " os resultados obtidos das atividades realizadas."
     planned_activities = ui.TextInput(
         label="Atividades planejadas",
         style=discord.TextStyle.paragraph,
+        placeholder=placeholder1,
         min_length=300,
         max_length=600,
     )
     performed_activities = ui.TextInput(
         label="Atividades realizadas",
         style=discord.TextStyle.paragraph,
+        placeholder=placeholder2,
         min_length=300,
         max_length=600,
     )
     results = ui.TextInput(
         label="Resultados obtidos",
         style=discord.TextStyle.paragraph,
+        placeholder=placeholder3,
         min_length=300,
         max_length=600,
     )

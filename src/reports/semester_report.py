@@ -16,18 +16,12 @@ from io import BytesIO
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import (
-    Image,
-    Paragraph,
-    SimpleDocTemplate,
-    Spacer,
-    Table,
-    TableStyle,
-)
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 from data import student_registration
 
 from . import styles
+from .commons import setup_header
 
 locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
 
@@ -152,44 +146,35 @@ class SemesterReport:
             title=title,
             subject=subject,
         )
-        self.setup_header()
-        self.setup_report_table()
-        self.setup_activities_section()
-        self.setup_signature_section()
+
+        self.content += self.generate_header()
+        self.content.append(self.setup_report_table())
+        self.content.append(self.setup_activities_section())
+        self.content.append(self.setup_signature_section())
+
         doc.build(self.content)
         return buffer.getvalue()
 
-    def setup_header(self):
+    def generate_header(self) -> list:
         """
-        Sets up the header section of the report.
-
+        Sets up the header section of the sheet.
+        :return: List of all header contents
+        :rtype: list
         """
-        logo = Image("./assets/img/logo_federal.jpg", width=75, height=75)
-        logo.hAlign = "CENTER"
-        self.content.append(logo)
+        header_content = []
+        header_content += setup_header()
 
-        header_title = Paragraph("MINISTÉRIO DA EDUCAÇÃO", styles.header_text_style)
-        self.content.append(header_title)
-
-        sub_header_title = Paragraph(
-            "INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE SÃO PAULO",
-            styles.header_text_style,
-        )
-        self.content.append(sub_header_title)
-        self.content.append(Spacer(1, 8))
-
-        notice_title = Paragraph(
-            "EDITAL Nº SPO.009, DE 1º DE FEVEREIRO DE 2023", styles.header_text_style
-        )
-        self.content.append(notice_title)
-        self.content.append(Spacer(1, 8))
+        header_content.append(Spacer(1, 12))
 
         report_title = Paragraph(
-            "ANEXO IV- RELATÓRIO MENSAL DE FREQUÊNCIA E AVALIAÇÃO – 2023",
+            "ANEXO IV- RELATÓRIO SEMESTRAL DE FREQUÊNCIA E AVALIAÇÃO – 2023",
             styles.header_text_style,
         )
-        self.content.append(report_title)
-        self.content.append(Spacer(1, 18))
+
+        header_content.append(report_title)
+        header_content.append(Spacer(1, 12))
+
+        return header_content
 
     def setup_report_table(self):
         """

@@ -7,7 +7,6 @@ Functions:
 - start_bot: Starts the Discord bot.
 
 """
-
 from datetime import datetime
 
 import discord
@@ -119,7 +118,8 @@ def start_bot(student_service: StudentService):
             await interaction.response.send_message(embed=embed)
 
     @bot.tree.command(
-        name="relatorio_semestral", description="Gera um relatório semestral de ensino"
+        name="relatorio_semestral",
+        description="Gera um relatório semestral de ensino",
     )
     async def open_semester_report_form(interaction: discord.Interaction):
         """
