@@ -1,46 +1,62 @@
 """
-modals.py
+semester_report_cog.py
 
 This module defines classes for modal forms used in Discord bot interactions.
 
 Classes:
-- MonthyReportForm: Represents a monthly report form for generating monthly reports.
+- SemesterReportForm: Represents a monthly report form for generating monthly reports.
 
 """
+from datetime import datetime
 from io import BytesIO
 
 import discord
 from discord import ui
 
-from reports import MonthlyReport, MonthlyReportData
+import settings
+from reports import SemesterReport, SemesterReportData
 from services import StudentService
 
+logger = settings.logging.getLogger(__name__)
 
-class MonthyReportForm(ui.Modal):
+
+class SemesterReportForm(ui.Modal):
     """
-    Class representing a monthly report form.
+    Class representing a semester report form.
 
-    This class defines a modal form for generating monthly reports.
+    This class defines a modal form for generating semester reports.
 
     """
+
+    placeholder1 = "Aqui, você deve inserir as atividades"
+    placeholder1 += " planejadas até o presente momento."
+
+    placeholder2 = "Aqui, você deve inserir quais as atividades"
+    placeholder2 += " foram realizadas até o presente momento."
+
+    placeholder3 = "Aqui, você deve discorrer sobre quais foram"
+    placeholder3 += " os resultados obtidos das atividades realizadas."
 
     planned_activities = ui.TextInput(
         label="Atividades planejadas",
         style=discord.TextStyle.paragraph,
-        min_length=200,
-        max_length=500,
+        placeholder=placeholder1,
+        min_length=300,
+        max_length=600,
     )
     performed_activities = ui.TextInput(
         label="Atividades realizadas",
         style=discord.TextStyle.paragraph,
-        min_length=200,
-        max_length=500,
+        placeholder=placeholder2,
+        min_length=300,
+        max_length=600,
     )
     results = ui.TextInput(
         label="Resultados obtidos",
         style=discord.TextStyle.paragraph,
-        min_length=200,
-        max_length=500,
+        placeholder=placeholder3,
+        min_length=300,
+        max_length=600,
     )
 
     def __init__(
@@ -48,13 +64,13 @@ class MonthyReportForm(ui.Modal):
         student_service: StudentService,
     ) -> None:
         """
-        Initialize the MonthyReportForm instance.
+        Initialize the SemesterReportForm instance.
 
         :param student_service: An instance of the StudentService class.
         :type student_service: StudentService
 
         """
-        super().__init__(title="Relatório Mensal")
+        super().__init__(title="Relatório Semestral")
         self.student_service = student_service
 
     async def on_submit(self, interaction: discord.Interaction, /):
@@ -62,7 +78,7 @@ class MonthyReportForm(ui.Modal):
         Handle the submit event of the form.
 
         This method is called when the user submits the form.
-        It generates the monthly report based on the form data and sends it to the user.
+        It generates the semester report based on the form data and sends it to the user.
 
         :param interaction: The Discord interaction object.
         :type interaction: discord.Interaction
@@ -72,10 +88,10 @@ class MonthyReportForm(ui.Modal):
 
         if student is None:
             await interaction.response.send_message(
-                "Você não tem permissão para gerar relatório mensal"
+                "Você não tem permissão para gerar relatório semestral"
             )
         else:
-            data = MonthlyReportData(
+            data = SemesterReportData(
                 project_title=student["project"]["title"],
                 project_manager=student["project"]["professor"],
                 student_name=student["name"],
@@ -84,14 +100,18 @@ class MonthyReportForm(ui.Modal):
                 results=self.results.value.strip(),
             )
 
-            report = MonthlyReport(data)
-            registration = student["registration"]
+            report = SemesterReport(data)
+            month = datetime.now().strftime("%B")
+
+            name_of_report = (f"RelatorioSemestral_Ensino_{month}").upper()
+            name_of_report += (f"_{student['name']}").upper() + ".pdf"
 
             student_first_name = student["name"].split()[0]
-            report_name = f"Relatorio-Mensal-{student_first_name}-{registration}.pdf"
-
+            report_name = name_of_report
+            content = f"Sucesso, {student_first_name}! Aqui está"
+            content += " o relatório semestral em formato PDF:"
             await interaction.response.send_message(
-                content=f"{student_first_name}, aqui está o relatório mensal em formato PDF:",
+                content=content,
                 file=discord.File(
                     BytesIO(report.generate()),
                     filename=report_name,

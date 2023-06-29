@@ -15,7 +15,8 @@ from discord.ext import commands
 import settings
 from services import StudentService
 
-from .modals import MonthyReportForm, SemesterReportForm
+from .modals import MonthyReportForm
+from .semester_report_cog import SemesterReportForm
 
 logger = settings.logging.getLogger(__name__)
 
@@ -118,8 +119,8 @@ def start_bot(student_service: StudentService):
             await interaction.response.send_message(embed=embed)
 
     @bot.tree.command(
-        name="relatorio_semestral",
-        description="Gera um relatório semestral de ensino",
+        name="relatorio-semestral",
+        description="Gera um relatório de ensino semestral",
     )
     async def open_semester_report_form(interaction: discord.Interaction):
         """
@@ -130,24 +131,24 @@ def start_bot(student_service: StudentService):
 
         """
 
-        def invalid_request_period():
-            """
-            Check if the request for generating the semester report is within the allowed period.
+        # def invalid_request_period():
+        #     """
+        #     Check if the request for generating the semester report is within the allowed period.
 
-            :return: True if the request is outside the allowed period, False otherwise.
-            :rtype: bool
-            """
-            current_date = datetime.now().date()
-            current_month = current_date.month
-            current_day = current_date.day
+        #     :return: True if the request is outside the allowed period, False otherwise.
+        #     :rtype: bool
+        #     """
+        #     current_date = datetime.now().date()
+        #     current_month = current_date.month
+        #     current_day = current_date.day
 
-            if current_month == 7 and 23 <= current_day <= 31:
-                return False
+        #     if current_month == 7 and 23 <= current_day <= 31:
+        #         return False
 
-            if current_month == 12 and 1 <= current_day <= 10:
-                return False
+        #     if current_month == 12 and 1 <= current_day <= 10:
+        #         return False
 
-            return True
+        #     return True
 
         errors = []
         student = student_service.find_student_by_discord_id(interaction.user.id)
@@ -159,15 +160,15 @@ def start_bot(student_service: StudentService):
                 interaction.user.name,
             )
 
-        if invalid_request_period():
-            errors.append(
-                "O período de submissões ocorre entre os dias 23 a 31 "
-                "de julho e 01 a 10 de dezembro."
-            )
-            logger.warning(
-                "User %s attempted to generate the semester report outside the allowed period.",
-                interaction.user.name,
-            )
+        # if invalid_request_period():
+        #     errors.append(
+        #         "O período de submissões ocorre entre os dias 23 a 31 "
+        #         "de julho e 01 a 10 de dezembro."
+        #     )
+        #     logger.warning(
+        #         "User %s attempted to generate the semester report outside the allowed period.",
+        #         interaction.user.name,
+        #     )
 
         if not errors:
             logger.info("Semester report user %s", interaction.user.name)
