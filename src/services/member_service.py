@@ -77,18 +77,18 @@ class MemberService:
         self.member_data = member_data
         self.database = self.member_data.load_members()
 
-    def find_member_by_user(self, member_id):
-        """Method to find a member by user ID.
+    def find_member_by_discord_id(self, discord_id):
+        """Method to find a member by discord ID.
 
         Args:
-            member_id (int): The user ID of the member to find.
+            discord_id (int): The discord ID of the member to find.
 
         Returns:
             Member or None: The member object if found, or None if not found.
         """
 
         for member in self.database:
-            if member.member_id == member_id:
+            if member.discord_id == discord_id:
                 return member
 
         return None
