@@ -10,6 +10,7 @@ Modules:
 
 """
 
+from .coordinator_service import CoordinatorService
 from .participation_service import (
     DateError,
     InputAlreadyExists,

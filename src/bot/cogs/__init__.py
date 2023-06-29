@@ -9,4 +9,4 @@ Modules:
 
 """
 
-from .participation import ParticipationCommand, ParticipationModal
+from .participation import ParticipationCommand

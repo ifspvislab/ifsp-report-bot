@@ -56,3 +56,18 @@ class StudentService:
                 return student
 
         return None
+
+    def find_member_by_type(self, attr_type, value):
+        """
+        Find a member in the database based on the specified attribute type and value.
+        Args:
+            attr_type (str): The attribute type to be checked.
+            value: The value of the attribute to be matched.
+        Returns:
+            The member object if found, None otherwise.
+        """
+        for member in self.database:
+            if getattr(member, attr_type) == value:
+                return member
+
+        return None

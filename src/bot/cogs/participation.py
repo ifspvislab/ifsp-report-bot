@@ -10,8 +10,9 @@ from discord import app_commands, ui
 from discord.ext import commands
 
 import settings
-from data import CoordinatorData, ParticipationData, StudentData
+from data import ParticipationData, StudentData
 from services import (
+    CoordinatorService,
     DateError,
     InputAlreadyExists,
     ParticipationService,
@@ -86,6 +87,7 @@ class ParticipationModal(discord.ui.Modal):
         super().__init__(title="Participação")
         self.participation_service = ParticipationService
 
+        #pylint: disable=unused-variable
         async def on_submit(self, interaction=discord.Interaction, /):
             """
             Handles the submit event when creating a participation.
@@ -108,16 +110,15 @@ class ParticipationModal(discord.ui.Modal):
                     )
                 )
 
-                first_name = StudentData.student_registration_to_name(
+                name = StudentData.student_registration_to_name(
                     self, registration=self.prontuario
                 )
+                title = self.project
 
                 await interaction.response.send_message(
-                content=f"A participação do aluno/a {first_name} no projeto {self.project} foi registrada."
+                    content=f"A participação do aluno/a {name} no projeto {title} foi registrada."
                 )
-                logger.warning(
-                    "A participação de %s foi registrada com sucesso.", first_name
-                )
+                logger.warning("A participação de %s foi registrada com sucesso.", name)
 
             except (InputAlreadyExists, DateError, ProjectError, StudentError) as erro:
                 await interaction.response.send_message(content=f"{erro}")
@@ -129,12 +130,17 @@ class ParticipationCommand(commands.Cog):
     Class containing the command that sends the 'create participation' modal.
     """
 
-    intents = discord.Intents.all()
-    intents.message_content = True
-    bot = commands.Bot(intents=intents, command_prefix="/")
+    def __init__(
+        self,
+        participation_service=ParticipationService,
+        coordinator_service=CoordinatorService,
+    ):
+        super().__init__()
+        self.participation_service = participation_service
+        self.coordinator_service = coordinator_service
 
     @app_commands.command(
-        name="add-participation",
+        name="adicionar-participacao",
         description="Registra a participação de um aluno em um projeto.",
     )
     async def call_participation_modal(self, interaction: discord.Interaction):
@@ -142,11 +148,13 @@ class ParticipationCommand(commands.Cog):
         Verifies if the command was used by authorized personnel
         And calls for the pop up of the modal.
         """
-        coordinator = CoordinatorData.find_coordinator_by_discord_id(
-            self, discord_id=interaction.user.id
-        )
 
-        if coordinator is None:
+        if (
+            self.coordinator_service.find_coordinator_by_type(
+                self, "discord_id", interaction.user.id
+            )
+            is None
+        ):
             logger.warning(
                 "User %s without permission tried to register a participation",
                 interaction.user.name,

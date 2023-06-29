@@ -40,7 +40,7 @@ class CoordinatorData:
         :rtype: list
         """
 
-        with open("assets/data/professors.csv", "r", encoding="utf-8") as file:
+        with open("assets/data/coordinators.csv", "r", encoding="utf-8") as file:
             coordinators = []
             for row in file:
                 coordinators.append(self._row_to_coordinator(row))

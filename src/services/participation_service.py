@@ -1,12 +1,13 @@
 """Service regarding input issues"""
 
-from datetime import date
 from uuid import uuid4
 
-from data import Participation
+from data import Participation, Student
 from data.participation_data import ParticipationData
 from data.projects_data import ProjectData
 from data.students_data import StudentData
+
+from .student_service import StudentService
 
 
 class InputAlreadyExists(Exception):
@@ -55,10 +56,12 @@ class ParticipationService:
     """
 
     def __init__(self, participation_data: ParticipationData) -> None:
-        self.database = []
         self.participation_data = participation_data
         self.student_data = StudentData
         self.project_data = ProjectData
+        self.student_service = StudentService
+        self.student = Student
+        self.database = self.participation_data.load_participations(self)
 
     def find_participation_by_discord_id(self, discord_id: int) -> list | None:
         """
@@ -70,8 +73,6 @@ class ParticipationService:
         """
 
         students = self.student_data.load_students(self)
-        if not self.database:
-            self.database = self.participation_data.load_participations(self)
 
         for participation in self.database:
             for student in students:
@@ -83,7 +84,7 @@ class ParticipationService:
                 break
         return None
 
-    def date_validation(self, value):
+    def date_validation(self, value, _value):
         """
         Validates the input of date.
 
@@ -91,19 +92,20 @@ class ParticipationService:
         :raises DateError: If the date is invalid.
         """
 
-        input_date = date(int(value.year), int(value.month), int(value.day))
+        input_date = value
         for project in self.project_data.load_projects(self):
-            referencial_date = project.start_date
-            final_date = project.final_date
-            if input_date < referencial_date:
-                raise DateError(
-                    "A data inserida é inválida, pois é anterior ao início do projeto."
-                )
+            if project.title == _value:
+                referencial_date = project.start_date
+                final_date = project.final_date
+                if input_date < referencial_date:
+                    raise DateError(
+                        "A data inserida é inválida, pois é anterior ao início do projeto."
+                    )
 
-            if final_date < input_date:
-                raise DateError(
-                    "A data inserida é inválida, pois é após o fim do projeto."
-                )
+                if final_date < input_date:
+                    raise DateError(
+                        "A data inserida é inválida, pois é após o fim do projeto."
+                    )
 
     def project_validation(self, value):
         """
@@ -167,7 +169,7 @@ class ParticipationService:
         :raises StudentError: If the student isn't in the database.
         :raises InputAlreadyExists: If the participation already exists.
         """
-        self.date_validation(participation.initial_date)
+        self.date_validation(participation.initial_date, participation.project)
         self.project_validation(participation.project)
         self.student_validation(participation.registration)
         self.modal_input_verification(participation.project, participation.registration)
@@ -177,8 +179,13 @@ class ParticipationService:
         final_date = self.project_data.project_name_to_final_date(
             self, title=participation.project
         )
+        member = self.student_service.find_member_by_type(
+            self, self.student.registration, participation.registration
+        )
+
         uuid = uuid4()
         with open("assets/data/participations.csv", "a", encoding="utf-8") as data:
             data.write(
-                f"{uuid},{data.registration},{p_id},{data.inital_date},{final_date}\n"
+                f"{uuid},{member.discord_id},{p_id},{data.inital_date},{final_date}\n"
             )
+        data.close()
