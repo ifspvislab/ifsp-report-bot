@@ -10,7 +10,7 @@ Classes:
 import uuid
 from datetime import datetime, time
 
-from data.attendances_data import Attendance, load_attend, save_attend
+from data import Attendance, AttendanceData
 from reports import AttendanceSheet, AttendanceSheetData
 
 
@@ -72,22 +72,43 @@ class AttendanceService:
 
         Sets up the initial state by creating an empty `database` list to store attendance data.
         """
-        self.database = load_attend()
+        self.attend_data = AttendanceData()
+        self.database = self.attend_data.load_attend()
 
-    def find_attendances_by_discord_id(self, discord_id: int) -> list[Attendance]:
+    def find_attendances_by_member_id(self, member_id: str) -> list[Attendance]:
         """
-        Find all attendances associated with a Discord ID in the attendances database.
+        Find all attendances associated with a member in the attendances database.
 
-        :param discord_id: The discord id of a student
-        :type discord_id: int
-        :return: A list of all Attendances associated with a student's discord id
+        :param member_id: The member id of a student
+        :type member_id: str
+        :return: A list of all Attendances associated with a student's id
         :rtype: list[Attendance]
         """
 
         student_attendances: list[Attendance] = []
         for attendance in self.database:
-            if discord_id == attendance.student_id:
+            if member_id == attendance.student_id:
                 student_attendances.append(attendance)
+        return student_attendances
+
+    def find_attends_by_member_and_project(
+        self, member_id: str, proj_id: str
+    ) -> list[Attendance]:
+        """
+        Method that gets all attendances related to a specific member and project
+
+        :param member_id: The member uuid of a student
+        :type member_id: str
+        :param member_id: The project uuid
+        :type member_id: str
+        :return: A list of all Attendances associated with the member and the project
+        :rtype: list[Attendance]
+        """
+        student_attendances: list[Attendance] = []
+        for attendance in self.database:
+            if member_id == attendance.student_id:
+                if proj_id == attendance.project_id:
+                    student_attendances.append(attendance)
         return student_attendances
 
     def _validate_day(self, test_day: str) -> datetime:
@@ -156,7 +177,7 @@ class AttendanceService:
         :return: True if the entry is before and false if it is not
         :rtype: bool
         """
-        if entry_time < exit_time:
+        if entry_time > exit_time:
             raise EntryTimeAfterExitTime(
                 "O horário de saída não pode ser anterior à entrada"
             )
@@ -179,7 +200,10 @@ class AttendanceService:
 
         return None
 
-    def create(self, day: str, entry_time: str, exit_time: str, user: int) -> None:
+    # pylint: disable-next=too-many-arguments
+    def create_attendance(
+        self, day: str, entry_time: str, exit_time: str, user_id: str, proj_id: str
+    ) -> None:
         """
         Validates the day, entry time and exit time sent by the user and creates a new attendance.
         If the user didn't sent a date, selects the current date
@@ -211,7 +235,8 @@ class AttendanceService:
 
         new_attend = Attendance(
             attendance_id=str(uuid.uuid4()),
-            student_id=user,
+            student_id=user_id,
+            project_id=proj_id,
             day=test_day,
             entry_time=test_entry_time,
             exit_time=test_exit_time,
@@ -222,14 +247,14 @@ class AttendanceService:
             self.database.append(new_attend)
         else:
             self.database[index] = new_attend
-        save_attend(new_attend)
+        self.attend_data.save_attend(new_attend)
 
-    def get_all_students_id(self) -> set[int]:
+    def get_all_students_id(self) -> set[str]:
         """
         Iterates over the database and gets all students_id without repetition
 
         :return: A set with all student_ids
-        :rtype: set[int]
+        :rtype: set[str]
         """
         all_students = set()
         for attendance in self.database:
@@ -239,16 +264,16 @@ class AttendanceService:
 
     def create_sheet(
         self,
-        student_id: int,
         student_name: str,
         student_registration: str,
         project_name: str,
+        attendances: list[Attendance],
     ) -> bytes:
         """
         Create the current month's Attendance sheet for a student
 
         :param student_id: The student id
-        :type student_id: int
+        :type student_id: str
         :param student_name: The name of the student
         :type student_name: str
         :param project_name: The attendance sheet's project name
@@ -257,10 +282,8 @@ class AttendanceService:
         :rtype: bytes
         """
 
-        student_attendances = self.find_attendances_by_discord_id(student_id)
-
         current_month_attends = []
-        for attendance in student_attendances:
+        for attendance in attendances:
             if attendance.day.month == datetime.now().month:
                 current_month_attends.append(attendance)
 

@@ -20,8 +20,13 @@ from discord import File, app_commands, ui
 from discord.ext import commands, tasks
 
 import settings
-from data.attendances_data import MONTHS
-from services import AttendanceService, StudentService
+from data import MONTHS, Member
+from services import (
+    AttendanceService,
+    MemberService,
+    ParticipationService,
+    ProjectService,
+)
 from services.attendance_service import (
     DayOutOfRange,
     EntryTimeAfterExitTime,
@@ -37,6 +42,12 @@ logger = settings.logging.getLogger(__name__)
 current_timezone = timezone(offset=timedelta(hours=-3))
 
 
+class ServerNotFound(Exception):
+    """
+    Indicates that the discord server wasn't found in any project
+    """
+
+
 class AttendanceCog(commands.Cog):
     """
     Class that unifies all attendance sheet code that is related to the bot
@@ -46,15 +57,20 @@ class AttendanceCog(commands.Cog):
     def __init__(
         self,
         bot: commands.Bot,
-        student_service: StudentService,
+        member_service: MemberService,
+        participation_service: ParticipationService,
+        project_service: ProjectService,
     ) -> None:
         """
         Loads instance with the needed information and starts the sheet creation task
 
         """
         self.bot = bot
-        self.student_service = student_service
         self.attendance_service = AttendanceService()
+        self.member_service = member_service
+        self.participation_service = participation_service
+        self.project_service = project_service
+
         # pylint: disable-next=no-member
         self.is_last_day.start()
 
@@ -68,7 +84,9 @@ class AttendanceCog(commands.Cog):
         Only exibits said modal if the user is allowed.
         Calls attendance_service for data validation
         """
-        student = self.student_service.find_student_by_discord_id(interaction.user.id)
+        student = self.member_service.find_member_by_type(
+            "discord_id", interaction.user.id
+        )
 
         if student is None:
             logger.warning(
@@ -82,7 +100,9 @@ class AttendanceCog(commands.Cog):
         else:
             logger.info("Attendance sheet user %s", interaction.user.name)
             await interaction.response.send_modal(
-                AttendanceSheetForm(self.attendance_service)
+                AttendanceSheetForm(
+                    self.attendance_service, self.member_service, self.project_service
+                )
             )
 
     @tasks.loop(time=time(hour=12, minute=0, tzinfo=current_timezone))
@@ -106,7 +126,7 @@ class AttendanceCog(commands.Cog):
         """
         all_students_id = self.attendance_service.get_all_students_id()
         for student_id in all_students_id:
-            student = self.student_service.find_student_by_discord_id(student_id)
+            student = self.member_service.find_member_by_type("discord_id", student_id)
             if student is None:
                 log_msg = f"Student with id {student_id}"
                 log_msg += "in attendances database not inside the students database"
@@ -114,39 +134,94 @@ class AttendanceCog(commands.Cog):
                 continue
 
             # If the user saved doesn't exist, it won't create the sheet
-            user = self.bot.get_user(student_id)
+            user = self.bot.get_user(student.discord_id)
             if user is None:
                 log_msg = f"Student with id {student_id}"
                 log_msg += "in attendances database couldn't be found by discord bot"
                 logger.info(log_msg)
                 continue
 
-            file = self.attendance_service.create_sheet(
-                student_id=student_id,
-                student_registration=student["registration"],
-                student_name=student["name"],
-                project_name=student["project"]["title"],
+            files = self._create_attendance_sheet(student)
+            if not files:
+                log_msg = (
+                    f"Student with id {student_id} had no attendance, proceeding..."
+                )
+                logger.info(log_msg)
+                continue
+
+            log_msg = f"Attendance sheets for the student with id {student_id}"
+            log_msg += " were successfuly created. Sending..."
+            logger.info(log_msg)
+
+            first_name = student.name.split()[0]
+
+            for file in files:
+                await user.send(
+                    content=f"{first_name}, aqui está a sua folha de presença em formato PDF:",
+                    file=file,
+                )
+
+    def _create_attendance_sheet(self, student: Member) -> list[File]:
+        """
+        Gets all attendances for a student, dividing them for each project
+        """
+        all_participations = (
+            self.participation_service.find_participation_by_discord_id(
+                student.discord_id
+            )
+        )
+        if all_participations is None:
+            return []
+
+        all_projects_id = set()
+        for part in all_participations:
+            all_projects_id.add(part.project)
+
+        first_name = student.name.split()[0]
+        month_str = MONTHS[datetime.now().month - 1]
+
+        files = []
+        for project_id in all_projects_id:
+
+            project = self.project_service.find_project_by_type(
+                "project_id", project_id
+            )
+            if project is None:
+                # Breaking line to not exceed 100 chars
+                log_msg = f"The project with id {project_id}"
+                log_msg += "doesn't exist but it is saved in participation"
+                logger.info(log_msg)
+                continue
+
+            proj_attends = self.attendance_service.find_attends_by_member_and_project(
+                student.member_id, project_id
             )
 
-            first_name = student["name"].split()[0]
-            month_str = MONTHS[datetime.now().month - 1]
+            if not proj_attends:
+                continue
+
+            file = self.attendance_service.create_sheet(
+                student_registration=student.prontuario,
+                student_name=student.name,
+                project_name=project.titulo,
+                attendances=proj_attends,
+            )
 
             # Breaking line to not exceed 100 characters
             sheet_name = "folha-de-frequencia-"
-            sheet_name += f"{month_str}-{first_name}-{student['registration']}.pdf"
+            sheet_name += (
+                f"{month_str}-{first_name}-{student.prontuario}-{project.titulo}.pdf"
+            )
 
-            log_msg = f"Attendance data for the student with id {student_id}"
-            log_msg += "was successfuly created. Sending..."
-            logger.info(log_msg)
-
-            await user.send(
-                content=f"{first_name}, aqui está a sua folha de presença em formato PDF:",
-                file=File(
+            files.append(
+                File(
                     BytesIO(file),
                     filename=sheet_name,
                     spoiler=False,
-                ),
+                )
             )
+
+        return files
 
 
 class AttendanceSheetForm(ui.Modal):
@@ -160,7 +235,12 @@ class AttendanceSheetForm(ui.Modal):
     entry_time_field = ui.TextInput(label="Hora de entrada", placeholder="hh:mm")
     exit_time_field = ui.TextInput(label="Hora de saída", placeholder="hh:mm")
 
-    def __init__(self, attendance_service: AttendanceService, /):
+    def __init__(
+        self,
+        attendance_service: AttendanceService,
+        member_service: MemberService,
+        project_service: ProjectService,
+    ):
         """
         Initialize the AttendanceSheetForm instance.
 
@@ -170,6 +250,8 @@ class AttendanceSheetForm(ui.Modal):
         """
         super().__init__(title="Folha de frequência")
         self.attendance_service = attendance_service
+        self.member_service = member_service
+        self.project_service = project_service
 
     async def on_submit(self, interaction: discord.Interaction, /) -> None:
         """
@@ -184,16 +266,27 @@ class AttendanceSheetForm(ui.Modal):
         """
 
         try:
-            self.attendance_service.create(
+            project = self.project_service.find_project_by_type(
+                "discord_server_id", interaction.channel_id
+            )
+
+            if project is None:
+                raise ServerNotFound("Servidor não cadastrado em um projeto")
+
+            self.attendance_service.create_attendance(
                 day=self.day_field.value,
                 entry_time=self.entry_time_field.value,
                 exit_time=self.exit_time_field.value,
-                user=interaction.user.id,
+                user_id=self.member_service.find_member_by_type(
+                    "discord_id", interaction.user.id
+                ).member_id,
+                proj_id=project.project_id,
             )
 
             await interaction.response.send_message("Tudo certo! Presença cadastrada")
 
         except (
+            ServerNotFound,
             InvalidDate,
             InvalidTime,
             DayOutOfRange,

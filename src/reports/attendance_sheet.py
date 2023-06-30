@@ -22,7 +22,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
-from data.attendances_data import MONTHS, Attendance
+from data import MONTHS, Attendance
 
 from . import styles
 from .commons import setup_header
@@ -106,6 +106,9 @@ class AttendanceSheet:
         subject = "Este documento é a folha de frequência do mês"
         subject += f"{month} do aluno {student_name} do projeto {proj_name}"
 
+        title = f"folha-de-frequencia-{month}-{student_name}-{self.data.student_registration}"
+        title += f"-{proj_name}"
+
         buffer = BytesIO()
         doc = SimpleDocTemplate(
             buffer,
@@ -116,7 +119,7 @@ class AttendanceSheet:
             bottomMargin=cm * 2,
             pageCompression=True,
             subject=subject,
-            title=f"folha-de-frequencia-{month}-{student_name}-{self.data.student_registration}",
+            title=title,
         )
 
         self.content += self.generate_header()
