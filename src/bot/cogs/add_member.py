@@ -69,15 +69,20 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
         self.member_service.add_member(member)
         await interaction.response.send_message("Membro cadastrado com sucesso.")
         logger.info(
-            f"Membro {member.registration} adicionado por"
-            + f" {self.coordinator_service.find_coordinator_by_type('discord_id' ,interaction.user.id).registration}"
+            "Membro %s adicionado por %s",
+            member.registration,
+            self.coordinator_service.find_coordinator_by_type(
+                "discord_id", interaction.user.id
+            ).registration,
         )
 
     async def on_error(self, interaction: Interaction, error: Exception, /):
         logger.error(
-            f"Erro: {error} na tentativa do usuário"
-            + f" {self.coordinator_service.find_coordinator_by_type('discord_id' ,interaction.user.id).registration}"
-            + " de adicionar membro"
+            "Erro: %s na tentativa do usuário %s de adicionar membro",
+            error,
+            self.coordinator_service.find_coordinator_by_type(
+                "discord_id", interaction.user.id
+            ).registration,
         )
         await interaction.response.send_message(error)
 
