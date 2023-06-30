@@ -6,7 +6,14 @@ This module provides the AttendanceService class for managing Attendance data.
 
 Classes:
     - AttendanceService: Service class for managing attendance data.
+    - InvalidDate(Exception): Custom exception for invalid dates, such as 60/15/-133 or "abc"
+    - InvalidTime(Exception): Custom exception for invalid times, such as 28:75 or "idk"
+    - DayOutOfRange(Exception): Custom exception for sundays, since IFSP is closed these weekdays
+    - TimeOutOfRange(Exception): Custom exception for times outside of the IFSP's buiseness hours   
+    - EntryTimeAfterExitTime(Exception): Custom exception for when the entry time is after
+    the exit time
 """
+
 import uuid
 from datetime import datetime, time
 
@@ -50,16 +57,30 @@ class AttendanceService:
 
     Methods:
         - __init__(): Initialize the AttendanceService object.
-        - find_attendances_by_discord_id(self, discord_id: int) -> list[Attendance]:
-        Find all attendances by Discord ID in the attendances database.
-        - _is_valid_day(self, test_day: str) -> None | datetime:
+        - find_attendances_by_member_id(self, member_id: str) -> list[Attendance]:
+        Find all attendances associated with a member in the attendances database.
+        - find_attends_by_member_and_project(self, member_id: str, proj_id: str) ->
+        list[Attendance]: Method that gets all attendances related to a specific member and project
+        - _validate_day(self, test_day: str) -> datetime:
         Verifies if the day passed by the user is valid.
-        - _is_valid_time(self, weekday: int, param_time: str) -> None | time:
+        - _validate_time(self, weekday: int, param_time: str) -> time:
         Verifies if the time passed by the user is valid.
-        - _is_entry_before(self, entry_time: time, exit_time: time) -> bool:
+        - _is_entry_before(self, entry_time: time, exit_time: time) -> None:
         Tests if the exit time passed by the user is before the entry time
-        - validate_data(self, day: str, entry_time: str, exit_time: str) -> list[str]:
-        Validates the day, entry time and exit time sent by the user and return the errors
+        - _get_date_already_saved(self, new_attendance: Attendance) -> int | None:
+        Verifies if an attendance is already saved in the database
+        - create_attendance(
+            self, day: str, entry_time: str, exit_time: str, user_id: str, proj_id: str
+        ) -> None:
+        Validates the day, entry time and exit time sent by the user and creates a new attendance.
+        - get_all_students_id(self) -> set[str]:
+        Iterates over the database and gets all students_id without repetition
+        - create_sheet(
+            self, student_name: str, student_registration: str,
+            project_name: str, attendances: list[Attendance],
+        ) -> bytes:
+        Create the current month's Attendance sheet for a student
+
 
 
     Attributes:

@@ -7,6 +7,8 @@ Has the commands and the tasks necessary to create attendance sheets
 Classes:
     - AttendanceCog: The cog that unifies all attendance sheet code that is 
     related to the bot
+    - AttendanceSheetForm: A form that allows the user to send the needed data to create
+    an attendance
 
 """
 
@@ -62,7 +64,7 @@ class AttendanceCog(commands.Cog):
         project_service: ProjectService,
     ) -> None:
         """
-        Loads instance with the needed information and starts the sheet creation task
+        Loads instance with the needed services and the bot, then starts the sheet creation task
 
         """
         self.bot = bot
@@ -163,7 +165,8 @@ class AttendanceCog(commands.Cog):
 
     def _create_attendance_sheet(self, student: Member) -> list[File]:
         """
-        Gets all attendances for a student, dividing them for each project
+        Get all attendances for a student, dividing them for each project and then create each
+        sheet
         """
         all_participations = (
             self.participation_service.find_participation_by_discord_id(
@@ -226,7 +229,7 @@ class AttendanceCog(commands.Cog):
 
 class AttendanceSheetForm(ui.Modal):
     """
-    A Class modal that represents a form for adding a new project attendance
+    A Class modal that represents a form for sending the needed data to create a new attendance
     """
 
     day_field = ui.TextInput(
@@ -242,11 +245,7 @@ class AttendanceSheetForm(ui.Modal):
         project_service: ProjectService,
     ):
         """
-        Initialize the AttendanceSheetForm instance.
-
-        :param attendance_service: An instance of the AttendanceService class.
-        :type attendance_service: AttendanceService
-
+        Initialize the AttendanceSheetForm instance with the needed services.
         """
         super().__init__(title="Folha de frequência")
         self.attendance_service = attendance_service
@@ -258,11 +257,7 @@ class AttendanceSheetForm(ui.Modal):
         Handle the submit event of the form.
 
         This method is called when the user submits the form.
-        It tests the data sent by the user and if it is valid, creates a new attendance register
-
-        :param interaction: The Discord interaction object.
-        :type interaction: discord.Interaction
-
+        Sends all the data to the service to create the attendance
         """
 
         try:

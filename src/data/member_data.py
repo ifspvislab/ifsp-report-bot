@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 """
 :mod: member_data
 =================

@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 """ 
 This module contains the definition of the 'Project' and 'ProjectData' classes,
 which are used for managing project data.

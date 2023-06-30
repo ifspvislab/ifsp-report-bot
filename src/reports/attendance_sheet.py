@@ -35,6 +35,7 @@ class AttendanceSheetData:
 
     Attributes:
         student_name (str): The name of the student.
+        student_registration (str): The student's registration.
         current_date (datetime): The creation date of the document.
         project_name (str): The name of the project.
         attendances (list[Attendance]): All Attendances of the current month
@@ -52,16 +53,20 @@ class AttendanceSheet:
     Generates the attendance sheet from the data sent
 
     Attributes:
-        data (AttendanceSheetData): The data for the attendance sheet.
-        content (list): List to store the content of the sheet.
-        total_hours (timedelta): The total hours of the attendances
+        - data (AttendanceSheetData): The data for the attendance sheet.
+        - content (list): List to store the content of the sheet.
+        - total_hours (timedelta): The total hours of the attendances
 
     Methods:
-        generate(): Generates the attendance sheet.
-        generate_header(): Sets up the header section of the sheet.
-        generate_upper_table(): Create the table with the student name, project name, etc.
-        generate_mid_table(): Create the attendances section.
-        generate_lower_table(): Create the total hours and signature section.
+        - generate(): Generates the attendance sheet.
+        - generate_header(): Sets up the header section of the sheet.
+        - generate_upper_table(): Create the table with the student name, project name, etc.
+        - generate_mid_table(): Create the attendances section.
+        - generate_lower_table(): Create the total hours and signature section.
+        - _seconds_to_hours_minutes(seconds: float) -> tuple[int, int]:
+        Transforms the time in seconds to a tuple with (hours, minutes)
+        - _calc_time_difference(self, entry_time: time, exit_time: time):
+        Calculates the time difference between two moments
 
 
     """
@@ -79,12 +84,18 @@ class AttendanceSheet:
         self.total_hours = timedelta()
 
     def _seconds_to_hours_minutes(self, seconds: float) -> tuple[int, int]:
+        """
+        Transforms the time in seconds to a tuple with (hours, minutes)
+        """
         total_seconds = seconds
         hours = int(total_seconds / 3600)
         minutes = int((total_seconds % 3600) / 60)
         return (hours, minutes)
 
-    def _calc_time_difference(self, entry_time: time, exit_time: time):
+    def _calc_time_difference(self, entry_time: time, exit_time: time) -> timedelta:
+        """
+        Calculates the time difference between two moments.
+        """
         # Converting the time into datetime to calculate the difference
         converted_entry_time = datetime.strptime(entry_time.isoformat(), "%H:%M:%S")
         converted_exit_time = datetime.strptime(exit_time.isoformat(), "%H:%M:%S")

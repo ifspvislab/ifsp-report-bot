@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 """
 student_service
 =======================

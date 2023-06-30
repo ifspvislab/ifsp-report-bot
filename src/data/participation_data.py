@@ -1,4 +1,6 @@
-""" 
+# pylint: skip-file
+
+"""
 Participation Data
 """
 

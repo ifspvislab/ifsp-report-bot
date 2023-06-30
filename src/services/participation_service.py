@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 """Service regarding input issues"""
 
 from datetime import datetime

@@ -9,12 +9,18 @@ Classes:
 
 Functions:
     - _strtime_to_time(strtime: str) -> time: Converts from string type to time type.
+    - _strdate_to_date(strdate: str) -> datetime: Converts from string type to datetime type
     - _row_to_attend(row: str) -> Attendance: Create a Attendance from a row string.
+    - _attend_to_row(self, attend: Attendance) -> str: Transforms an attendance into a
+    string separated by commas
     - _load_attend() -> list[Attendance]: Read the saved Attendances.
     - load_attend() -> list[Attendance]: Returns all saved Attendences.
     - save_attend(new_attend: Attendance) -> None: Saves new attendances to the csv file,
     overwriting the saved attendance with the new one if it is from the same
     user and date
+
+Variables:
+    MONTHS: List with the names of the months in portuguese
 
 """
 
@@ -41,7 +47,7 @@ MONTHS = [
 @dataclass
 class Attendance:
     """
-    Data Class for attendances
+    Data Class that represents an attendance
     """
 
     attendance_id: str
@@ -54,8 +60,7 @@ class Attendance:
 
 class AttendanceData:
     """
-    Class for unifying all functions that work with data files
-
+    Class for unifying all functions that work with .csv files
     """
 
     def _strtime_to_time(self, strtime: str) -> time:
@@ -103,6 +108,14 @@ class AttendanceData:
         )
 
     def _attend_to_row(self, attend: Attendance) -> str:
+        """
+        Transforms an attendance into a string separated by commas
+
+        :param attend: The Attendance to be transformed
+        :type row: Attendance
+        :return: The string that represents the attendance
+        :rtype: str
+        """
         row = ""
         row += f"{attend.attendance_id}"
         row += f",{attend.student_id}"
@@ -131,7 +144,9 @@ class AttendanceData:
         If the new data have the same date and student as another registered date, it will
         erase the older one
 
-        :rtype: None
+        :param new_attend: The new Attendance to be saved
+        :type new_attend: Attendance
+        :return: Nothing
         """
 
         buffer = []
