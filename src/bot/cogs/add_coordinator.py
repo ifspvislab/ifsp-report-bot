@@ -105,6 +105,11 @@ class AddCoordinatorModal(ui.Modal):
             await interaction.response.send_message(
                 "Coordenador cadastrado com sucesso!"
             )
+            logger.info(
+                "Coordinator '%s' successfully created by '%s'",
+                self.name,
+                interaction.user.name,
+            )
 
         except (
             CoordinatorAlreadyExists,

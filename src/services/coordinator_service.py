@@ -12,7 +12,10 @@ Classes:
 
 from validate_email_address import validate_email
 
+import settings
 from data import Coordinator, CoordinatorData
+
+logger = settings.logging.getLogger(__name__)
 
 
 class CoordinatorAlreadyExists(Exception):
@@ -85,7 +88,7 @@ class CoordinatorService:
         ):
             raise ProntuarioError("ERRO: Prontuario incorreto")
 
-        print("Prontuario correto")
+        logger.info("Prontuario correto")
 
     def verify_email(self, value):
         """
@@ -97,7 +100,7 @@ class CoordinatorService:
         if not validate_email(value, check_mx=True):
             raise EmailError("ERRO: Email inválido")
 
-        print("Email correto")
+        logger.info("Email correto")
 
     def verify_discord_id(self, value):
         """
@@ -109,7 +112,7 @@ class CoordinatorService:
         if not value.isnumeric():
             raise DiscordIdError("ERRO: Discord ID inválido")
 
-        print("Discord ID correto")
+        logger.info("Discord ID correto")
 
     def check_ocurrance(self, prontuario):
         """
