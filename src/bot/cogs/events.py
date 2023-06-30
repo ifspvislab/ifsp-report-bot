@@ -25,13 +25,16 @@ class Events(commands.Cog):
         if not message.guild or message.author.bot:
             return
 
-        if LogService.check_student_in_project(self=LogService, student_id=int(message.author.id)):
-            
-            project_id_by_student = LogService.get_project_id_by_student_id(self=LogService, student_id=int(message.author.id))
+        if LogService.check_student_in_project(
+            self=LogService, student_id=int(message.author.id)
+        ):
+            project_id_by_student = LogService.get_project_id_by_student_id(
+                self=LogService, student_id=int(message.author.id)
+            )
 
             if len(message.attachments) > 0:
-                date = LogService.get_date(self=LogService, message=message)
-                action = f"{date} - {message.author} - {message.channel} - {message.attachments[0].url}"
+                date = LogService.formatted_get_date(self=LogService, message=message)
+                action = f"{date}-{message.author}-{message.channel}-{message.attachments[0].url}"
                 LogService.add_logs(
                     self=LogService,
                     project_id=project_id_by_student,
@@ -41,7 +44,7 @@ class Events(commands.Cog):
                 )
 
             else:
-                date = LogService.get_date(self=LogService, message=message)
+                date = LogService.formatted_get_date(self=LogService, message=message)
                 action = (
                     f"{date} - {message.author} - {message.channel} - {message.content}"
                 )
@@ -62,13 +65,21 @@ class Events(commands.Cog):
         if not message.guild or message.author.bot:
             return
 
-        if LogService.check_student_in_project(self=LogService, student_id=int(message.author.id)):
-            project_id_by_student = LogService.get_project_id_by_student_id(self=LogService, student_id=int(message.author.id))
-            
-            date = LogService.get_date(self=LogService, message=message)
+        if LogService.check_student_in_project(
+            self=LogService, student_id=int(message.author.id)
+        ):
+            project_id_by_student = LogService.get_project_id_by_student_id(
+                self=LogService, student_id=int(message.author.id)
+            )
+
+            date = LogService.formatted_get_date(self=LogService, message=message)
             action = f"{date} - {message.author} - {message.channel} - Deleted: {message.content}"
             LogService.add_logs(
-                self=LogService, project_id=project_id_by_student, student_id=int(message.author.id), date=date, action=action
+                self=LogService,
+                project_id=project_id_by_student,
+                student_id=int(message.author.id),
+                date=date,
+                action=action,
             )
 
     @Cog.listener()
@@ -82,15 +93,24 @@ class Events(commands.Cog):
         if before.author.bot or before.content == after.content:
             return
 
-        if LogService.check_student_in_project(self=LogService, student_id=int(before.author.id)):
-            project_id_by_student = LogService.get_project_id_by_student_id(self=LogService, student_id=int(before.author.id))
-                   
-            date = LogService.get_date(self=LogService, before=before)
+        if LogService.check_student_in_project(
+            self=LogService, student_id=int(before.author.id)
+        ):
+            project_id_by_student = LogService.get_project_id_by_student_id(
+                self=LogService, student_id=int(before.author.id)
+            )
+
+            date = LogService.formatted_get_date(self=LogService, before=before)
             action_info = f"{date} - {before.author} - {before.channel}"
-            action = action_info + \
-                f" - Before: {before.content} - After: {after.content}"
+            action = (
+                action_info + f" - Before: {before.content} - After: {after.content}"
+            )
             LogService.add_logs(
-                self=LogService, project_id=project_id_by_student, student_id=int(before.author.id), date=date, action=action
+                self=LogService,
+                project_id=project_id_by_student,
+                student_id=int(before.author.id),
+                date=date,
+                action=action,
             )
 
     @Cog.listener()
@@ -99,10 +119,16 @@ class Events(commands.Cog):
         Event handler for interaction events.
         Logs the user and the interaction name.
         """
-        if LogService.check_student_in_project(self=LogService, student_id=int(interaction.user.id)):
-            project_id_by_student = LogService.get_project_id_by_student_id(self=LogService, student_id=int(interaction.user.id))
-                   
-            date = LogService.get_date(self=LogService, interaction=interaction)
+        if LogService.check_student_in_project(
+            self=LogService, student_id=int(interaction.user.id)
+        ):
+            project_id_by_student = LogService.get_project_id_by_student_id(
+                self=LogService, student_id=int(interaction.user.id)
+            )
+
+            date = LogService.formatted_get_date(
+                self=LogService, interaction=interaction
+            )
             action = (
                 f"{date} - {interaction.user} - Interaction: {interaction.data['name']}"
             )
@@ -120,13 +146,21 @@ class Events(commands.Cog):
         Event handler for reaction add events.
         Logs the user, reacted emoji, and the reacted message's content.
         """
-        if LogService.check_student_in_project(self=LogService, student_id=int(user.id)):
-            project_id_by_student = LogService.get_project_id_by_student_id(self=LogService, student_id=int(user.id))
-             
-            date = LogService.get_date(self=LogService)
+        if LogService.check_student_in_project(
+            self=LogService, student_id=int(user.id)
+        ):
+            project_id_by_student = LogService.get_project_id_by_student_id(
+                self=LogService, student_id=int(user.id)
+            )
+
+            date = LogService.formatted_get_date(self=LogService)
             action = f"{date}-{user}-Reaction:{reaction.emoji}-Reacted:{reaction.message.content}"
             LogService.add_logs(
-                self=LogService, project_id=project_id_by_student, student_id=int(user.id), date=date, action=action
+                self=LogService,
+                project_id=project_id_by_student,
+                student_id=int(user.id),
+                date=date,
+                action=action,
             )
 
 

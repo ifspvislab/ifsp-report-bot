@@ -22,6 +22,13 @@ logger = settings.logging.getLogger(__name__)
 
 
 async def load_cogs(bot):
+    """
+    Loads the necessary cogs for the bot.
+
+    This function is created to resolve conflicts with Pylint.
+    Pylint may incorrectly flag the use of `bot.load_extension` as an error,
+    even though it is a valid method for loading cogs in discord.py.
+    """
     await bot.load_extension("bot.cogs.log_command")
     await bot.load_extension("bot.cogs.events")
 

@@ -9,5 +9,5 @@
 
 from .coordinator_data import Coordinator, CoordinatorData
 from .log_data import LogData
-from .project_data import ProjectData
+from .project_data import Project, ProjectData
 from .student_data import StudentData

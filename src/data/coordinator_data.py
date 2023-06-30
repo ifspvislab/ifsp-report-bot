@@ -47,7 +47,8 @@ class CoordinatorData:
 
     """
 
-    def _row_to_coordinator(self, row: str) -> dict:
+    @staticmethod
+    def _row_to_coordinator(row: str) -> dict:
         """
         Converts a row of data from the coordinators.csv file into a dictionary format.
 
@@ -68,7 +69,6 @@ class CoordinatorData:
         :return: A list of dictionaries, where each dictionary represents a coordinator.
         :rtype: list[dict]
         """
-
         with open("assets/data/coordinators.csv", "r", encoding="utf-8") as file:
             coordinators = []
             for row in file:

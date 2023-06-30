@@ -54,4 +54,10 @@ def get_coordinator_id() -> int:
 
 
 def get_time_zone():
+    """
+    Retrieve the time zone.
+
+    Returns:
+        zoneinfo.ZoneInfo: The time zone representing 'America/Sao_Paulo'.
+    """
     return zoneinfo.ZoneInfo("America/Sao_Paulo")

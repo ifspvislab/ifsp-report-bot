@@ -1,19 +1,25 @@
 """
 Services for log command.
 """
-import os
+
 from datetime import datetime
 
 import discord
 
 import settings
-from data.coordinator_data import CoordinatorData
 from data.log_data import LogData
+from data.project_data import ProjectData
 from data.student_data import StudentData
 
 zone = settings.get_time_zone()
 students_data = StudentData()
-students = students_data.load_students()
+students_list = students_data.load_students()
+projects_data = ProjectData()
+projects_list = projects_data.load_projects()
+
+
+class IncorrectDateFilter(Exception):
+    """Incorrect date filter"""
 
 
 class LogService:
@@ -21,73 +27,107 @@ class LogService:
     Service class for log command.
     """
 
-    def add_logs(self, project_id:int, student_id: int, date: str, action: str) -> None:
+    def add_logs(
+        self, project_id: int, student_id: int, date: str, action: str
+    ) -> None:
         """
         Adds logs to the log file.
 
-        Parameters:
-            - member_id: ID of the member associated with the log.
-            - date: Date of the log entry.
-            - action: Action performed for the log.
-
-        Returns:
-            None
+        :param project_id: ID of the project associated with the log.
+        :type project_id: int
+        :param student_id: ID of the student associated with the log.
+        :type student_id: int
+        :param date: Date of the log entry.
+        :type date: str
+        :param action: Action performed for the log.
+        :type action: str
+        :return: None
         """
-        log_list = [project_id,student_id, date, action]
+
+        log_list = [project_id, student_id, date, action]
         LogData.create_logs(self=LogData, data_list=log_list)
 
-    def check_student_in_project(self, student_id: int, students: list[dict]=students) -> bool:
+    def check_student_in_project(
+        self, student_id: int, students: list[dict] = None
+    ) -> bool:
         """
         Checks if the given student ID is associated with a project.
 
-        Parameters:
-            - student_id: The student ID to be checked.
-            - students: The list of student dictionaries.
-
-        Returns:
-            - True if the student ID is associated with a project.
-            - False otherwise.
+        :param student_id: The student ID to be checked.
+        :type student_id: int
+        :param students: The list of student dictionaries.
+                        Defaults to None.
+        :type students: list[dict] or None
+        :return: True if the student ID is associated with a project, False otherwise.
+        :rtype: bool
         """
+        if students is None:
+            students = students_list
+
         for student in students:
             if student["discord_id"] == student_id:
                 return True
         return False
 
-    def get_project_id_by_student_id(self, student_id: int, students: list[dict]=students) -> int:
+    def get_project_id_by_student_id(
+        self, student_id: int, students: list[dict] = None
+    ) -> int:
         """
         Get the project ID associated with the given student ID.
 
-        Parameters:
-            - student_id: The student ID.
-            - students: The list of student dictionaries.
-
-        Returns:
-            - The project ID associated with the student ID.
-            Returns None if the student is not associated with any project.
+        :param student_id: The student ID.
+        :type student_id: int
+        :param students: The list of student dictionaries.
+        :type students: list[dict]
+        :return: The project ID associated with the student ID.
+                 Returns None if the student is not associated with any project.
+        :rtype: int or None
         """
+        if students is None:
+            students = students_list
+
         for student in students:
             if student["discord_id"] == student_id:
                 if "project" in student and "id" in student["project"]:
                     return student["project"]["id"]
-
         return None
 
-    # def coordenator_id_validation(self):
-    #     pass
+    def get_project_id_by_server_id(
+        self, server_id: int, projects: list[dict] = None
+    ) -> int:
+        """
+        Get the project ID associated with the given server ID.
+
+        :param server_id: The server ID.
+        :type server_id: int
+        :param projects: The list of project dictionaries.
+        :type projects: list[dict]
+        :return: The project ID associated with the server ID.
+                 Returns None if no project is associated with the server.
+        :rtype: int or None
+        """
+        if projects is None:
+            projects = projects_list
+
+        for project in projects:
+            if project["discord_server_id"] == str(server_id):
+                return project["id"]
+        return None
 
     def date_validation(self, date: str, start_date: str, end_date: str) -> bool:
         """
         Validates a date within a specified range.
 
-        Parameters:
-            - date: Date to be validated.
-            - start_date: Start date of the range.
-            - end_date: End date of the range.
-
-        Returns:
-            - True if the date is within the range.
-            - False otherwise.
+        :param date: Date to be validated.
+        :type date: str
+        :param start_date: Start date of the range.
+        :type start_date: str
+        :param end_date: End date of the range.
+        :type end_date: str
+        :return: True if the date is within the range, False otherwise.
+        :rtype: bool
         """
+
         split_date = date.split(" ")
         correct_date = datetime.strptime(split_date[0], "%d/%m/%Y")
 
@@ -99,28 +139,7 @@ class LogService:
             return True
         return False
 
-    # def file_validation(
-    #     self,
-    #     file="D:/Faculdade/VisLab/ifsp-report-bot/src/cogs/log.pdf",
-    #     limit_in_bytes=25 * 1024 * 1024,
-    # ) -> bool:
-    #     """
-    #     Validates the size of a file.
-
-    #     Parameters:
-    #         - file: File to be validated.
-    #         - limit_in_bytes: Maximum file size in bytes.
-
-    #     Returns:
-    #         - True if the file size exceeds the limit.
-    #         - False otherwise.
-    #     """
-    #     file_size = os.path.getsize(file)
-    #     if file_size > limit_in_bytes:
-    #         return True
-    #     return False
-
-    def get_date(
+    def formatted_get_date(
         self,
         message: discord.Message = None,
         before: discord.Message = None,
@@ -129,14 +148,16 @@ class LogService:
         """
         Retrieves the formatted date based on the provided message, before message, or interaction.
 
-        Parameters:
-            - message: Discord message object.
-            - before: Discord message object before the edit.
-            - interaction: Discord interaction object.
-
-        Returns:
-            - Formatted date as a string.
+        :param message: Discord message object.
+        :type message: discord.Message or None
+        :param before: Discord message object before the edit.
+        :type before: discord.Message or None
+        :param interaction: Discord interaction object.
+        :type interaction: discord.Interaction or None
+        :return: Formatted date as a string.
+        :rtype: str
         """
+
         if message is not None:
             formatted_date = message.created_at.astimezone(zone).strftime(
                 "%d/%m/%Y %H:%M"
