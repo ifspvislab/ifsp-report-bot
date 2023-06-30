@@ -111,7 +111,6 @@ class AddCoordinatorModal(ui.Modal):
             await interaction.response.send_message(
                 "Coordenador cadastrado com sucesso!"
             )
-           
 
         except (
             CoordinatorAlreadyExists,
@@ -119,7 +118,9 @@ class AddCoordinatorModal(ui.Modal):
             EmailError,
             RegistrationError,
         ) as exception:
-            logger.error("An error occurred while creating a new coordinator: %s", str(exception))
+            logger.error(
+                "An error occurred while creating a new coordinator: %s", str(exception)
+            )
             await interaction.response.send_message(str(exception))
 
 
