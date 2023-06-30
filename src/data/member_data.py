@@ -27,7 +27,7 @@ class Member:
     """
 
     member_id: str
-    prontuario: str
+    registration: str
     discord_id: int
     name: str
     email: str
@@ -77,7 +77,7 @@ class MemberData:
         """
         with open("assets/data/members.csv", "a", encoding="UTF-8") as member_data:
             member_data.write(
-                f"{member.member_id},{member.prontuario},"
+                f"{member.member_id},{member.registration},"
                 + f"{member.discord_id},{member.name},{member.email}\n"
             )
 

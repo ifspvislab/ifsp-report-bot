@@ -24,7 +24,7 @@ class Coordinator:
     """
 
     coord_id: str
-    prontuario: str
+    registration: str
     discord_id: int
     name: str
     email: str
@@ -97,6 +97,6 @@ class CoordinatorData:
             "assets/data/coordinators.csv", "a", encoding="UTF-8"
         ) as coordinator_data:
             coordinator_data.write(
-                f"{coord.coord_id},{coord.prontuario},"
+                f"{coord.coord_id},{coord.registration},"
                 + f"{coord.discord_id},{coord.name},{coord.email}\n"
             )

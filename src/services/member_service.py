@@ -39,7 +39,7 @@ class MemberAlreadyExists(Exception):
     print(Exception)
 
 
-class ProntuarioError(Exception):
+class RegistrationError(Exception):
     """Exception raised when there is an error with the prontuario."""
 
     print(Exception)
@@ -94,7 +94,7 @@ class MemberService:
 
         return None
 
-    def verify_prontuario(self, value):
+    def verify_registration(self, value):
         """Verify the correctness of the prontuario.
 
         Args:
@@ -109,9 +109,7 @@ class MemberService:
             and value[-1].isalnum()
             and len(value) == 9
         ):
-            raise ProntuarioError("Prontuario incorreto")
-
-        print("Prontuario correto")
+            raise RegistrationError("Prontuario incorreto")
 
     def verify_email(self, value):
         """Verify the correctness of the email address.
@@ -125,8 +123,6 @@ class MemberService:
         if not validate_email(value, check_mx=True):
             raise EmailError("Email inválido")
 
-        print("Email correto")
-
     def verify_discord_id(self, value):
         """Verify the correctness of the Discord ID.
 
@@ -139,9 +135,7 @@ class MemberService:
         if not value.isnumeric():
             raise DiscordIdError("Discord ID inválido")
 
-        print("Discord ID correto")
-
-    def check_ocurrance(self, prontuario):
+    def check_ocurrance(self, registration):
         """Check if a member with the given prontuario already exists.
 
         Args:
@@ -151,10 +145,8 @@ class MemberService:
             OccurrenceError: If a member with the same prontuario already exists.
         """
 
-        if self.find_member_by_type("prontuario", prontuario):
+        if self.find_member_by_type("registration", registration):
             raise OccurrenceError("Já existe esse membro")
-
-        print("Novo membro")
 
     def add_member(self, member):
         """Add a new member.
@@ -162,13 +154,13 @@ class MemberService:
         Args:
             member (Member): Member object.
         """
-        self.verify_prontuario(member.prontuario)
+        self.verify_registration(member.registration)
         self.verify_email(member.email)
         self.verify_discord_id(member.discord_id)
-        self.check_ocurrance(member.prontuario)
+        self.check_ocurrance(member.registration)
         member = Member(
             member.member_id,
-            member.prontuario,
+            member.registration,
             member.discord_id,
             member.name,
             member.email,

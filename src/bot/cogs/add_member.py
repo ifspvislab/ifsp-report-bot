@@ -40,11 +40,14 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
         - discord_id: Represente the field discord id
     """
 
-    def __init__(self, member_service: MemberService):
+    def __init__(
+        self, member_service: MemberService, coordinator_service: CoordinatorService
+    ):
         super().__init__()
         self.member_service = member_service
+        self.coordinator_service = coordinator_service
 
-    prontuario = ui.TextInput(label="prontuario", placeholder="SPXXXXX")
+    registration = ui.TextInput(label="prontuario", placeholder="SPXXXXX", max_length=9)
     name = ui.TextInput(label="name", placeholder="nome", min_length=5, max_length=100)
     email = ui.TextInput(label="email", placeholder="nome@email.com")
     discord_id = ui.TextInput(label="discord id", placeholder="discord id")
@@ -56,21 +59,25 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
         :param interaction: The Discord interaction object
         """
 
-        self.member_service.add_member(
-            data.Member(
-                str(uuid4()),
-                self.prontuario.value,
-                self.discord_id.value,
-                self.name.value,
-                self.email.value,
-            )
+        member = data.Member(
+            str(uuid4()),
+            self.registration.value,
+            self.discord_id.value,
+            self.name.value,
+            self.email.value,
         )
+        self.member_service.add_member(member)
         await interaction.response.send_message("Membro cadastrado com sucesso.")
+        logger.info(
+            f"Membro {member.registration} adicionado por"
+            + f" {self.coordinator_service.find_coordinator_by_type('discord_id' ,interaction.user.id).registration}"
+        )
 
     async def on_error(self, interaction: Interaction, error: Exception, /):
-        logger.warning(
-            f"Erro: {error}, na tentativa do usuário"
-            + f" {interaction.user} de adicionar membro"
+        logger.error(
+            f"Erro: {error} na tentativa do usuário"
+            + f" {self.coordinator_service.find_coordinator_by_type('discord_id' ,interaction.user.id).registration}"
+            + " de adicionar membro"
         )
         await interaction.response.send_message(error)
 
@@ -105,7 +112,7 @@ class MemberCog(commands.Cog):
         if self.coordinator_service.find_coordinator_by_type(
             "discord_id", interaction.user.id
         ):
-            modal = ModalAddMember(self.member_service)
+            modal = ModalAddMember(self.member_service, self.coordinator_service)
             if member is not None:
                 modal.discord_id.default = str(member.id)
             await interaction.response.send_modal(modal)
@@ -114,7 +121,7 @@ class MemberCog(commands.Cog):
         await interaction.response.send_message(
             "Você não tem permissão para adicionar membro."
         )
-        logger.warning(
+        logger.error(
             "Usuário (dicord_id: %s)"
             + "tentou adicionar membro, porém não possui permissão.",
             interaction.user,
