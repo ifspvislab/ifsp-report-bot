@@ -16,6 +16,6 @@ from .coordinator_service import (
     CoordinatorService,
     DiscordIdError,
     EmailError,
-    ProntuarioError,
+    RegistrationError,
 )
 from .student_service import StudentService

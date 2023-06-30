@@ -24,7 +24,7 @@ class CoordinatorAlreadyExists(Exception):
     """
 
 
-class ProntuarioError(Exception):
+class RegistrationError(Exception):
     """
     Exception raised when an incorrect prontuario is encountered.
     """
@@ -73,7 +73,7 @@ class CoordinatorService:
 
         return None
 
-    def verify_prontuario(self, value):
+    def verify_registration(self, value):
         """
         Verify the correctness of a prontuario.
 
@@ -86,9 +86,7 @@ class CoordinatorService:
             and value[-1].isalnum()
             and len(value) == 9
         ):
-            raise ProntuarioError("ERRO: Prontuario incorreto")
-
-        logger.info("Prontuario correto")
+            raise RegistrationError("ERRO: Prontuario incorreto")
 
     def verify_email(self, value):
         """
@@ -100,8 +98,6 @@ class CoordinatorService:
         if not validate_email(value, check_mx=True):
             raise EmailError("ERRO: Email inválido")
 
-        logger.info("Email correto")
-
     def verify_discord_id(self, value):
         """
         Verify the validity of a Discord ID.
@@ -112,9 +108,7 @@ class CoordinatorService:
         if not value.isnumeric():
             raise DiscordIdError("ERRO: Discord ID inválido")
 
-        logger.info("Discord ID correto")
-
-    def check_ocurrance(self, prontuario):
+    def check_ocurrance(self, registration):
         """
         Check if a coordinator with the given prontuario already exists.
 
@@ -122,7 +116,7 @@ class CoordinatorService:
         :raises ValueError: If a coordinator with the given prontuario already exists.
         """
         for coordinator in self.database:
-            if prontuario == coordinator.prontuario:
+            if registration == coordinator.registration:
                 raise CoordinatorAlreadyExists(
                     "ERRO: Já há um coordenador com este prontuário!"
                 )
@@ -137,13 +131,13 @@ class CoordinatorService:
         :raises DiscordIdError: If the Discord ID is invalid.
         :raises ValueError: If a coordinator with the given prontuario already exists.
         """
-        self.verify_prontuario(coordenador.prontuario)
+        self.verify_registration(coordenador.registration)
         self.verify_email(coordenador.email)
         self.verify_discord_id(coordenador.discord_id)
-        self.check_ocurrance(coordenador.prontuario)
+        self.check_ocurrance(coordenador.registration)
         coordinator = Coordinator(
             coordenador.coord_id,
-            coordenador.prontuario,
+            coordenador.registration,
             coordenador.discord_id,
             coordenador.name,
             coordenador.email,

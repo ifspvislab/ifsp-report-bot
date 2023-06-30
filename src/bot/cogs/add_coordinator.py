@@ -21,7 +21,7 @@ from services import (
     CoordinatorService,
     DiscordIdError,
     EmailError,
-    ProntuarioError,
+    RegistrationError,
     is_admin,
 )
 
@@ -102,23 +102,25 @@ class AddCoordinatorModal(ui.Modal):
                 )
             )
 
-            await interaction.response.send_message(
-                "Coordenador cadastrado com sucesso!"
-            )
             logger.info(
                 "Coordinator '%s' successfully created by '%s'",
                 self.name,
                 interaction.user.name,
             )
 
+            await interaction.response.send_message(
+                "Coordenador cadastrado com sucesso!"
+            )
+           
+
         except (
             CoordinatorAlreadyExists,
             DiscordIdError,
             EmailError,
-            ProntuarioError,
+            RegistrationError,
         ) as exception:
+            logger.error("An error occurred while creating a new coordinator: %s", str(exception))
             await interaction.response.send_message(str(exception))
-            logger.warning("An error occurred while creating a new coordinator")
 
 
 class CoordinatorCog(commands.Cog):
