@@ -1,23 +1,33 @@
 """
-    data for students
-"""
+:mod: student_data
+==================
 
+Module for managing student data stored in a CSV file.
+
+Module Dependencies:
+    - ``csv``: A module for working with CSV files.
+    - ``project_data``: A module for accessing project data.
+
+Classes:
+    - :class:`StudentData`: Class for managing student data.
+"""
 from .project_data import ProjectData
 
 
+# pylint: disable=too-few-public-methods
 class StudentData:
     """
-    A class for managing student data.
+    Class for managing student data stored in a CSV file.
+
+    Module Dependencies:
+        - csv: A module for working with CSV files.
+        - project_data: A module for accessing project data.
 
     Methods:
-        _row_to_student(row: str) -> dict:
-            Convert a row of student data to a dictionary.
-
-        _load_students() -> list[dict]:
-            Load students from the CSV file.
-
-        load_students() -> list[dict]:
-            Load students and associate them with their respective projects.
+        - _row_to_student(row: str) -> dict: Convert a row of student data to a dictionary.
+        - _load_students() -> list[dict]: Load students from the CSV file.
+        - load_students() -> list[dict]: Load students and associate them
+          with their respective projects.
 
     """
 
@@ -30,7 +40,7 @@ class StudentData:
         """
         self.project_data = ProjectData()
 
-    def row_to_student(self, row: str) -> dict:
+    def _row_to_student(self, row: str) -> dict:
         """
         Convert a row of student data to a dictionary.
 
@@ -57,7 +67,7 @@ class StudentData:
         with open("assets/data/students.csv", "r", encoding="utf-8") as file:
             students = []
             for row in file:
-                students.append(self.row_to_student(row))
+                students.append(self._row_to_student(row))
             return students
 
     def load_students(self) -> list[dict]:

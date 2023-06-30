@@ -10,10 +10,10 @@ Classes:
 
 """
 
-from validate_email_address import validate_email
-
 import settings
 from data import Coordinator, CoordinatorData
+
+from .validation import verify_discord_id, verify_email, verify_registration
 
 logger = settings.logging.getLogger(__name__)
 
@@ -21,24 +21,6 @@ logger = settings.logging.getLogger(__name__)
 class CoordinatorAlreadyExists(Exception):
     """
     Exception raised when a coordinator already exists.
-    """
-
-
-class RegistrationError(Exception):
-    """
-    Exception raised when an incorrect prontuario is encountered.
-    """
-
-
-class EmailError(Exception):
-    """
-    Exception raised when an invalid email is encountered.
-    """
-
-
-class DiscordIdError(Exception):
-    """
-    Exception raised when an invalid Discord ID is encountered.
     """
 
 
@@ -73,41 +55,6 @@ class CoordinatorService:
 
         return None
 
-    def verify_registration(self, value):
-        """
-        Verify the correctness of a prontuario.
-
-        :param value: The prontuario value to be verified.
-        :raises ProntuarioError: If the prontuario is incorrect.
-        """
-        if not (
-            value[:1].isalpha()
-            and value[2:-2].isnumeric()
-            and value[-1].isalnum()
-            and len(value) == 9
-        ):
-            raise RegistrationError("ERRO: Prontuario incorreto")
-
-    def verify_email(self, value):
-        """
-        Verify the validity of an email address.
-
-        :param value: The email address to be verified.
-        :raises EmailError: If the email address is invalid.
-        """
-        if not validate_email(value, check_mx=True):
-            raise EmailError("ERRO: Email inválido")
-
-    def verify_discord_id(self, value):
-        """
-        Verify the validity of a Discord ID.
-
-        :param value: The Discord ID to be verified.
-        :raises DiscordIdError: If the Discord ID is invalid.
-        """
-        if not value.isnumeric():
-            raise DiscordIdError("ERRO: Discord ID inválido")
-
     def check_ocurrance(self, registration):
         """
         Check if a coordinator with the given prontuario already exists.
@@ -131,9 +78,9 @@ class CoordinatorService:
         :raises DiscordIdError: If the Discord ID is invalid.
         :raises ValueError: If a coordinator with the given prontuario already exists.
         """
-        self.verify_registration(coordenador.registration)
-        self.verify_email(coordenador.email)
-        self.verify_discord_id(coordenador.discord_id)
+        verify_registration(coordenador.registration)
+        verify_email(coordenador.email)
+        verify_discord_id(coordenador.discord_id)
         self.check_ocurrance(coordenador.registration)
         coordinator = Coordinator(
             coordenador.coord_id,

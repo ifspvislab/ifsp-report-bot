@@ -58,7 +58,9 @@ class CoordinatorData:
         """
 
         fields = [field.strip() for field in row.split(sep=",")]
-        coordinator = Coordinator(fields[0], fields[1], fields[2], fields[3], fields[4])
+        coordinator = Coordinator(
+            fields[0], fields[1], int(fields[2]), fields[3], fields[4]
+        )
         return coordinator
 
     def load_coordinators(self) -> list[Coordinator]:

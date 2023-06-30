@@ -1,27 +1,41 @@
 """
-This module provides a class for managing project data.
+:mod: project_data
+==================
+
+Module for managing project data stored in a CSV file.
+
+Module Dependencies:
+    - ``csv``: A module for working with CSV files.
+    - ``datetime``: A module for working with dates and times.
 
 Classes:
-    ProjectData: A class for managing project data.
-
+    - :class:`ProjectData`: Class for managing project data.
 """
+
 from datetime import datetime
 
 
+# pylint: disable=too-few-public-methods
 class ProjectData:
     """
-    A class for managing project data.
+    :class: ProjectData
+    ===================
+
+    Class for managing project data stored in a CSV file.
+
+    Module Dependencies:
+        - ``csv``: A module for working with CSV files.
+        - ``datetime``: A module for working with dates and times.
 
     Methods:
-        _row_to_project(row: str) -> dict:
-            Convert a row of project data to a dictionary.
-
-        _load_projects() -> list[dict]:
-            Load projects from the CSV file.
+        - ``_row_to_project(row: str) -> dict``: Convert a row of project data to a dictionary.
+        - ``load_projects() -> list[dict]``: Load projects from the CSV file.
     """
 
-    def row_to_project(self, row: str) -> dict:
+    def _row_to_project(self, row: str) -> dict:
         """
+        .. method:: _row_to_project(row: str) -> dict
+
         Convert a row of project data to a dictionary.
 
         :param row: The row of project data.
@@ -40,6 +54,8 @@ class ProjectData:
 
     def load_projects(self) -> list[dict]:
         """
+        .. method:: load_projects() -> list[dict]
+
         Load projects from the CSV file.
 
         :return: A list of project dictionaries.
@@ -48,5 +64,5 @@ class ProjectData:
         with open("assets/data/projects.csv", "r", encoding="utf-8") as file:
             projects = []
             for row in file:
-                projects.append(self.row_to_project(row))
+                projects.append(self._row_to_project(row))
             return projects

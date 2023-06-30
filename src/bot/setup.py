@@ -14,14 +14,19 @@ import discord
 from discord.ext import commands
 
 import settings
-from bot.cogs.add_coordinator import CoordinatorCog
-from bot.modals import MonthyReportForm
-from services import CoordinatorService, StudentService
+from services import CoordinatorService, MemberService, StudentService
+
+from .cogs import CoordinatorCog, MemberCog
+from .modals import MonthyReportForm
 
 logger = settings.logging.getLogger(__name__)
 
 
-def start_bot(student_service: StudentService, coordinator_service: CoordinatorService):
+def start_bot(
+    student_service: StudentService,
+    member_service: MemberService,
+    coordinator_service: CoordinatorService,
+):
     """
     Start bot.
 
@@ -46,6 +51,7 @@ def start_bot(student_service: StudentService, coordinator_service: CoordinatorS
          the latest information about all available commands and their respective settings.
 
         """
+        await bot.add_cog(MemberCog(member_service, coordinator_service))
         await bot.add_cog(CoordinatorCog(coordinator_service))
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
