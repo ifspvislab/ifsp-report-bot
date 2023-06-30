@@ -11,7 +11,7 @@ Package Structure
 """
 
 
-from .coordinator_data import CoordinatorData
+from .coordinator_data import Coordinator, CoordinatorData
 from .member_data import Member, MemberData
 from .project_data import ProjectData
 from .student_data import StudentData

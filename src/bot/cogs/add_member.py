@@ -129,5 +129,5 @@ class MemberCog(commands.Cog):
         logger.error(
             "Usuário (dicord_id: %s)"
             + "tentou adicionar membro, porém não possui permissão.",
-            interaction.user,
+            interaction.user.id,
         )

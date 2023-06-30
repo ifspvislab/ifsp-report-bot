@@ -10,6 +10,12 @@ Modules:
 
 """
 
-from .coordinator_service import CoordinatorService
+from .admin_service import is_admin
+from .coordinator_service import (
+    Coordinator,
+    CoordinatorAlreadyExists,
+    CoordinatorService,
+)
 from .member_service import MemberService
 from .student_service import StudentService
+from .validation import DiscordIdError, EmailError, RegistrationError

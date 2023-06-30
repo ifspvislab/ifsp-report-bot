@@ -16,7 +16,7 @@ from discord.ext import commands
 import settings
 from services import CoordinatorService, MemberService, StudentService
 
-from .cogs import MemberCog
+from .cogs import CoordinatorCog, MemberCog
 from .modals import MonthyReportForm
 
 logger = settings.logging.getLogger(__name__)
@@ -52,7 +52,8 @@ def start_bot(
 
         """
         await bot.add_cog(MemberCog(member_service, coordinator_service))
-        # updates the bot's command representation
+        await bot.add_cog(CoordinatorCog(coordinator_service))
+        await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
 
     @bot.tree.command(name="ping", description="Verifica se o bot está no ar")
@@ -64,6 +65,7 @@ def start_bot(
         :type interaction: discord.Interaction
 
         """
+        await bot.tree.sync(guild=interaction.guild)
         logger.info("Ping command user %s", interaction.user.name)
         await interaction.response.send_message(f":ping_pong: {interaction.user.name}")
 
@@ -121,15 +123,5 @@ def start_bot(
                 embed.add_field(name=f"Erro {index+1}", value=error, inline=False)
 
             await interaction.response.send_message(embed=embed)
-
-    @bot.command()
-    async def sync(ctx):
-        """
-        Command that updates the bot's command representation
-
-        :param ctx: Command context object
-        """
-        await bot.tree.sync()
-        await ctx.send("Sync")
 
     bot.run(settings.get_discord_bot_token())

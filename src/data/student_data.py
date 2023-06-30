@@ -31,6 +31,15 @@ class StudentData:
 
     """
 
+    def __init__(self) -> None:
+        """
+        Initialize the StudentData instance.
+
+        :return: None
+        :rtype: None
+        """
+        self.project_data = ProjectData()
+
     def _row_to_student(self, row: str) -> dict:
         """
         Convert a row of student data to a dictionary.
@@ -68,8 +77,7 @@ class StudentData:
         :return: A list of student dictionaries with associated project information.
         :rtype: list[dict]
         """
-        project_data = ProjectData()
-        projects = project_data.load_projects()
+        projects = self.project_data.load_projects()
         students = self._load_students()
 
         for student in students:
