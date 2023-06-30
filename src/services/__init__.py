@@ -8,8 +8,8 @@ Modules:
     - student_service: Module for managing student data.
 
 """
-from admin_service import is_admin
-from project_service import (
+from .admin_service import is_admin
+from .project_service import (
     DiscordServerIdError,
     EqualOrSmallerDateError,
     InvalidCoordinator,
@@ -17,5 +17,6 @@ from project_service import (
     InvalidTimeInterval,
     Project,
     ProjectAlreadyExists,
+    ProjectService,
 )
-from student_service import StudentService
+from .student_service import StudentService

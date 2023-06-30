@@ -35,6 +35,14 @@ def get_discord_bot_token() -> str:
 
 
 def get_admin_id() -> int:
+    """
+    Retrieve the admin ID from the environment variables.
+
+    :return: The admin ID.
+    :rtype: int
+
+    :raises KeyError: If the 'ADMIN_DISCORD_ID' environment variable does not exist.
+    """
     discord_admin_id = os.getenv("ADMIN_DISCORD_ID")
     if discord_admin_id is None:
         raise KeyError(

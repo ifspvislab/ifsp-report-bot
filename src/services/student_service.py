@@ -35,7 +35,7 @@ class StudentService:
         self.database = []
         self.student_data = StudentData()
 
-    def find_student_by_discord_id(self, discord_id: int) -> dict | None:
+    def find_student_by_discord_id(self, discord_id: int) -> dict or None:
         """
         Find a student by Discord ID in the student database.
 
@@ -47,7 +47,7 @@ class StudentService:
         :param discord_id: The Discord ID of the student to find.
         :type discord_id: int
         :return: A dictionary representing the student if found, or None if not found.
-        :rtype: dict | None
+        :rtype: dict or None
         """
         if not self.database:
             self.database = self.student_data.load_students()
