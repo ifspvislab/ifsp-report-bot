@@ -9,4 +9,13 @@ Modules:
 
 """
 
+from .admin_service import is_admin
+from .coordinator_service import (
+    Coordinator,
+    CoordinatorAlreadyExists,
+    CoordinatorService,
+    DiscordIdError,
+    EmailError,
+    RegistrationError,
+)
 from .student_service import StudentService
