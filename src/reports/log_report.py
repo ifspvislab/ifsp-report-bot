@@ -30,7 +30,7 @@ class LogReport:
         Returns:
             None
         """
-        title = Paragraph("Value 1 - Padrao", events_header_style)
+        title = Paragraph("Log File", events_header_style)
         content.append(title)
         for ids in data_ids:
             if ids[-1] == str(project_id):
@@ -60,7 +60,7 @@ class LogReport:
         Returns:
             None
         """
-        title = Paragraph("Value 2 - Data escolhida", events_header_style)
+        title = Paragraph("Log File", events_header_style)
         content.append(title)
         for ids in data_ids:
             if ids[-1] == str(project_id):
@@ -95,7 +95,7 @@ class LogReport:
         Returns:
             None
         """
-        title = Paragraph("Value 3 - ID", events_header_style)
+        title = Paragraph("Log File", events_header_style)
         content.append(title)
         for ids in data_ids:
             if ids[-1] == str(project_id):
@@ -133,7 +133,7 @@ class LogReport:
         Returns:
             None
         """
-        title = Paragraph("Value 4 - id E DATA", events_header_style)
+        title = Paragraph("Log File", events_header_style)
         content.append(title)
         for ids in data_ids:
             if ids[-1] == str(project_id):

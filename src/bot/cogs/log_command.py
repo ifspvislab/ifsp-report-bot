@@ -112,7 +112,7 @@ class LogCommand(commands.Cog):
                 "D:/Faculdade/VisLab/ifsp-report-bot/src/bot/cogs/log.pdf", "rb"
             ) as file:
                 await interaction.response.send_message(
-                    file=discord.File(file, filename="teste.pdf"), ephemeral=True
+                    file=discord.File(file, filename="log.pdf"), ephemeral=True
                 )
         else:
             await interaction.response.send_message(
