@@ -33,6 +33,7 @@ class StudentService:
         Sets up the initial state by creating an empty `database` list to store student data.
         """
         self.database = []
+        # self.student_data = StudentData()
 
     def find_student_by_discord_id(self, discord_id: int) -> dict | None:
         """

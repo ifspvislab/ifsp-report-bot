@@ -14,6 +14,8 @@ Functions:
 Classes:
 - MonthlyReportData: Represents the data for a monthly report.
 - MonthlyReport: Generates monthly reports.
+- SemesterReportData: Represents the data for a semester report.
+- SemesterReport: Generates semester reports.
 
 """
 

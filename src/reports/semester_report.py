@@ -18,10 +18,9 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
-from data import student_registration
-
 from . import styles
 from .commons import setup_header
+from .data import student_registration
 
 locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
 
@@ -47,16 +46,6 @@ class SemesterReportData:
     planned_activities: str
     performed_activities: str
     results: str
-
-    # def day_05_of_next_month(self) -> datetime:
-    #     """
-    #     Returns the date representing the 5th day of the next month.
-
-    #     Returns:
-    #         datetime: The date of the 5th day in the next month.
-    #     """
-    #     next_month = datetime.now() + timedelta(days=30)
-    #     return datetime(next_month.year, next_month.month, 5)
 
     def current_date(self) -> datetime:
         """
@@ -190,7 +179,6 @@ class SemesterReport:
         student_name_par = Paragraph(self.data.student_name, styles.table_content_style)
         submission_date_par = Paragraph(
             self.data.current_date().strftime("%d/%m/%Y"),
-            # self.data.day_05_of_next_month().strftime("%d/%m/%Y"),
             styles.table_content_style,
         )
 
@@ -230,9 +218,7 @@ class SemesterReport:
         Sets up the activities section of the report.
 
         """
-        # now = datetime.now()
         month_name = datetime.now().strftime("%B")
-        # current_month = now.month
         semester = self.current_semester()
 
         month_name = datetime.now().strftime("%B")

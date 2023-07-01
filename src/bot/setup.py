@@ -14,6 +14,7 @@ from discord.ext import commands
 
 import settings
 from services import StudentService
+from services.report_service import ReportService
 
 from .modals import MonthyReportForm
 from .semester_report_cog import SemesterReportForm
@@ -34,6 +35,7 @@ def start_bot(student_service: StudentService):
     intents = discord.Intents.all()
     intents.message_content = True
     bot = commands.Bot(intents=intents, command_prefix="!")
+    # report_service = ReportService()
 
     @bot.event
     async def on_ready():
@@ -131,25 +133,6 @@ def start_bot(student_service: StudentService):
 
         """
 
-        # def invalid_request_period():
-        #     """
-        #     Check if the request for generating the semester report is within the allowed period.
-
-        #     :return: True if the request is outside the allowed period, False otherwise.
-        #     :rtype: bool
-        #     """
-        #     current_date = datetime.now().date()
-        #     current_month = current_date.month
-        #     current_day = current_date.day
-
-        #     if current_month == 7 and 23 <= current_day <= 31:
-        #         return False
-
-        #     if current_month == 12 and 1 <= current_day <= 10:
-        #         return False
-
-        #     return True
-
         errors = []
         student = student_service.find_student_by_discord_id(interaction.user.id)
 
@@ -160,15 +143,16 @@ def start_bot(student_service: StudentService):
                 interaction.user.name,
             )
 
-        # if invalid_request_period():
-        #     errors.append(
-        #         "O período de submissões ocorre entre os dias 23 a 31 "
-        #         "de julho e 01 a 10 de dezembro."
-        #     )
-        #     logger.warning(
-        #         "User %s attempted to generate the semester report outside the allowed period.",
-        #         interaction.user.name,
-        #     )
+        report_service = ReportService()
+        if report_service.invalid_request_period():
+            errors.append(
+                "O período de submissões ocorre entre os dias 23 a 31 "
+                "de julho e 01 a 10 de dezembro."
+            )
+            logger.warning(
+                "User %s attempted to generate the semester report outside the allowed period.",
+                interaction.user.name,
+            )
 
         if not errors:
             logger.info("Semester report user %s", interaction.user.name)

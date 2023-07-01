@@ -98,3 +98,19 @@ def load_students() -> list[dict]:
                 break
 
     return students
+
+
+def student_registration(student_name: str) -> str:
+    """
+    Function that returns the registration of a specific student.
+
+    :param student_name: The name of the student.
+    :type student_name: str
+    :return: The registration of the student.
+    :rtype: str
+    """
+    students = _load_students()
+    for student in students:
+        if student["name"] == student_name:
+            return student["registration"]
+    return ""
