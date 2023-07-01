@@ -14,6 +14,7 @@ from discord.ext import commands
 
 import settings
 from services import StudentService
+from services.member_service import MemberService
 from services.report_service import ReportService
 
 from .modals import MonthyReportForm
@@ -22,7 +23,7 @@ from .semester_report_cog import SemesterReportForm
 logger = settings.logging.getLogger(__name__)
 
 
-def start_bot(student_service: StudentService):
+def start_bot(student_service: StudentService, member_service: MemberService):
     """
     Start bot.
 
@@ -35,7 +36,6 @@ def start_bot(student_service: StudentService):
     intents = discord.Intents.all()
     intents.message_content = True
     bot = commands.Bot(intents=intents, command_prefix="!")
-    # report_service = ReportService()
 
     @bot.event
     async def on_ready():
@@ -134,8 +134,7 @@ def start_bot(student_service: StudentService):
         """
 
         errors = []
-        student = student_service.find_student_by_discord_id(interaction.user.id)
-
+        student = member_service.find_member_by_type("discord_id", interaction.user.id)
         if student is None:
             errors.append("Você não tem permissão para gerar relatório semestral")
             logger.warning(
@@ -156,7 +155,7 @@ def start_bot(student_service: StudentService):
 
         if not errors:
             logger.info("Semester report user %s", interaction.user.name)
-            await interaction.response.send_modal(SemesterReportForm(student_service))
+            await interaction.response.send_modal(SemesterReportForm(member_service))
         else:
             embed = discord.Embed(title=":sob: Problemas com a sua requisição")
             for index, error in enumerate(errors):
