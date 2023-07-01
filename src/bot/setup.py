@@ -15,10 +15,9 @@ from discord.ext import commands
 import settings
 from services import StudentService
 from services.member_service import MemberService
-from services.report_service import ReportService
 
 from .modals import MonthyReportForm
-from .semester_report_cog import SemesterReportForm
+from .semester_report_cog import SemesterReportCog
 
 logger = settings.logging.getLogger(__name__)
 
@@ -50,6 +49,7 @@ def start_bot(student_service: StudentService, member_service: MemberService):
         """
 
         # updates the bot's command representation
+        await bot.add_cog(SemesterReportCog(member_service))
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
 
@@ -115,49 +115,6 @@ def start_bot(student_service: StudentService, member_service: MemberService):
             await interaction.response.send_modal(MonthyReportForm(student_service))
         else:
             embed = discord.Embed(title=":cry: Problemas com a sua requisição")
-            for index, error in enumerate(errors):
-                embed.add_field(name=f"Erro {index+1}", value=error, inline=False)
-
-            await interaction.response.send_message(embed=embed)
-
-    @bot.tree.command(
-        name="relatorio-semestral",
-        description="Gera um relatório de ensino semestral",
-    )
-    async def open_semester_report_form(interaction: discord.Interaction):
-        """
-        Command 'relatorio-semestral' to open the semester report form.
-
-        :param interaction: The Discord interaction object.
-        :type interaction: discord.Interaction
-
-        """
-
-        errors = []
-        student = member_service.find_member_by_type("discord_id", interaction.user.id)
-        if student is None:
-            errors.append("Você não tem permissão para gerar relatório semestral")
-            logger.warning(
-                "User %s without permission tried to generate monthly report",
-                interaction.user.name,
-            )
-
-        report_service = ReportService()
-        if report_service.invalid_request_period():
-            errors.append(
-                "O período de submissões ocorre entre os dias 23 a 31 "
-                "de julho e 01 a 10 de dezembro."
-            )
-            logger.warning(
-                "User %s attempted to generate the semester report outside the allowed period.",
-                interaction.user.name,
-            )
-
-        if not errors:
-            logger.info("Semester report user %s", interaction.user.name)
-            await interaction.response.send_modal(SemesterReportForm(member_service))
-        else:
-            embed = discord.Embed(title=":sob: Problemas com a sua requisição")
             for index, error in enumerate(errors):
                 embed.add_field(name=f"Erro {index+1}", value=error, inline=False)
 
