@@ -16,21 +16,10 @@ from discord.ext import commands
 import settings
 from services import StudentService
 
+from .cogs import Events, LogCommand
 from .modals import MonthyReportForm
 
 logger = settings.logging.getLogger(__name__)
-
-
-async def load_cogs(bot):
-    """
-    Loads the necessary cogs for the bot.
-
-    This function is created to resolve conflicts with Pylint.
-    Pylint may incorrectly flag the use of `bot.load_extension` as an error,
-    even though it is a valid method for loading cogs in discord.py.
-    """
-    await bot.load_extension("bot.cogs.log_command")
-    await bot.load_extension("bot.cogs.events")
 
 
 def start_bot(student_service: StudentService):
@@ -60,7 +49,10 @@ def start_bot(student_service: StudentService):
         """
 
         # updates the bot's command representation
-        await load_cogs(bot)
+        # await load_cogs()
+        # await load_cogs(bot)
+        await bot.add_cog(Events(bot))
+        await bot.add_cog(LogCommand(bot))
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
 

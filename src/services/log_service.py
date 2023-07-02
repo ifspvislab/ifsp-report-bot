@@ -7,9 +7,7 @@ from datetime import datetime
 import discord
 
 import settings
-from data.log_data import LogData
-from data.project_data import ProjectData
-from data.student_data import StudentData
+from data import CoordinatorData, LogData, ProjectData, StudentData
 
 zone = settings.get_time_zone()
 students_data = StudentData()
@@ -20,6 +18,28 @@ projects_list = projects_data.load_projects()
 
 class IncorrectDateFilter(Exception):
     """Incorrect date filter"""
+
+
+def is_coordinator(interaction: discord.Interaction):
+    """
+    Check if the user is a coordinator.
+
+    This function checks if the user associated with the provided `discord.Interaction`
+    is a coordinator by comparing their Discord ID with the coordinators' Discord IDs
+    stored in the coordinator data.
+
+    :param interaction: The Discord interaction object.
+    :type interaction: discord.Interaction
+    :return: True if the user is a coordinator, False otherwise.
+    :rtype: bool
+    """
+    discord_id = interaction.user.id
+    coordinators = CoordinatorData.load_coordinators(self=CoordinatorData)
+
+    for coordinator in coordinators:
+        if str(coordinator.discord_id) == str(discord_id):
+            return True
+    return False
 
 
 class LogService:

@@ -1,14 +1,14 @@
 """
 Cog for handling log commands.
 """
+from io import BytesIO
+
 import discord
 from discord import app_commands
 from discord.ext import commands
 
-from data import LogData
 from reports import LogReport
-from services import IncorrectDateFilter, LogService
-from services.coordinator_service import is_coordinator
+from services import IncorrectDateFilter, LogService, is_coordinator
 
 
 class LogCommand(commands.Cog):
@@ -61,13 +61,13 @@ class LogCommand(commands.Cog):
 
         if start_date is None and end_date is None:
             if student_id is not None:
-                LogReport.create_pdf(
+                LogReport.generate(
                     project_id=project_id,
                     value=3,
                     student_id=str(student_id),
                 )
             else:
-                LogReport.create_pdf(project_id=project_id)
+                LogReport.generate(project_id=project_id)
         elif end_date is not None and start_date is None:
             await interaction.response.send_message(
                 "É preciso de uma data de inicio. Ex:01/09/2023",
@@ -92,7 +92,7 @@ class LogCommand(commands.Cog):
                 return
 
             if student_id is not None:
-                LogReport.create_pdf(
+                LogReport.generate(
                     project_id=project_id,
                     value=4,
                     start_date=start_date,
@@ -100,25 +100,17 @@ class LogCommand(commands.Cog):
                     student_id=str(student_id),
                 )
             else:
-                LogReport.create_pdf(
+                LogReport.generate(
                     project_id=project_id,
                     value=2,
                     start_date=start_date,
                     end_date=end_date,
                 )
 
-        if LogData.log_file_validation(self=LogData):
-            with open(
-                "D:/Faculdade/VisLab/ifsp-report-bot/src/bot/cogs/log.pdf", "rb"
-            ) as file:
-                await interaction.response.send_message(
-                    file=discord.File(file, filename="log.pdf"), ephemeral=True
-                )
-        else:
-            await interaction.response.send_message(
-                "Arquivo possui mais de 25Mb, portanto não pode ser enviado via Discord"
-                + " utilize o filtro de data ou id para compactar"
-            )
+        await interaction.response.send_message(
+            file=discord.File(BytesIO(LogReport.generate()), filename="log.pdf"),
+            ephemeral=True,
+        )
 
     @log_file.error
     async def log_file_error(self, interaction: discord.Interaction, error):
@@ -127,10 +119,3 @@ class LogCommand(commands.Cog):
         await interaction.response.send_message(
             "Apenas o coordenador tem acesso ao comando!", ephemeral=True
         )
-
-
-async def setup(bot):
-    """
-    Function to add the LogCommand cog to the bot.
-    """
-    await bot.add_cog(LogCommand(bot))

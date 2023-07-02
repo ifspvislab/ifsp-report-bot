@@ -2,8 +2,9 @@
     Log Report
 """
 import csv
+from io import BytesIO
 
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import A4
 from reportlab.platypus import Paragraph, SimpleDocTemplate
 
 from reports.styles import events_header_style, events_text_style
@@ -30,7 +31,7 @@ class LogReport:
         Returns:
             None
         """
-        title = Paragraph("Log File", events_header_style)
+        title = Paragraph("Value 1", events_header_style)
         content.append(title)
         for ids in data_ids:
             if ids[-1] == str(project_id):
@@ -60,7 +61,7 @@ class LogReport:
         Returns:
             None
         """
-        title = Paragraph("Log File", events_header_style)
+        title = Paragraph("Value 2", events_header_style)
         content.append(title)
         for ids in data_ids:
             if ids[-1] == str(project_id):
@@ -95,7 +96,7 @@ class LogReport:
         Returns:
             None
         """
-        title = Paragraph("Log File", events_header_style)
+        title = Paragraph("Value 3", events_header_style)
         content.append(title)
         for ids in data_ids:
             if ids[-1] == str(project_id):
@@ -133,7 +134,7 @@ class LogReport:
         Returns:
             None
         """
-        title = Paragraph("Log File", events_header_style)
+        title = Paragraph("Value 4", events_header_style)
         content.append(title)
         for ids in data_ids:
             if ids[-1] == str(project_id):
@@ -154,13 +155,13 @@ class LogReport:
                     content.append(title)
 
     @staticmethod
-    def create_pdf(
+    def generate(
         project_id: str = None,
         value: int = 1,
         start_date: str = None,
         end_date: str = None,
         student_id: str = None,
-    ) -> None:
+    ):
         """
         Generates a PDF report based on the specified parameters.
 
@@ -174,9 +175,13 @@ class LogReport:
         Returns:
             None
         """
+
+        buffer = BytesIO()
         doc = SimpleDocTemplate(
-            "D:/Faculdade/VisLab/ifsp-report-bot/src/bot/cogs/log.pdf", pagesize=letter
+            buffer,
+            pagesize=A4,
         )
+
         with open(
             "assets/data/logs.csv", "r", newline="", encoding="utf-8"
         ) as csv_logs:
@@ -219,3 +224,4 @@ class LogReport:
                     selected_function(*selected_args)
 
         doc.build(content)
+        return buffer.getvalue()

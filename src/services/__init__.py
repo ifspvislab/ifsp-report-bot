@@ -8,6 +8,5 @@ Modules:
     - student_service: Module for managing student data.
 
 """
-from .coordinator_service import is_coordinator
-from .log_service import IncorrectDateFilter, LogService
+from .log_service import IncorrectDateFilter, LogService, is_coordinator
 from .student_service import StudentService

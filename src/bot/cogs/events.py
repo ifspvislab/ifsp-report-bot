@@ -162,10 +162,3 @@ class Events(commands.Cog):
                 date=date,
                 action=action,
             )
-
-
-async def setup(bot):
-    """
-    Function to add the Events cog to the bot.
-    """
-    await bot.add_cog(Events(bot))
