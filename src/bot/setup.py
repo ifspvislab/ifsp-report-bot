@@ -15,6 +15,8 @@ from discord.ext import commands
 import settings
 from services import StudentService
 from services.member_service import MemberService
+from services.project_service import ProjectService
+from services.report_service import ReportService
 
 from .modals import MonthyReportForm
 from .semester_report_cog import SemesterReportCog
@@ -22,7 +24,12 @@ from .semester_report_cog import SemesterReportCog
 logger = settings.logging.getLogger(__name__)
 
 
-def start_bot(student_service: StudentService, member_service: MemberService):
+def start_bot(
+    student_service: StudentService,
+    member_service: MemberService,
+    project_service: ProjectService,
+    report_service: ReportService,
+):
     """
     Start bot.
 
@@ -49,7 +56,9 @@ def start_bot(student_service: StudentService, member_service: MemberService):
         """
 
         # updates the bot's command representation
-        await bot.add_cog(SemesterReportCog(member_service))
+        await bot.add_cog(
+            SemesterReportCog(member_service, project_service, report_service)
+        )
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
 

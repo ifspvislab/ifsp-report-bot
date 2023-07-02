@@ -1,5 +1,6 @@
 """
 Classes:
+    - SemesterReportCog: The cog that handles all interactions related to the semester report.
     - SemesterReportForm: A form that allows the user to send the needed data to create
     the semester report.
 """
@@ -15,6 +16,7 @@ from discord.ext import commands
 import settings
 from reports import SemesterReport, SemesterReportData
 from services.member_service import MemberService
+from services.project_service import ProjectService
 from services.report_service import ReportService
 
 logger = settings.logging.getLogger(__name__)
@@ -27,9 +29,16 @@ class SemesterReportCog(commands.Cog):
         - send_modal: Sends the SemesterReportForm as a modal in response to an interaction.
     """
 
-    def __init__(self, member_service: MemberService):
+    def __init__(
+        self,
+        member_service: MemberService,
+        project_service: ProjectService,
+        report_service: ReportService,
+    ):
         super().__init__()
         self.member_service = member_service
+        self.project_service = project_service
+        self.report_service = report_service
 
     @app_commands.command(
         name="relatorio-semestral",
@@ -51,12 +60,22 @@ class SemesterReportCog(commands.Cog):
         if student is None:
             errors.append("Você não tem permissão para gerar relatório semestral")
             logger.warning(
-                "User %s without permission tried to generate monthly report",
+                "User %s without permission tried to generate semester report",
                 interaction.user.name,
             )
 
-        report_service = ReportService()
-        if report_service.invalid_request_period():
+        project = self.project_service.find_project_by_type(
+            "discord_server_id", interaction.channel_id
+        )
+
+        if project is None:
+            errors.append("Projeto não encontrado no database.")
+            logger.warning(
+                "Project not found for server ID %s",
+                interaction.channel_id,
+            )
+
+        if self.report_service.invalid_request_period():
             errors.append(
                 "O período de submissões ocorre entre os dias 23 a 31 "
                 "de julho e 01 a 10 de dezembro."
@@ -68,8 +87,11 @@ class SemesterReportCog(commands.Cog):
 
         if not errors:
             logger.info("Semester report user %s", interaction.user.name)
+            # pylint: disable=too-many-function-args
             await interaction.response.send_modal(
-                SemesterReportForm(self.member_service)
+                SemesterReportForm(
+                    self.member_service, self.project_service, self.report_service
+                )
             )
         else:
             embed = discord.Embed(title=":sob: Problemas com a sua requisição")
@@ -119,17 +141,19 @@ class SemesterReportForm(ui.Modal):
     )
 
     def __init__(
-        self,
-        member_service: MemberService,
+        self, member_service: MemberService, project_service: ProjectService
     ) -> None:
         """
         Initialize the SemesterReportForm instance.
 
         :param member_service: An instance of the MemberService class.
         :type member_service: MemberService
+        :param project_service: An instance of the ProjectService class.
+        :type project_service: ProjectService
         """
         super().__init__(title="Relatório Semestral")
         self.member_service = member_service
+        self.project_service = project_service
 
     async def on_submit(self, interaction: discord.Interaction, /):
         """
@@ -146,16 +170,18 @@ class SemesterReportForm(ui.Modal):
             "discord_id", interaction.user.id
         )
 
+        project = self.project_service.find_project_by_type(
+            "discord_server_id", interaction.channel_id
+        )
+
         if student is None:
             await interaction.response.send_message(
-                "Você não tem permissão para gerar relatório semestral"
+                "Você não tem permissão para gerar relatório semestral!"
             )
         else:
             data = SemesterReportData(
-                # apenas testando com student.name para ver se os campos são preenchidos
-                # corretamente
-                project_title=student.name,
-                project_manager=student.name,
+                project_title=project.titulo,
+                project_manager=project.coordenador,
                 student_name=student.name,
                 planned_activities=self.planned_activities.value.strip(),
                 performed_activities=self.performed_activities.value.strip(),
