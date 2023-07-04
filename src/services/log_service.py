@@ -2,9 +2,11 @@
 Services for log command.
 """
 from datetime import datetime
+
 import discord
+
 import settings
-from data import CoordinatorData,ProjectData, StudentData
+from data import CoordinatorData, ProjectData, StudentData
 
 zone = settings.get_time_zone()
 students_data = StudentData().load_students()

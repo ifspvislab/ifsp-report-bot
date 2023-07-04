@@ -4,10 +4,14 @@
 
 from dataclasses import dataclass
 from io import BytesIO
+
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import Paragraph, SimpleDocTemplate
+
 from services import LogService
+
 from .styles import events_header_style, events_text_style
+
 
 @dataclass
 # pylint: disable-next=too-many-arguments
@@ -32,6 +36,7 @@ class LogReportData:
     start_date: str
     end_date: str
     student_id: str
+
 
 class LogReport:
     """

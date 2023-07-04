@@ -8,6 +8,7 @@ Class:
 import csv
 from dataclasses import dataclass
 
+
 @dataclass
 class Log:
     """
@@ -18,6 +19,7 @@ class Log:
     - date: The date of the log entry.
     - action: The action or description of the log.
     """
+
     discord_id: int
     date: str
     action: str
