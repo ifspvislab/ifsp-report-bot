@@ -77,8 +77,8 @@ class AttendanceCog(commands.Cog):
         self.is_last_day.start()
 
     @app_commands.command(
-        name="adicionar-presenca",
-        description="Adiciona uma nova presença na folha de frequência",
+        name="cadastrar-presenca",
+        description="Cadastra uma nova presença na folha de frequência",
     )
     async def add_student_attendance(self, interaction: discord.Interaction) -> None:
         """
@@ -132,7 +132,7 @@ class AttendanceCog(commands.Cog):
             if student is None:
                 log_msg = f"Student with id {student_id}"
                 log_msg += "in attendances database not inside the students database"
-                logger.info(log_msg)
+                logger.warning(log_msg)
                 continue
 
             # If the user saved doesn't exist, it won't create the sheet
@@ -140,7 +140,7 @@ class AttendanceCog(commands.Cog):
             if user is None:
                 log_msg = f"Student with id {student_id}"
                 log_msg += "in attendances database couldn't be found by discord bot"
-                logger.info(log_msg)
+                logger.warning(log_msg)
                 continue
 
             files = self._create_attendance_sheet(student)
@@ -193,7 +193,7 @@ class AttendanceCog(commands.Cog):
                 # Breaking line to not exceed 100 chars
                 log_msg = f"The project with id {project_id}"
                 log_msg += "doesn't exist but it is saved in participation"
-                logger.info(log_msg)
+                logger.warning(log_msg)
                 continue
 
             proj_attends = self.attendance_service.find_attends_by_member_and_project(
@@ -288,4 +288,6 @@ class AttendanceSheetForm(ui.Modal):
             TimeOutOfRange,
             EntryTimeAfterExitTime,
         ) as exception:
+            log_msg = f"Error during attendance creation: {exception}"
+            logger.error(log_msg)
             await interaction.response.send_message(exception.args[0])
