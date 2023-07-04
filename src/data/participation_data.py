@@ -13,10 +13,10 @@ class Participation:
     """
 
     participation_id: str
-    prontuario: str
-    project: str
-    data_inicio: date
-    data_final: date
+    registration: str
+    project_title: str
+    initial_date: date
+    final_date: date
 
 
 class ParticipationData:
@@ -39,10 +39,10 @@ class ParticipationData:
         data = Participation
         fields = [field.strip() for field in row.split(sep=",")]
         data.participation_id = fields[0]
-        data.prontuario = fields[1]
-        data.project = fields[2]
-        data.data_inicio = datetime.strptime(fields[3], "%d/%m/%Y").date()
-        data.data_final = datetime.strptime(fields[4], "%d/%m/%Y").date()
+        data.registration = fields[1]
+        data.project_title = fields[2]
+        data.initial_date = datetime.strptime(fields[3], "%d/%m/%Y").date()
+        data.final_date = datetime.strptime(fields[4], "%d/%m/%Y").date()
 
         return Participation
 
@@ -67,13 +67,13 @@ class ParticipationData:
         :param participation: the participation dataclass.
         :type participation: Dataclass.
         """
-        initial_date = datetime.strftime(participation.data_inicio, "%d/%m/%Y")
-        final_date = datetime.strftime(participation.data_final, "%d/%m/%Y")
+        initial_date = datetime.strftime(participation.initial_date, "%d/%m/%Y")
+        final_date = datetime.strftime(participation.final_date, "%d/%m/%Y")
         with open(
             "assets/data/participations.csv", "a", encoding="UTF-8"
         ) as participation_data:
             participation_data.write(
-                f"{participation.participation_id},{participation.prontuario},"
-                + f"{participation.project},{initial_date},{final_date}\n"
+                f"{participation.participation_id},{participation.registration},"
+                + f"{participation.project_title},{initial_date},{final_date}\n"
             )
         participation_data.close()

@@ -31,11 +31,11 @@ class Project:
     """
 
     project_id: str
-    coordenador: str
+    coordinator_id: str
     discord_server_id: int
-    titulo: str
-    data_inicio: date
-    data_fim: date
+    project_title: str
+    start_date: date
+    end_date: date
 
 
 # pylint: disable=too-few-public-methods

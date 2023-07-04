@@ -3,10 +3,7 @@ validation module
 """
 from validate_email_address import validate_email
 
-import settings
 from data import Member
-
-logger = settings.logging.getLogger(__name__)
 
 
 class RegistrationError(Exception):

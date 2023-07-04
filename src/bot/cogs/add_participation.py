@@ -44,11 +44,11 @@ class AddParticipationModal(ui.Modal):
         on_submit(interaction): Handles the submit event when adding a coordinator.
     """
 
-    prontuario = ui.TextInput(
+    registration = ui.TextInput(
         label="Prontuário:", placeholder="SPXXXXXXX", min_length=9, max_length=9
     )
 
-    projeto = ui.TextInput(
+    project_title = ui.TextInput(
         label="Título do projeto:",
         placeholder="Ex: IFSP Vislab",
         min_length=5,
@@ -83,7 +83,7 @@ class AddParticipationModal(ui.Modal):
 
         try:
             project = self.project_service.find_project_by_type(
-                "titulo", self.projeto.value
+                "project_title", self.project_title.value
             )
             if project is None:
                 logger.error("O projeto inserido inexiste nos registros.")
@@ -95,10 +95,10 @@ class AddParticipationModal(ui.Modal):
                 self.participation_service.create(
                     Participation(
                         str(uuid4()),
-                        self.prontuario.value,
-                        self.projeto.value,
+                        self.registration.value,
+                        self.project_title.value,
                         datetime.strptime(self.date.value, "%d/%m/%Y").date(),
-                        project.data_fim,
+                        project.end_date,
                     )
                 )
                 logger.info(

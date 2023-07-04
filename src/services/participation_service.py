@@ -96,14 +96,14 @@ class ParticipationService:
         :raises ParticipationAlreadyExists: If a participation with the given prontuario
         and project already exists.
         """
-        project = self.project_service.find_project_by_type("titulo", value)
+        project = self.project_service.find_project_by_type("project_title", value)
         member = self.member_service.find_member_by_type("registration", second_value)
         for participation in self.database:
             if (
-                participation.project == project.titulo
-                and participation.prontuario == member.registration
+                participation.project_title == project.project_title
+                and participation.registration == member.registration
             ):
-                if third_value < participation.data_final:
+                if third_value < participation.final_date:
                     raise ParticipationAlreadyExists("Essa participação já existe!")
 
     def verify_date(self, value, value_):
@@ -119,11 +119,11 @@ class ParticipationService:
         """
 
         project = self.project_service.find_project_by_type("titulo", value_)
-        if not value > project.data_inicio:
+        if not value > project.start_date:
             raise DateError(
                 "A data inserida é inválida! Ela fica antes do início do projeto."
             )
-        if not value < project.data_fim:
+        if not value < project.end_date:
             raise DateError(
                 "A data inserida é inválida! Ela fica após o fim do projeto."
             )
@@ -134,11 +134,13 @@ class ParticipationService:
 
         :param participation: The participation dataclass.
         """
-        verify_registration(participation.prontuario)
-        verify_member(participation.prontuario, self.members)
-        self.verify_date(participation.data_inicio, participation.project)
+        verify_registration(participation.registration)
+        verify_member(participation.registration, self.members)
+        self.verify_date(participation.initial_date, participation.project_title)
         self.check_ocurrence(
-            participation.project, participation.prontuario, participation.data_inicio
+            participation.project_title,
+            participation.registration,
+            participation.initial_date,
         )
 
         self.participation_data.add_participation(participation)
