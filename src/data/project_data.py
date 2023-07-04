@@ -10,7 +10,7 @@ Classes:
 """
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 
 
 @dataclass
@@ -20,19 +20,19 @@ class Project:
 
     Attributes:
         project_id (str): the project's uuid.
-        coordenador (str): the projects's coordinator.
+        coordinator_id (str): the projects's coordinator_id.
         discord_server_id (int): the project's Discord Server ID.
-        titulo (str): the project's title.
-        data_inicio (int): the project's start date.
-        data_fim (int): the project's end date.
+        project_title (str): the project's title.
+        start_date (int): the project's start date.
+        end_date (int): the project's end date.
     """
 
     project_id: str
-    coordenador: str
+    coordinator_id: str
     discord_server_id: int
-    titulo: str
-    data_inicio: int
-    data_fim: int
+    project_title: str
+    start_date: date
+    end_date: date
 
 
 class ProjectData:
@@ -47,7 +47,7 @@ class ProjectData:
     load_projects() -> list[dict]
         Loads project data from the projects.csv file and returns a list of dictionaries.
 
-    add_project(project_id, coordenador, discord_server_id, titulo, data_inicio, data_fim)
+    add_project(project_id, coordinator, discord_server_id, title, start_date, end_date)
         Adds a new project to the projects.csv file.
     """
 
@@ -57,8 +57,8 @@ class ProjectData:
 
         :param row: The row of project data.
         :type row: str
-        :return: A dictionary representing the project's coordenador,
-        discord_server_id, titulo, data_inicio and data_fim.
+        :return: A dictionary representing the project's coordinator,
+        discord_server_id, title, start_date and end_date.
         :rtype: dict
         """
 
@@ -87,22 +87,24 @@ class ProjectData:
                 projects.append(self._row_to_project(row))
             return projects
 
-    def add_projects(self, project: Project) -> None:
+    def add_project(self, project: Project) -> None:
         """
         Add project data to the CVS file
 
-        :param coordenador: project coordenator
-        :type coordenador: str
+        :param coordinator: project coordinator
+        :type coordinator: str
         :param discord_server_id: project discord_server_id
         :type discord_server_id: int
-        :param titulo: project titulo
-        :type data_inicio: int
-        :param data_fim: project data_fim
-        :type data_fim: int
+        :param title: project title
+        :type title: str
+        :param start_date: project start_date
+        :type start_date: int
+        :param end_date: project end_date
+        :type end_date: int
         """
 
         with open("assets/data/projects.csv", "a", encoding="UTF-8") as project_data:
             project_data.write(
-                f"{project.project_id}, {project.coordenador}, {project.discord_server_id},"
-                + f"{project.titulo}, {project.data_inicio}, {project.data_fim}\n"
+                f"{project.project_id}, {project.coordinator_id}, {project.discord_server_id},"
+                + f" {project.project_title}, {project.start_date}, {project.end_date}\n"
             )

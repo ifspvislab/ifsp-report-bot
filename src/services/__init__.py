@@ -9,6 +9,7 @@ Modules:
 
 """
 from .admin_service import is_admin
+from .coordinator_service import Coordinator, CoordinatorService
 from .project_service import (
     DiscordServerIdError,
     EqualOrSmallerDateError,

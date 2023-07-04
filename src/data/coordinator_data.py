@@ -18,16 +18,16 @@ class Coordinator:
     A class that represents a coordinator.
 
     Attributes:
-        prontuario (str): The coordinator's prontuario.
+        registration (str): The coordinator's registration.
         discord_id (int): The coordinator's Discord ID.
         name (str): The coordinator's name.
         email (str): The coordinator's email.
     """
 
     coord_id: str
-    prontuario: str
+    registration: str
     discord_id: int
-    nome: str
+    name: str
     email: str
 
 
@@ -43,7 +43,7 @@ class CoordinatorData:
     load_coordinators() -> list[dict]
         Loads coordinator data from the coordinators.csv file and returns a list of dictionaries.
 
-    add_coordinator(prontuario, name, email, discord_id)
+    add_coordinator(registration, name, email, discord_id)
         Adds a new coordinator to the coordinators.csv file.
     """
 
@@ -53,7 +53,8 @@ class CoordinatorData:
 
         :param row: The row of data representing a coordinator.
         :type row: str
-        :return: A dictionary representing the coordinator's prontuario, discord_id, nome and email.
+        :return: A dictionary representing the coordinator's registration, 
+        discord_id, name and email.
         :rtype: dict
         """
 
@@ -81,10 +82,10 @@ class CoordinatorData:
         """
         Add coordinator data to the CVS file
 
-        :param prontuario: coordinator prontuario
-        :type prontuario: str
-        :param nome: coordinator nome
-        :type nome: str
+        :param registration: coordinator registration
+        :type registration: str
+        :param name: coordinator name
+        :type name: str
         :param email: coordinator email
         :type email: str
         :param discord_id: coordinator discord_id
@@ -95,6 +96,6 @@ class CoordinatorData:
             "assets/data/coordinators.csv", "a", encoding="UTF-8"
         ) as coordinator_data:
             coordinator_data.write(
-                f"{coord.coord_id}, {coord.prontuario},"
-                + f"{coord.discord_id}, {coord.nome}, {coord.email}\n"
+                f"{coord.coord_id}, {coord.registration},"
+                + f" {coord.discord_id}, {coord.name}, {coord.email}\n"
             )

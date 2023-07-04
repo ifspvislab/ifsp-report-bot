@@ -1,10 +1,4 @@
-"""
-admin_service
-=======================
-
-This module provides the function for managing the admin verification.
-
-"""
+"""Services for administrator"""
 import discord
 
 from settings import get_admin_id
@@ -13,14 +7,7 @@ ID_ADMIN = int(get_admin_id())
 
 
 def is_admin(interaction: discord.Interaction):
-    """
-    Check if the interaction user is an admin.
-
-    :param interaction: The Discord interaction.
-    :type interaction: discord.Interaction
-    :return: True if the user is an admin, False otherwise.
-    :rtype: bool
-    """
-    if interaction.user.id == int(get_admin_id()):
+    """Check if it's the administrator doing the command by the discord id user"""
+    if interaction.user.id == ID_ADMIN:
         return True
     return False

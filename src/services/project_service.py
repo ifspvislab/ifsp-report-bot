@@ -14,9 +14,15 @@ Classes:
     - DiscordServerIdError: Exception raised when the Discord Server ID is invalid.
     - ProjectAlreadyExists: Exception raised when the project already exists.
 """
-from datetime import date, datetime, timedelta
 
+from datetime import datetime, timedelta
+
+import settings
 from data import CoordinatorData, Project, ProjectData
+
+from .coordinator_service import CoordinatorService
+
+logger = settings.logging.getLogger(__name__)
 
 
 class InvalidCoordinator(Exception):
@@ -61,7 +67,12 @@ class ProjectService:
     A service for managing projects.
     """
 
-    def __init__(self, project_data: ProjectData):
+    def __init__(
+        self,
+        project_data: ProjectData,
+        coordinator_data: CoordinatorData,
+        coordinator_service: CoordinatorService,
+    ):
         """
         Initializes the ProjectService instance.
 
@@ -69,8 +80,12 @@ class ProjectService:
             project_data (ProjectData): The project data object for managing project data.
         """
         self.project_data = project_data
-        self.coordinator_data = CoordinatorData
-        self.database = self.project_data.load_projects(self)
+        self.coordinator_data = coordinator_data
+
+        self.database = self.project_data.load_projects()
+        self.coordinators = self.coordinator_data.load_coordinators()
+
+        self.coordinator_service = coordinator_service
 
     def find_project_by_type(self, attr_type, value):
         """
@@ -89,25 +104,29 @@ class ProjectService:
 
         return None
 
-    def verify_coordinator(self, coordenador):
+    def verify_coordinator(self, value):
         """
         Verifies if the coordinator exists.
 
         Args:
-            coordenador (str): The coordinator to verify.
+            coordinator_id (str): The coordinator to verify.
 
         Raises:
             InvalidCoordinator: If the coordinator does not manage any projects.
         """
-        self.coordinator_data = self.coordinator_data.load_coordinators()
 
-        for coordinator_entry in self.coordinator_data:
-            if coordenador == coordinator_entry.nome:
-                return
+        # for project in self.project_data.load_projects():
+        #     if coordinator_id != project.coordinator_id:
+        #         raise InvalidCoordinator("O coordenador não administra nenhum projeto!")
 
-        raise InvalidCoordinator("O coordenador não administra nenhum projeto!")
+        coordinator = self.coordinator_service.find_coordinator_by_type(
+            "discord_id", value
+        )
+        for project in self.database:
+            if project.coordinator_id != coordinator.discord_id:
+                raise InvalidCoordinator("O coordenador não administra nenhum projeto!")
 
-    def verify_data(self, data_inicio: date, data_fim: date):
+    def verify_data(self, start_date, end_date):
         """
         Verifies if the end date is greater than the start date.
 
@@ -118,12 +137,15 @@ class ProjectService:
         Raises:
             EqualOrSmallerDateError: If the end date is equal to or earlier than the start date.
         """
-        if data_inicio >= data_fim:
+        if (
+            datetime.strptime(start_date, "%d/%m/%Y").date()
+            >= datetime.strptime(end_date, "%d/%m/%Y").date()
+        ):
             raise EqualOrSmallerDateError(
                 "A data de fim é menor ou igual a data de início!"
             )
 
-    def verify_intervalo_data(self, data_inicio: date, data_fim: date):
+    def verify_intervalo_data(self, start_date, end_date):
         """
         Verifies if the time interval between the start and end dates is greater than 1 month.
 
@@ -135,13 +157,16 @@ class ProjectService:
             InvalidTimeInterval: If the time interval
             between the start and end dates is less than 1 month.
         """
-        diferenca = data_fim - data_inicio
-        if diferenca < timedelta(days=30):
+        difference = (
+            datetime.strptime(end_date, "%d/%m/%Y").date()
+            - datetime.strptime(start_date, "%d/%m/%Y").date()
+        )
+        if difference < timedelta(days=30):
             raise InvalidTimeInterval(
                 "O intervalo de tempo entre a data de início e a data de fim é menor que 1 mês!"
             )
 
-    def verify_data_atual(self, data_fim: date):
+    def verify_data_atual(self, end_date):
         """
         Verifies if the end date is greater than the current date.
 
@@ -152,8 +177,8 @@ class ProjectService:
         Raises:
             InvalidEndDate: If the end date is earlier than the current date.
         """
-        data_atual = datetime.now().date()
-        if data_fim < data_atual:
+        current_date = datetime.now().date()
+        if datetime.strptime(end_date, "%d/%m/%Y").date() < current_date:
             raise InvalidEndDate("A data de fim é menor que a data atual!")
 
     def verify_discord_server_id(self, value):
@@ -169,12 +194,12 @@ class ProjectService:
         if not value.isnumeric():
             raise DiscordServerIdError("Discord Server ID inválido.")
 
-    def verify_projeto(self, titulo, data_inicio: date, data_fim: date):
+    def verify_projeto(self, project_title, start_date, end_date):
         """
         Verifies if a project with the same title and dates already exists.
 
         Args:
-            titulo (str): The title of the project.
+            title (str): The title of the project.
             data_inicio (date): The start date of the project.
             data_fim (date): The end date of the project.
 
@@ -183,9 +208,10 @@ class ProjectService:
         """
         for project in self.project_data.load_projects():
             if (
-                titulo == project.titulo
-                and data_inicio == project.data_inicio
-                and data_fim == project.data_fim
+                project_title == project.project_title
+                and datetime.strptime(start_date, "%d/%m/%Y").date()
+                == project.start_date
+                and datetime.strptime(end_date, "%d/%m/%Y").date() == project.end_date
             ):
                 raise ProjectAlreadyExists("Esse projeto já existe!")
 
@@ -205,19 +231,19 @@ class ProjectService:
             DiscordServerIdError: If the Discord Server ID is invalid.
             ProjectAlreadyExists: If a project with the same title and dates already exists.
         """
-        self.verify_coordinator(projeto.coordenador)
-        self.verify_data(projeto.data_inicio, projeto.data_fim)
-        self.verify_intervalo_data(projeto.data_inicio, projeto.data_fim)
-        self.verify_data_atual(projeto.data_fim)
+        self.verify_coordinator(projeto.coordinator_id)
+        self.verify_data(projeto.start_date, projeto.end_date)
+        self.verify_intervalo_data(projeto.start_date, projeto.end_date)
+        self.verify_data_atual(projeto.end_date)
         self.verify_discord_server_id(projeto.discord_server_id)
-        self.verify_projeto(projeto.titulo, projeto.data_inicio, projeto.data_fim)
+        self.verify_projeto(projeto.project_title, projeto.start_date, projeto.end_date)
         project = Project(
             projeto.project_id,
-            projeto.coordenador,
+            projeto.coordinator_id,
             projeto.discord_server_id,
-            projeto.titulo,
-            projeto.data_inicio,
-            projeto.data_fim,
+            projeto.project_title,
+            projeto.start_date,
+            projeto.end_date,
         )
         self.project_data.add_project(project)
         self.database.append(project)
