@@ -1,6 +1,7 @@
 """ . """
 
 import locale
+from datetime import datetime
 from io import BytesIO
 
 import discord
@@ -40,6 +41,7 @@ class TerminationStatementForm(ui.Modal):
         """
         .
         """
+
         student = self.student_service.find_student_by_discord_id(interaction.user.id)
         if student is None:
             await interaction.response.send_message(
@@ -53,25 +55,81 @@ class TerminationStatementForm(ui.Modal):
                 await interaction.response.send_message(
                     "Coloque as barras da data, conforme no modelo dd/mm/aaaa"
                 )
-            data = TerminationStatementData(
-                student_name=student["name"],
-                student_code=student["registration"],
-                project_name=student["project"]["title"],
-                project_manager=student["project"]["professor"],
-                termination_date=self.termination_date.value,
-                termination_reason=self.termination_reason.value,
-            )
+            else:
+                try:
+                    termination_date = self.termination_date.value.split(sep="/")
 
-            termination_statement = TerminationStatement(data)
+                    start_date_project = datetime(
+                        student["project"]["start_date"].year,
+                        student["project"]["start_date"].month,
+                        student["project"]["start_date"].day,
+                    ).date()
+                    end_date_project = datetime(
+                        student["project"]["end_date"].year,
+                        student["project"]["end_date"].month,
+                        student["project"]["end_date"].day,
+                    ).date()
+                    termination_date = datetime(
+                        int(termination_date[2]),
+                        int(termination_date[1]),
+                        int(termination_date[0]),
+                    ).date()
 
-            document_name = f"""termo-encerramento-{student["name"]}-
-                {student['registration']}-{student["project"]["title"]}.pdf"""
+                    days_difference = end_date_project - start_date_project
 
-            await interaction.response.send_message(
-                content="Termo de Encerramento gerado.",
-                file=discord.File(
-                    BytesIO(termination_statement.generate()),
-                    filename=document_name,
-                    spoiler=False,
-                ),
-            )
+                    input_days_difference = end_date_project - termination_date
+
+                    if (
+                        input_days_difference >= days_difference
+                        or input_days_difference.days <= 0
+                    ):
+                        await interaction.response.send_message(
+                            "Insira uma data dentro do período de execução do projeto!"
+                        )
+                    current_time = datetime.now().date()
+                    if current_time > termination_date:
+                        await interaction.response.send_message(
+                            "Insira o dia de hoje ou uma data futura!"
+                        )
+
+                    data = TerminationStatementData(
+                        student_name=student["name"],
+                        student_code=student["registration"],
+                        project_name=student["project"]["title"],
+                        project_manager=student["project"]["professor"],
+                        termination_date=self.termination_date.value,
+                        termination_reason=self.termination_reason.value,
+                    )
+
+                    termination_statement = TerminationStatement(data)
+
+                    document_name = f"""termo-encerramento-{student["name"]}-
+                        {student['registration']}-{student["project"]["title"]}.pdf"""
+
+                    await interaction.response.send_message(
+                        content="Termo de Encerramento gerado.",
+                        file=discord.File(
+                            BytesIO(termination_statement.generate()),
+                            filename=document_name,
+                            spoiler=False,
+                        ),
+                    )
+                except ValueError as expection:
+                    error = str(expection)
+                    print(error)
+                    if "invalid literal" in error:
+                        await interaction.response.send_message(
+                            "Coloque um número nos campos **dia**/**mês**/**ano**!"
+                        )
+                    if "1..12" in error:
+                        await interaction.response.send_message(
+                            "Coloque um mês de 01 a 12."
+                        )
+                    if "day" in error:
+                        await interaction.response.send_message(
+                            "Coloque um dia válido para o mês inserido."
+                        )
+                    else:
+                        await interaction.response.send_message(
+                            "Ocorreu um erro inesperado na sua solicitação, tente novamente."
+                        )
