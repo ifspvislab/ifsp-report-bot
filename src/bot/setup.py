@@ -14,9 +14,15 @@ import discord
 from discord.ext import commands
 
 import settings
-from services import CoordinatorService, ParticipationService, StudentService
+from services import (
+    CoordinatorService,
+    MemberService,
+    ParticipationService,
+    ProjectService,
+    StudentService,
+)
 
-from .cogs import ParticipationCommand
+from .cogs import CoordinatorCog, MemberCog, ParticipationCog
 from .modals import MonthyReportForm
 
 logger = settings.logging.getLogger(__name__)
@@ -24,8 +30,10 @@ logger = settings.logging.getLogger(__name__)
 
 def start_bot(
     student_service: StudentService,
-    participation_service: ParticipationService,
+    member_service: MemberService,
     coordinator_service: CoordinatorService,
+    participation_service: ParticipationService,
+    project_service: ProjectService,
 ):
     """
     Start bot.
@@ -51,10 +59,13 @@ def start_bot(
          the latest information about all available commands and their respective settings.
 
         """
-
         await bot.add_cog(
-            ParticipationCommand(participation_service, coordinator_service)
+            ParticipationCog(
+                participation_service, coordinator_service, project_service
+            )
         )
+        await bot.add_cog(MemberCog(member_service, coordinator_service))
+        await bot.add_cog(CoordinatorCog(coordinator_service))
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
 
@@ -67,6 +78,7 @@ def start_bot(
         :type interaction: discord.Interaction
 
         """
+        await bot.tree.sync(guild=interaction.guild)
         logger.info("Ping command user %s", interaction.user.name)
         await interaction.response.send_message(f":ping_pong: {interaction.user.name}")
 

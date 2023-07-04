@@ -5,8 +5,8 @@ This module defines classes for modal forms used in Discord bot interactions.
 
 Classes:
 - MonthyReportForm: Represents a monthly report form for generating monthly reports.
-"""
 
+"""
 
 from io import BytesIO
 
