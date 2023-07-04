@@ -1,227 +1,169 @@
 """
     Log Report
 """
-import csv
-from io import BytesIO
 
+from dataclasses import dataclass
+from io import BytesIO
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import Paragraph, SimpleDocTemplate
+from services import LogService
+from .styles import events_header_style, events_text_style
 
-from reports.styles import events_header_style, events_text_style
-from services.log_service import LogService
+@dataclass
+# pylint: disable-next=too-many-arguments
+class LogReportData:
+    """
+    Data class to store log report data.
 
-content = []
+    Attributes:
+    - students: A list of dictionaries representing student data.
+    - logs: A list of dictionaries representing log data.
+    - project_id: The project ID for filtering students.
+    - value: An integer indicating the type of report to generate.
+    - start_date: The start date for filtering log entries.
+    - end_date: The end date for filtering log entries.
+    - student_id: The ID of the student for filtering log entries.
+    """
 
+    students: list[dict]
+    logs: list[dict]
+    project_id: str
+    value: int
+    start_date: str
+    end_date: str
+    student_id: str
 
 class LogReport:
     """
-    LogReport class for generating log PDF reports.
+    Class to generate log reports based on provided data.
+
+    Attributes:
+    - content: A list to store the content of the generated report.
+    - data: An instance of LogReportData containing the report data.
     """
 
-    @staticmethod
-    def generate_default_report(data_ids: list, data_logs: list, project_id: str):
+    def __init__(self, data: LogReportData) -> None:
+        self.content = []
+        self.data = data
+
+    def generate(self) -> bytes:
         """
-        Generates a default PDF report based on the specified parameters.
-
-        Parameters:
-            - data_ids: List of data IDs.
-            - data_logs: List of data logs.
-            - project_id: Project ID for filtering.
-
-        Returns:
-            None
+        Generates the log report based on the provided data.
+        Returns the generated report as bytes.
         """
-        title = Paragraph("Value 1", events_header_style)
-        content.append(title)
-        for ids in data_ids:
-            if ids[-1] == str(project_id):
-                user_title = Paragraph(ids[2], events_header_style)
-                content.append(user_title)
-
-                for rows in data_logs:
-                    for events in rows:
-                        if events == ids[0]:
-                            log_event = Paragraph(rows[-1], events_text_style)
-                            content.append(log_event)
-
-    @staticmethod
-    def generate_data_report(
-        data_ids: list, data_logs: list, project_id: str, start_date: str, end_date: str
-    ):
-        """
-        Generates a PDF report based on the specified parameters.
-
-        Parameters:
-            - data_ids: List of data IDs.
-            - data_logs: List of data logs.
-            - project_id: Project ID for filtering.
-            - start_date: Start date for log filtering.
-            - end_date: End date for log filtering.
-
-        Returns:
-            None
-        """
-        title = Paragraph("Value 2", events_header_style)
-        content.append(title)
-        for ids in data_ids:
-            if ids[-1] == str(project_id):
-                user_title = Paragraph(ids[2], events_header_style)
-                content.append(user_title)
-
-                for rows in data_logs:
-                    for events in rows:
-                        validation = LogService.date_validation(
-                            self=LogService,
-                            date=str(rows[2]),
-                            start_date=start_date,
-                            end_date=end_date,
-                        )
-                        if events == ids[0] and validation:
-                            log_event = Paragraph(rows[-1], events_text_style)
-                            content.append(log_event)
-
-    @staticmethod
-    def generate_id_report(
-        data_ids: list, data_logs: list, project_id: str, student_id: str
-    ):
-        """
-        Generates an ID-based PDF report based on the specified parameters.
-
-        Parameters:
-            - data_ids: List of data IDs.
-            - data_logs: List of data logs.
-            - project_id: Project ID for filtering.
-            - student_id: Student ID for filtering.
-
-        Returns:
-            None
-        """
-        title = Paragraph("Value 3", events_header_style)
-        content.append(title)
-        for ids in data_ids:
-            if ids[-1] == str(project_id):
-                if ids[0] == student_id:
-                    user_title = Paragraph(ids[2], events_header_style)
-                    content.append(user_title)
-
-        for rows in data_logs:
-            for events in rows:
-                if events == student_id:
-                    log_event = Paragraph(rows[-1], events_text_style)
-                    content.append(log_event)
-
-    @staticmethod
-    # pylint: disable-next=too-many-arguments
-    def generate_id_and_data_report(
-        data_ids: list,
-        data_logs: list,
-        project_id: str,
-        start_date: str,
-        end_date: str,
-        student_id: str,
-    ):
-        """
-        Generates an ID and data-based PDF report based on the specified parameters.
-
-        Parameters:
-            - data_ids: List of data IDs.
-            - data_logs: List of data logs.
-            - project_id: Project ID for filtering.
-            - start_date: Start date for log filtering.
-            - end_date: End date for log filtering.
-            - student_id: Student ID for filtering.
-
-        Returns:
-            None
-        """
-        title = Paragraph("Value 4", events_header_style)
-        content.append(title)
-        for ids in data_ids:
-            if ids[-1] == str(project_id):
-                if ids[0] == student_id:
-                    title = Paragraph(ids[2], events_header_style)
-                    content.append(title)
-
-        for rows in data_logs:
-            for events in rows:
-                validation = LogService.date_validation(
-                    self=LogService,
-                    date=str(rows[2]),
-                    start_date=start_date,
-                    end_date=end_date,
-                )
-                if events == student_id and validation:
-                    title = Paragraph(rows[-1], events_text_style)
-                    content.append(title)
-
-    @staticmethod
-    def generate(
-        project_id: str = None,
-        value: int = 1,
-        start_date: str = None,
-        end_date: str = None,
-        student_id: str = None,
-    ):
-        """
-        Generates a PDF report based on the specified parameters.
-
-        Parameters:
-            - project_id: Project ID for filtering.
-            - value: Integer value representing the report type.
-            - start_date: Optional start date for log filtering.
-            - end_date: Optional end date for log filtering.
-            - student_id: Optional student ID for log filtering.
-
-        Returns:
-            None
-        """
-
         buffer = BytesIO()
-        doc = SimpleDocTemplate(
-            buffer,
-            pagesize=A4,
-        )
+        doc = SimpleDocTemplate(buffer, pagesize=A4)
 
-        with open(
-            "assets/data/logs.csv", "r", newline="", encoding="utf-8"
-        ) as csv_logs:
-            data_logs = list(csv.reader(csv_logs))
+        if self.data.value == 1:
+            self.generate_default_report()
+        elif self.data.value == 2:
+            self.generate_date_report()
+        elif self.data.value == 3:
+            self.generate_id_report()
+        else:
+            self.generate_id_and_date_report()
 
-            with open(
-                "assets/data/students.csv", "r", newline="", encoding="utf-8"
-            ) as csv_ids:
-                data_ids = list(csv.reader(csv_ids))
-
-                switch_cases = {
-                    1: (
-                        LogReport.generate_default_report,
-                        [data_ids, data_logs, project_id],
-                    ),
-                    2: (
-                        LogReport.generate_data_report,
-                        [data_ids, data_logs, project_id, start_date, end_date],
-                    ),
-                    3: (
-                        LogReport.generate_id_report,
-                        [data_ids, data_logs, project_id, student_id],
-                    ),
-                    4: (
-                        LogReport.generate_id_and_data_report,
-                        [
-                            data_ids,
-                            data_logs,
-                            project_id,
-                            start_date,
-                            end_date,
-                            student_id,
-                        ],
-                    ),
-                }
-
-                selected_case = switch_cases.get(value)
-                if selected_case:
-                    selected_function, selected_args = selected_case
-                    selected_function(*selected_args)
-
-        doc.build(content)
+        doc.build(self.content)
         return buffer.getvalue()
+
+    def generate_default_report(self):
+        """
+        Generates a default report for all students and logs.
+
+        This method adds a title to the report and iterates over
+        the student and log data to include relevant information
+        in the report content.
+        """
+
+        title_report = Paragraph("Log File", events_header_style)
+        self.content.append(title_report)
+
+        for student in self.data.students:
+            if student["project"]["id"] == str(self.data.project_id):
+                user_title = Paragraph(student["name"], events_header_style)
+                self.content.append(user_title)
+
+                for log in self.data.logs:
+                    if log.discord_id == student["discord_id"]:
+                        log_event = Paragraph(log.action, events_text_style)
+                        self.content.append(log_event)
+
+    def generate_date_report(self):
+        """
+        Generates a report for a specific date range.
+
+        This method adds a titled based on the specified date range,
+        filters the student and log data based on the project ID,
+        and includes relevant log entries in the report content.
+        """
+
+        title = f"Log File - {self.data.start_date} to {self.data.end_date}"
+        title_report = Paragraph(title, events_header_style)
+        self.content.append(title_report)
+
+        for student in self.data.students:
+            if student["project"]["id"] == str(self.data.project_id):
+                user_title = Paragraph(student["name"], events_header_style)
+                self.content.append(user_title)
+
+                for log in self.data.logs:
+                    validation = LogService().date_validation(
+                        date=log.date,
+                        start_date=self.data.start_date,
+                        end_date=self.data.end_date,
+                    )
+                    if log.discord_id == student["discord_id"] and validation:
+                        log_event = Paragraph(log.action, events_text_style)
+                        self.content.append(log_event)
+
+    def generate_id_report(self):
+        """
+        Generates a report for a specific student ID.
+
+        This method adds a title to the report, filters the student
+        data based on the project ID and student ID, and includes
+        relevant log entries in the report content.
+        """
+
+        title_report = Paragraph("Log File", events_header_style)
+        self.content.append(title_report)
+
+        for student in self.data.students:
+            if student["project"]["id"] == self.data.project_id:
+                if student["discord_id"] == int(self.data.student_id):
+                    user_title = Paragraph(student["name"], events_header_style)
+                    self.content.append(user_title)
+
+        for log in self.data.logs:
+            if log.discord_id == int(self.data.student_id):
+                log_event = Paragraph(log.action, events_text_style)
+                self.content.append(log_event)
+
+    def generate_id_and_date_report(self):
+        """
+        Generates a report for a specific student ID and date range.
+
+        This method adds a title based on the specified date range,
+        filters the student data based on the project ID and student ID,
+        and includes relevant log entries in the report content.
+        """
+
+        title = f"Log File - {self.data.start_date} to {self.data.end_date}"
+        title_report = Paragraph(title, events_header_style)
+        self.content.append(title_report)
+
+        for student in self.data.students:
+            if student["project"]["id"] == self.data.project_id:
+                if student["discord_id"] == int(self.data.student_id):
+                    user_title = Paragraph(student["name"], events_header_style)
+                    self.content.append(user_title)
+
+        for log in self.data.logs:
+            validation = LogService().date_validation(
+                date=log.date,
+                start_date=self.data.start_date,
+                end_date=self.data.end_date,
+            )
+            if log.discord_id == int(self.data.student_id) and validation:
+                log_event = Paragraph(log.action, events_text_style)
+                self.content.append(log_event)

@@ -18,7 +18,7 @@ Classes:
 """
 
 from . import styles
-from .log_report import LogReport
+from .log_report import LogReport, LogReportData
 from .monthly_report import MonthlyReport, MonthlyReportData
 from .setup import setup_reports_module
 

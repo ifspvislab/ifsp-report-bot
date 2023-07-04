@@ -7,7 +7,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from reports import LogReport
+from data import LogData, StudentData
+from reports import LogReport, LogReportData
 from services import IncorrectDateFilter, LogService, is_coordinator
 
 
@@ -46,12 +47,10 @@ class LogCommand(commands.Cog):
             None
         """
         server_id = interaction.guild.id
-        project_id = LogService.get_project_id_by_server_id(
-            self=LogService, server_id=server_id
-        )
+        project_id = LogService().get_project_id_by_server_id(server_id=server_id)
 
-        if student_id is not None and not LogService.check_student_in_project(
-            self=LogService, student_id=int(student_id)
+        if student_id is not None and not LogService().check_student_in_project(
+            student_id=int(student_id)
         ):
             await interaction.response.send_message(
                 "ID inválido",
@@ -61,13 +60,25 @@ class LogCommand(commands.Cog):
 
         if start_date is None and end_date is None:
             if student_id is not None:
-                LogReport.generate(
+                data = LogReportData(
+                    students=StudentData().load_students(),
+                    logs=LogData().load_logs(),
                     project_id=project_id,
                     value=3,
+                    start_date=None,
+                    end_date=None,
                     student_id=str(student_id),
                 )
             else:
-                LogReport.generate(project_id=project_id)
+                data = LogReportData(
+                    students=StudentData().load_students(),
+                    logs=LogData().load_logs(),
+                    project_id=project_id,
+                    value=1,
+                    start_date=None,
+                    end_date=None,
+                    student_id=None,
+                )
         elif end_date is not None and start_date is None:
             await interaction.response.send_message(
                 "É preciso de uma data de inicio. Ex:01/09/2023",
@@ -75,11 +86,10 @@ class LogCommand(commands.Cog):
             )
         elif start_date is not None:
             if end_date is None:
-                end_date = LogService.formatted_get_date(self=LogService)
+                end_date = LogService().formatted_get_date()
 
             try:
-                LogService.date_validation(
-                    self=LogService,
+                LogService().date_validation(
                     date="09/10/2023",
                     start_date=start_date,
                     end_date=end_date,
@@ -92,7 +102,9 @@ class LogCommand(commands.Cog):
                 return
 
             if student_id is not None:
-                LogReport.generate(
+                data = LogReportData(
+                    students=StudentData().load_students(),
+                    logs=LogData().load_logs(),
                     project_id=project_id,
                     value=4,
                     start_date=start_date,
@@ -100,15 +112,18 @@ class LogCommand(commands.Cog):
                     student_id=str(student_id),
                 )
             else:
-                LogReport.generate(
+                data = LogReportData(
+                    students=StudentData().load_students(),
+                    logs=LogData().load_logs(),
                     project_id=project_id,
                     value=2,
                     start_date=start_date,
                     end_date=end_date,
+                    student_id=None,
                 )
-
+        report = LogReport(data)
         await interaction.response.send_message(
-            file=discord.File(BytesIO(LogReport.generate()), filename="log.pdf"),
+            file=discord.File(BytesIO(report.generate()), filename="log.pdf"),
             ephemeral=True,
         )
 
