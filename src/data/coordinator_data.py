@@ -53,7 +53,7 @@ class CoordinatorData:
 
         :param row: The row of data representing a coordinator.
         :type row: str
-        :return: A dictionary representing the coordinator's registration, 
+        :return: A dictionary representing the coordinator's registration,
         discord_id, name and email.
         :rtype: dict
         """

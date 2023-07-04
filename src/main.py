@@ -23,7 +23,7 @@ def main():
         project_data, coordinator_data, coordinator_service
     )
     student_service = StudentService()
-    start_bot(project_service, student_service, coordinator_service)
+    start_bot(project_service, student_service)
 
 
 if __name__ == "__main__":

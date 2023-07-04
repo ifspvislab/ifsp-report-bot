@@ -104,7 +104,7 @@ class ProjectService:
 
         return None
 
-    def verify_coordinator(self, value):
+    def verify_coordinator(self, coordinator_id):
         """
         Verifies if the coordinator exists.
 
@@ -115,16 +115,16 @@ class ProjectService:
             InvalidCoordinator: If the coordinator does not manage any projects.
         """
 
-        # for project in self.project_data.load_projects():
-        #     if coordinator_id != project.coordinator_id:
-        #         raise InvalidCoordinator("O coordenador não administra nenhum projeto!")
-
-        coordinator = self.coordinator_service.find_coordinator_by_type(
-            "discord_id", value
-        )
-        for project in self.database:
-            if project.coordinator_id != coordinator.discord_id:
+        for project in self.project_data.load_projects():
+            if coordinator_id != project.coordinator_id:
                 raise InvalidCoordinator("O coordenador não administra nenhum projeto!")
+
+        # coordinator = self.coordinator_service.find_coordinator_by_type(
+        #     "discord_id", value
+        # )
+        # for project in self.database:
+        #     if project.coordinator_id != coordinator.discord_id:
+        #         raise InvalidCoordinator("O coordenador não administra nenhum projeto!")
 
     def verify_data(self, start_date, end_date):
         """
