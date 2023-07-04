@@ -20,5 +20,6 @@ Classes:
 from . import styles
 from .monthly_report import MonthlyReport, MonthlyReportData
 from .setup import setup_reports_module
+from .termination_statement import TerminationStatement, TerminationStatementData
 
 setup_reports_module()

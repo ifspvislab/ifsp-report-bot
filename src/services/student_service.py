@@ -8,7 +8,6 @@ Classes:
     - StudentService: Service class for managing student data.
 
 """
-
 from data import load_students
 
 

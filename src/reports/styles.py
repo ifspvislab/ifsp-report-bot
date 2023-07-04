@@ -76,6 +76,28 @@ observations_text_style = ParagraphStyle(
     textColor=colors.black,
 )
 
+termination_text_style = ParagraphStyle(
+    name="TerminationText",
+    fontSize=12,
+    leading=16,
+    spaceBefore=5,
+    spaceAfter=5,
+    fontName="Calibri",
+    alignment=enums.TA_LEFT,
+    textColor=colors.black,
+)
+
+generation_date_style = ParagraphStyle(
+    name="GenerationDate",
+    fontSize=12,
+    leading=16,
+    spaceBefore=10,
+    spaceAfter=15,
+    fontName="Calibri",
+    alignment=enums.TA_RIGHT,
+    textColor=colors.black,
+)
+
 signature_content_style = ParagraphStyle(
     name="SignatureContent",
     parent=styles["Normal"],

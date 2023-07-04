@@ -14,7 +14,6 @@ def main():
 
     It initializes the StudentService and starts the bot by calling the start_bot function.
     """
-
     student_service = StudentService()
     start_bot(student_service)
 
