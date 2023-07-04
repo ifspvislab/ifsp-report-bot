@@ -1,10 +1,12 @@
 """
 validation module
 """
+import settings
 from validate_email_address import validate_email
 
 from data import Member
 
+logger = settings.logging.getLogger(__name__)
 
 class RegistrationError(Exception):
     """
@@ -85,5 +87,7 @@ def verify_member(value, membros: list[Member]):
 
     members = membros
     for member in members:
-        if not member.registration == value:
-            raise MemberError("O membro inexiste nos registros!")
+        if member.registration == value:
+            return None
+    
+    raise MemberError("O membro inexiste nos registros!")

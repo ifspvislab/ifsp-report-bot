@@ -13,7 +13,7 @@ Classes:
 """
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, date
 
 
 @dataclass
@@ -34,8 +34,8 @@ class Project:
     coordenador: str
     discord_server_id: int
     titulo: str
-    data_inicio: str
-    data_fim: str
+    data_inicio: date
+    data_fim: date
 
 
 # pylint: disable=too-few-public-methods
@@ -72,8 +72,8 @@ class ProjectData:
             fields[1],
             int(fields[2]),
             fields[3],
-            datetime.strptime(fields[4], "%d/%m/%Y"),
-            datetime.strptime(fields[5], "%d/%m/%Y"),
+            datetime.strptime(fields[4], "%d/%m/%Y").date(),
+            datetime.strptime(fields[5], "%d/%m/%Y").date(),
         )
         return project
 

@@ -8,7 +8,7 @@ Classes:
 AddParticipationModal: Um modal para adicionar participação.
 """
 # pylint: disable-next=unused-import
-from datetime import date
+from datetime import datetime, date
 from uuid import uuid4
 
 import discord
@@ -97,7 +97,7 @@ class AddParticipationModal(ui.Modal):
                         str(uuid4()),
                         self.prontuario.value,
                         self.projeto.value,
-                        self.date.value,
+                        datetime.strptime(self.date.value, "%d/%m/%Y").date(),
                         project.data_fim,
                     )
                 )

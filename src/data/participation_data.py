@@ -2,6 +2,7 @@
 Participation Data
 """
 
+from datetime import date, datetime
 from dataclasses import dataclass
 
 
@@ -14,8 +15,8 @@ class Participation:
     participation_id: str
     prontuario: str
     project: str
-    data_inicio: str
-    data_final: str
+    data_inicio: date
+    data_final: date
 
 
 class ParticipationData:
@@ -40,8 +41,8 @@ class ParticipationData:
         data.participation_id = fields[0]
         data.prontuario = fields[1]
         data.project = fields[2]
-        data.data_inicio = fields[3]
-        data.data_final = fields[4]
+        data.data_inicio = datetime.strptime(fields[3], "%d/%m/%Y").date()
+        data.data_final = datetime.strptime(fields[4], "%d/%m/%Y").date()
 
         return Participation
 
@@ -66,11 +67,13 @@ class ParticipationData:
         :param participation: the participation dataclass.
         :type participation: Dataclass.
         """
+        initial_date = datetime.strftime(participation.data_inicio, "%d/%m/%Y")
+        final_date = datetime.strftime(participation.data_final, "%d/%m/%Y")
         with open(
             "assets/data/participations.csv", "a", encoding="UTF-8"
         ) as participation_data:
             participation_data.write(
                 f"{participation.participation_id},{participation.prontuario},"
-                + f"{participation.project},{participation.data_inicio},{participation.data_final}"
+                + f"{participation.project},{initial_date},{final_date}\n"
             )
         participation_data.close()
