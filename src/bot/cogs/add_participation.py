@@ -8,7 +8,7 @@ Classes:
 AddParticipationModal: Um modal para adicionar participação.
 """
 # pylint: disable-next=unused-import
-from datetime import datetime, date
+from datetime import date, datetime
 from uuid import uuid4
 
 import discord

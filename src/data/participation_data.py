@@ -2,8 +2,8 @@
 Participation Data
 """
 
-from datetime import date, datetime
 from dataclasses import dataclass
+from datetime import date, datetime
 
 
 @dataclass

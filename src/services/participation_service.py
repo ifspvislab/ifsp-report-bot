@@ -5,7 +5,6 @@ Participation Service
 
 This package provides services for managing participation data. 
 """
-from datetime import datetime
 
 from data import MemberData, Participation, ParticipationData
 
@@ -17,6 +16,12 @@ from .validation import verify_member, verify_registration
 class ParticipationAlreadyExists(Exception):
     """
     Exception raised when the participation inputed already exists.
+    """
+
+
+class OpenParticipation(Exception):
+    """
+    Exception raised when the participation inputed conflicts with a participation already existing.
     """
 
 
@@ -66,7 +71,14 @@ class ParticipationService:
         self, attr_type, value
     ) -> list[Participation] | None:
         """
-        a
+        Find all the participations in the database based on the specified attribute type and value.
+
+        Args:
+            attr_type (str): The attribute type to be checked.
+            value: The value of the attribute to be matched.
+
+        Returns:
+            A participations list if found, None otherwise.
         """
         for participation in self.database:
             if getattr(participation, attr_type) == value:
@@ -74,18 +86,25 @@ class ParticipationService:
 
         return None
 
-    def check_ocurrence(self, value, value_):
+    def check_ocurrence(self, value, second_value, third_value):
         """
-        a
+        Check if a participation with the given registration in the given project is open.
+
+        :param value: The project to check for existence.
+        :param second_value: The registation to check for existence.
+        :param third_value: The entry date to check if the participation is open.
+        :raises ParticipationAlreadyExists: If a participation with the given prontuario
+        and project already exists.
         """
         project = self.project_service.find_project_by_type("titulo", value)
-        member = self.member_service.find_member_by_type("registration", value_)
+        member = self.member_service.find_member_by_type("registration", second_value)
         for participation in self.database:
             if (
                 participation.project == project.titulo
                 and participation.prontuario == member.registration
             ):
-                raise ParticipationAlreadyExists("Essa participação já existe!")
+                if third_value < participation.data_final:
+                    raise ParticipationAlreadyExists("Essa participação já existe!")
 
     def verify_date(self, value, value_):
         """
@@ -111,12 +130,16 @@ class ParticipationService:
 
     def create(self, participation: Participation):
         """
-        a
+        Add a new participation to the database.
+
+        :param participation: The participation dataclass.
         """
         verify_registration(participation.prontuario)
         verify_member(participation.prontuario, self.members)
         self.verify_date(participation.data_inicio, participation.project)
-        self.check_ocurrence(participation.project, participation.prontuario)
+        self.check_ocurrence(
+            participation.project, participation.prontuario, participation.data_inicio
+        )
 
         self.participation_data.add_participation(participation)
         self.database.append(participation)
