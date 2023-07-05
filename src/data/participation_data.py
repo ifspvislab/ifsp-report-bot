@@ -14,7 +14,7 @@ class Participation:
 
     participation_id: str
     registration: str
-    project_title: str
+    project_id: str
     initial_date: date
     final_date: date
 
@@ -74,6 +74,6 @@ class ParticipationData:
         ) as participation_data:
             participation_data.write(
                 f"{participation.participation_id},{participation.registration},"
-                + f"{participation.project_title},{initial_date},{final_date}\n"
+                + f"{participation.project_id},{initial_date},{final_date}\n"
             )
         participation_data.close()

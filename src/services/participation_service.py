@@ -96,7 +96,7 @@ class ParticipationService:
         :raises ParticipationAlreadyExists: If a participation with the given prontuario
         and project already exists.
         """
-        project = self.project_service.find_project_by_type("project_title", value)
+        project = self.project_service.find_project_by_type("project_id", value)
         member = self.member_service.find_member_by_type("registration", second_value)
         for participation in self.database:
             if (
@@ -118,7 +118,7 @@ class ParticipationService:
             DateError: If the date is invalid.
         """
 
-        project = self.project_service.find_project_by_type("titulo", value_)
+        project = self.project_service.find_project_by_type("project_id", value_)
         if not value > project.start_date:
             raise DateError(
                 "A data inserida é inválida! Ela fica antes do início do projeto."
@@ -136,9 +136,9 @@ class ParticipationService:
         """
         verify_registration(participation.registration)
         verify_member(participation.registration, self.members)
-        self.verify_date(participation.initial_date, participation.project_title)
+        self.verify_date(participation.initial_date, participation.project_id)
         self.check_ocurrence(
-            participation.project_title,
+            participation.project_id,
             participation.registration,
             participation.initial_date,
         )

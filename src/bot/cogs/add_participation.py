@@ -96,7 +96,7 @@ class AddParticipationModal(ui.Modal):
                     Participation(
                         str(uuid4()),
                         self.registration.value,
-                        self.project_title.value,
+                        project.project_id,
                         datetime.strptime(self.date.value, "%d/%m/%Y").date(),
                         project.end_date,
                     )
