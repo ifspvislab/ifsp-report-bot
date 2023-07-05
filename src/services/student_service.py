@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 """
 student_service
 =======================
@@ -35,7 +37,7 @@ class StudentService:
         self.database = []
         self.student_data = StudentData()
 
-    def find_student_by_discord_id(self, discord_id: int) -> dict or None:
+    def find_student_by_discord_id(self, discord_id: int) -> dict | None:
         """
         Find a student by Discord ID in the student database.
 

@@ -11,3 +11,4 @@ from .add_coordinator import CoordinatorCog
 from .add_member import MemberCog
 from .add_participation import ParticipationCog
 from .add_project import ProjectCog
+from .attendance_cog import AttendanceCog

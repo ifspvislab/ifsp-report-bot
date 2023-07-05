@@ -11,6 +11,7 @@ Modules:
 """
 
 from .admin_service import is_admin
+from .attendance_service import AttendanceService
 from .coordinator_service import (
     Coordinator,
     CoordinatorAlreadyExists,

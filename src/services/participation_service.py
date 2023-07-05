@@ -80,10 +80,12 @@ class ParticipationService:
         Returns:
             A participations list if found, None otherwise.
         """
+        participations = []
         for participation in self.database:
             if getattr(participation, attr_type) == value:
-                return list[Participation]
-
+                participations.append(participation)
+        if participations:
+            return participations
         return None
 
     def check_ocurrence(self, project_id, registration, initial_date):
