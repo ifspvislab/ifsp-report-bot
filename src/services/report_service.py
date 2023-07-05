@@ -20,8 +20,6 @@ Functions:
 
 from datetime import datetime
 
-from data import MemberData
-
 
 class InvalidRequestPeriod(Exception):
     """
@@ -40,13 +38,6 @@ class ReportService:
         invalid_request_period(self): Checks if the current date is within the
             valid request period.
     """
-
-    def __init__(self) -> None:
-        """
-        Initialize the AttendanceService object.
-        """
-        self.member_data = MemberData()
-        self.database = self.member_data.load_members()
 
     def invalid_request_period(self):
         """
