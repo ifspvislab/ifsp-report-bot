@@ -57,25 +57,14 @@ class LogData:
                 logs.append(self._row_to_log(row))
             return logs
 
-    def row_add_log(self, student_id: int, date: str, action: str) -> None:
-        """
-        Adds a log entry to the logs.csv file using row-based formatting.
-
-        Args:
-        - student_id: The Discord ID of the log creator.
-        - date: The date of the log entry.
-        - action: The action or description of the log.
-        """
-        log_list = [student_id, date, action]
-        self.add_log(log=log_list)
-
-    def add_log(self, log: list) -> None:
+    def add_log(self, log: Log) -> None:
         """
         Adds a log entry to the logs.csv file.
 
         Args:
-        - log: A list containing the log data in the order [discord_id, date, action].
+        - log: A object containing the log data in the order [discord_id, date, action].
         """
+        log_list = [log.discord_id, log.date, log.action]
         with open("assets/data/logs.csv", "a", newline="", encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile, delimiter="§")
-            writer.writerow(log)
+            writer.writerow(log_list)

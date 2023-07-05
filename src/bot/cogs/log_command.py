@@ -9,7 +9,8 @@ from discord.ext import commands
 
 from data import LogData, StudentData
 from reports import LogReport, LogReportData
-from services import IncorrectDateFilter, LogService, is_coordinator
+from services import LogService, is_coordinator
+from services.validation import verify_discord_id
 
 
 class LogCommand(commands.Cog):
@@ -27,6 +28,7 @@ class LogCommand(commands.Cog):
         student_id="Registros apenas com o ID inserido",
     )
     @app_commands.check(is_coordinator)
+    # pylint: disable=too-many-branches
     async def log_file(
         self,
         interaction: discord.Interaction,
@@ -49,14 +51,14 @@ class LogCommand(commands.Cog):
         server_id = interaction.guild.id
         project_id = LogService().get_project_id_by_server_id(server_id=server_id)
 
-        if student_id is not None and not LogService().check_student_in_project(
-            student_id=int(student_id)
-        ):
-            await interaction.response.send_message(
-                "ID inválido",
-                ephemeral=True,
-            )
-            return
+        if student_id is not None:
+            verify_discord_id(student_id)
+            if not LogService().check_student_in_project(student_id=int(student_id)):
+                await interaction.response.send_message(
+                    "Este Discord ID não correponde a nenhum estudante",
+                    ephemeral=True,
+                )
+                return
 
         if start_date is None and end_date is None:
             if student_id is not None:
@@ -88,18 +90,11 @@ class LogCommand(commands.Cog):
             if end_date is None:
                 end_date = LogService().formatted_get_date()
 
-            try:
-                LogService().date_validation(
-                    date="09/10/2023",
-                    start_date=start_date,
-                    end_date=end_date,
-                )
-            except IncorrectDateFilter:
-                await interaction.response.send_message(
-                    "Data incorreta, digite no formato dd/MM/aaaa. Ex:01/09/2023",
-                    ephemeral=True,
-                )
-                return
+            LogService().filter_date_validation(
+                date="09/10/2023",
+                start_date=start_date,
+                end_date=end_date,
+            )
 
             if student_id is not None:
                 data = LogReportData(
@@ -121,16 +116,35 @@ class LogCommand(commands.Cog):
                     end_date=end_date,
                     student_id=None,
                 )
+
         report = LogReport(data)
-        await interaction.response.send_message(
-            file=discord.File(BytesIO(report.generate()), filename="log.pdf"),
-            ephemeral=True,
-        )
+
+        if report.generate() is not None:
+            await interaction.response.send_message(
+                file=discord.File(BytesIO(report.generate()), filename="log.pdf"),
+                ephemeral=True,
+            )
+        else:
+            await interaction.response.send_message(
+                "Arquivo muito grande para o Discord. Use filtros!", ephemeral=True
+            )
 
     @log_file.error
     async def log_file_error(self, interaction: discord.Interaction, error):
-        """Treating error if it's not the coordinator"""
-        print(error)  # Pylint-problem
-        await interaction.response.send_message(
-            "Apenas o coordenador tem acesso ao comando!", ephemeral=True
-        )
+        """
+        Logs and handles errors related to file operations during an interaction.
+
+        Args:
+            interaction (discord.Interaction): The Discord interaction where the error occurred.
+            error (Exception): The error object representing the encountered exception.
+
+        Returns:
+            None
+        """
+        if str(error) == "The check functions for command 'log' failed.":
+            await interaction.response.send_message(
+                "Apenas o coordenador tem acesso ao comando!", ephemeral=True
+            )
+        else:
+            error_message = str(error).rsplit(":", maxsplit=1)[-1]
+            await interaction.response.send_message(error_message, ephemeral=True)

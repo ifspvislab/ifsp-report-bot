@@ -69,7 +69,9 @@ class LogReport:
             self.generate_id_and_date_report()
 
         doc.build(self.content)
-        return buffer.getvalue()
+        if LogService().check_bytesio_size(bytes_io=buffer):
+            return buffer.getvalue()
+        return None
 
     def generate_default_report(self):
         """

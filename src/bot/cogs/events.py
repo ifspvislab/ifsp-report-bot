@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Cog
 
-from data import LogData
+from data import Log, LogData
 from services import LogService
 
 
@@ -30,22 +30,24 @@ class Events(commands.Cog):
             if len(message.attachments) > 0:
                 date = LogService().formatted_get_date(message=message)
                 action = f"{date}-{message.author}-{message.channel}-{message.attachments[0].url}"
-                LogData().row_add_log(
-                    student_id=message.author.id,
+                log = Log(
+                    discord_id=message.author.id,
                     date=date,
                     action=action,
                 )
+                LogData().add_log(log)
 
             else:
                 date = LogService().formatted_get_date(message=message)
                 action = (
                     f"{date} - {message.author} - {message.channel} - {message.content}"
                 )
-                LogData().row_add_log(
-                    student_id=int(message.author.id),
+                log = Log(
+                    discord_id=message.author.id,
                     date=date,
                     action=action,
                 )
+                LogData().add_log(log)
 
     @Cog.listener()
     async def on_message_delete(self, message: discord.Message) -> None:
@@ -59,11 +61,12 @@ class Events(commands.Cog):
         if LogService().check_student_in_project(student_id=int(message.author.id)):
             date = LogService().formatted_get_date(message=message)
             action = f"{date} - {message.author} - {message.channel} - Deleted: {message.content}"
-            LogData().row_add_log(
-                student_id=int(message.author.id),
+            log = Log(
+                discord_id=message.author.id,
                 date=date,
                 action=action,
             )
+            LogData().add_log(log)
 
     @Cog.listener()
     async def on_message_edit(
@@ -80,11 +83,12 @@ class Events(commands.Cog):
             date = LogService().formatted_get_date(before=before)
             # pylint: disable=line-too-long
             action = f"{date} - {before.author} - {before.channel} - Before: {before.content} - After: {after.content}"
-            LogData().row_add_log(
-                student_id=int(before.author.id),
+            log = Log(
+                discord_id=before.author.id,
                 date=date,
                 action=action,
             )
+            LogData().add_log(log)
 
     @Cog.listener()
     async def on_interaction(self, interaction: discord.Interaction):
@@ -97,11 +101,12 @@ class Events(commands.Cog):
             action = (
                 f"{date} - {interaction.user} - Interaction: {interaction.data['name']}"
             )
-            LogData().row_add_log(
-                student_id=int(interaction.user.id),
+            log = Log(
+                discord_id=interaction.user.id,
                 date=date,
                 action=action,
             )
+            LogData().add_log(log)
 
     @Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
@@ -113,8 +118,9 @@ class Events(commands.Cog):
             date = LogService().formatted_get_date()
             # pylint: disable=line-too-long
             action = f"{date} - {user} - Reaction:{reaction.emoji} - Reacted:{reaction.message.content}"
-            LogData().row_add_log(
-                student_id=int(user.id),
+            log = Log(
+                discord_id=user.id,
                 date=date,
                 action=action,
             )
+            LogData().add_log(log)

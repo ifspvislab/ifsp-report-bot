@@ -2,6 +2,7 @@
 Services for log command.
 """
 from datetime import datetime
+from io import BytesIO
 
 import discord
 
@@ -15,6 +16,10 @@ projects_data = ProjectData().load_projects()
 
 class IncorrectDateFilter(Exception):
     """Incorrect date filter"""
+
+
+class NotCoordiantor(Exception):
+    """NotCoordinator"""
 
 
 def is_coordinator(interaction: discord.Interaction):
@@ -112,6 +117,26 @@ class LogService:
             return True
         return False
 
+    def filter_date_validation(self, date: str, start_date: str, end_date: str):
+        """
+        Validates the date filter based on the provided start and end dates.
+
+        Args:
+            date (str): The date to be validated.
+            start_date (str): The start date for the filter range.
+            end_date (str): The end date for the filter range.
+
+        Raises:
+            IncorrectDateFilter: If the date format is incorrect.
+
+        Returns:
+            None
+        """
+        try:
+            self.date_validation(date=date, start_date=start_date, end_date=end_date)
+        except Exception as exc:
+            raise IncorrectDateFilter("Formato de data incorreto") from exc
+
     def formatted_get_date(
         self,
         message: discord.Message = None,
@@ -146,3 +171,19 @@ class LogService:
             formatted_date = datetime.now(zone).strftime("%d/%m/%Y %H:%M")
 
         return str(formatted_date)
+
+    def check_bytesio_size(
+        self, bytes_io: BytesIO, limit: int = 25 * 1024 * 1024
+    ) -> bool:
+        """
+        Checks if the size of the BytesIO object exceeds the specified limit.
+
+        Args:
+            bytes_io: The BytesIO object to check the size of.
+            limit: The size limit in bytes.
+
+        Returns:
+            bool: True if the size is within the limit, False otherwise.
+        """
+        size = len(bytes_io.getvalue())
+        return size <= limit
