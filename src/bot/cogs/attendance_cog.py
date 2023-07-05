@@ -75,6 +75,7 @@ class AttendanceCog(commands.Cog):
 
         # pylint: disable-next=no-member
         self.is_last_day.start()
+        # self.test.start()
 
     @app_commands.command(
         name="cadastrar-presenca",
@@ -162,6 +163,10 @@ class AttendanceCog(commands.Cog):
                     content=f"{first_name}, aqui está a sua folha de presença em formato PDF:",
                     file=file,
                 )
+
+    # @tasks.loop(count=1, seconds=1)
+    # async def test(self):
+    #     await self.create_all_attendance_sheets()
 
     def _create_attendance_sheet(self, student: Member) -> list[File]:
         """
