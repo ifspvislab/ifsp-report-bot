@@ -16,6 +16,7 @@ import discord
 from discord import app_commands, ui
 from discord.ext import commands
 
+import settings
 from reports import TerminationStatement, TerminationStatementData
 from services import (
     CoordinatorService,
@@ -23,8 +24,11 @@ from services import (
     ParticipationService,
     ProjectService,
 )
+from services.validation import verify_termination_date_format_error
 
 locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
+
+logger = settings.logging.getLogger(__name__)
 
 
 class TerminationStatementCog(commands.Cog):
@@ -65,9 +69,25 @@ class TerminationStatementCog(commands.Cog):
             "discord_id", interaction.user.id
         )
 
+        project = self.project_service.find_project_by_type(
+            "discord_server_id", interaction.guild_id
+        )
+
         if member is None:
+            logger.warning(
+                "User %s without permission tried to generate termination statement",
+                interaction.user.name,
+            )
             await interaction.response.send_message(
                 "Você não tem permissão para gerar o termo de encerramento."
+            )
+        elif project is None:
+            logger.warning(
+                "Project not found for server ID %s",
+                interaction.channel_id,
+            )
+            await interaction.response.send_message(
+                "Projeto não encontrado no sistema."
             )
         else:
             await interaction.response.send_modal(
@@ -181,6 +201,8 @@ class TerminationStatementForm(ui.Modal):
 
                 input_days_difference = project.end_date - termination_date
 
+                current_time = datetime.now().date()
+
                 if (
                     input_days_difference >= days_difference
                     or input_days_difference.days <= 0
@@ -188,50 +210,51 @@ class TerminationStatementForm(ui.Modal):
                     await interaction.response.send_message(
                         "Insira uma data dentro do período de execução do projeto!"
                     )
-                current_time = datetime.now().date()
-                if current_time > termination_date:
+                elif current_time > termination_date:
                     await interaction.response.send_message(
                         "Insira o dia de hoje ou uma data futura!"
                     )
-
-                data = TerminationStatementData(
-                    student_name=member.name,
-                    student_code=member.registration,
-                    project_name=project.title,
-                    project_manager=coordinator.name,
-                    termination_date=self.termination_date.value,
-                    termination_reason=self.termination_reason.value,
-                )
-
-                termination_statement = TerminationStatement(data)
-
-                document_name = f"""termo-encerramento-{member.name}-
-                    {member.registration}-{project.title}.pdf"""
-
-                await interaction.response.send_message(
-                    content="Termo de Encerramento gerado.",
-                    file=discord.File(
-                        BytesIO(termination_statement.generate()),
-                        filename=document_name,
-                        spoiler=False,
-                    ),
-                )
-            except ValueError as expection:
-                error = str(expection)
-
-                if "invalid literal" in error:
-                    await interaction.response.send_message(
-                        "Coloque um número nos campos **dia**/**mês**/**ano**!"
-                    )
-                if "1..12" in error:
-                    await interaction.response.send_message(
-                        "Coloque um mês de 01 a 12."
-                    )
-                if "day" in error:
-                    await interaction.response.send_message(
-                        "Coloque um dia válido para o mês inserido."
-                    )
                 else:
+                    data = TerminationStatementData(
+                        student_name=member.name,
+                        student_code=member.registration,
+                        project_name=project.title,
+                        project_manager=coordinator.name,
+                        termination_date=self.termination_date.value,
+                        termination_reason=self.termination_reason.value,
+                    )
+
+                    termination_statement = TerminationStatement(data)
+
+                    document_name = f"""termo-encerramento-{member.name}-
+                        {member.registration}-{project.title}.pdf"""
+
+                    logger.info(
+                        "Termination statement successfully created by user %s",
+                        interaction.user.name,
+                    )
+
                     await interaction.response.send_message(
-                        "Ocorreu um erro inesperado na sua solicitação, tente novamente."
+                        content="Termo de Encerramento gerado.",
+                        file=discord.File(
+                            BytesIO(termination_statement.generate()),
+                            filename=document_name,
+                            spoiler=False,
+                        ),
+                    )
+            except ValueError as expection:
+                logger.warning(
+                    " User %s inserted an invalid termination date format",
+                    interaction.user.name,
+                )
+                date_format_error = verify_termination_date_format_error(str(expection))
+                if date_format_error is not None:
+                    await interaction.response.send_message(date_format_error)
+                else:
+                    logger.error(
+                        "An unexpected error occurred in termination date input by user %s",
+                        interaction.user.name,
+                    )
+                    await interaction.response.send_message(
+                        "Um erro inesperado ocorreu no sistema, tente novamente."
                     )
