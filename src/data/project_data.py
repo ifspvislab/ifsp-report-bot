@@ -10,7 +10,7 @@ Classes:
 """
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 
 
 @dataclass
@@ -20,19 +20,19 @@ class Project:
 
     Attributes:
         project_id (str): the project's uuid.
-        coordenador (str): the projects's coordinator.
+        coordinator_id (str): the projects's coordinator_id.
         discord_server_id (int): the project's Discord Server ID.
-        titulo (str): the project's title.
-        data_inicio (int): the project's start date.
-        data_fim (int): the project's end date.
+        project_title (str): the project's title.
+        start_date (date): the project's start date.
+        end_date (date): the project's end date.
     """
 
     project_id: str
-    coordenador: str
+    coordinator_id: str
     discord_server_id: int
-    titulo: str
-    data_inicio: int
-    data_fim: int
+    project_title: str
+    start_date: date
+    end_date: date
 
 
 # pylint: disable=too-few-public-methods
@@ -47,6 +47,9 @@ class ProjectData:
 
     load_projects() -> list[dict]
         Loads project data from the projects.csv file and returns a list of dictionaries.
+
+    add_project(project_id, coordinator, discord_server_id, title, start_date, end_date)
+        Adds a new project to the projects.csv file.
     """
 
     def _row_to_project(self, row: str) -> dict:
@@ -55,8 +58,8 @@ class ProjectData:
 
         :param row: The row of project data.
         :type row: str
-        :return: A dictionary representing the project's coordenador,
-        discord_server_id, titulo, data_inicio and data_fim.
+        :return: A dictionary representing the project's coordinator,
+        discord_server_id, title, start_date and end_date.
         :rtype: dict
         """
 

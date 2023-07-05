@@ -14,21 +14,25 @@ from discord.ext import commands
 
 import settings
 from services import StudentService
+from services.coordinator_service import CoordinatorService
 from services.member_service import MemberService
+from services.participation_service import ParticipationService
 from services.project_service import ProjectService
 from services.report_service import ReportService
 
-from .modals import MonthyReportForm
-from .semester_report_cog import SemesterReportCog
+from .cogs.modals import MonthyReportForm
+from .cogs.semester_report_cog import SemesterReportCog
 
 logger = settings.logging.getLogger(__name__)
 
-
+# pylint: disable=too-many-arguments
 def start_bot(
     student_service: StudentService,
     member_service: MemberService,
     project_service: ProjectService,
     report_service: ReportService,
+    coordinator_service: CoordinatorService,
+    participation_service: ParticipationService,
 ):
     """
     Start bot.
@@ -57,7 +61,13 @@ def start_bot(
 
         # updates the bot's command representation
         await bot.add_cog(
-            SemesterReportCog(member_service, project_service, report_service)
+            SemesterReportCog(
+                member_service,
+                project_service,
+                report_service,
+                coordinator_service,
+                participation_service,
+            )
         )
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)

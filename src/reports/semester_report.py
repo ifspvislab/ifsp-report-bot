@@ -20,7 +20,6 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 
 from . import styles
 from .commons import setup_header
-from .data import student_registration
 
 locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
 
@@ -65,7 +64,7 @@ class SemesterReport:
     Class for generating a semester report.
 
     Attributes:
-        data (MonthlyReportData): The data for the semester report.
+        data (SemesterReportData): The data for the semester report.
         content (list): List to store the content of the report.
 
     Methods:
@@ -93,7 +92,6 @@ class SemesterReport:
     def current_semester() -> datetime:
         """
         Returns the current semester of submission, 1st or 2nd
-
         Returns:
             datetime: The current semester of submission, 1st or 2nd
         """
@@ -112,16 +110,15 @@ class SemesterReport:
             bytes: The generated report in bytes format.
 
         """
+        semester = self.current_semester()
         student_name = self.data.student_name
         proj_name = self.data.project_title
-        semester = self.current_semester()
-        student_register = student_registration(student_name)
 
         month = datetime.now().strftime("%B")
         subject = f"Este documento é o relatório semestral do {semester} semestre"
         subject += f" do aluno {student_name} do projeto {proj_name}"
 
-        title = f"relatório-semestral-{month}-{student_name}-{student_register}"
+        title = f"relatório-semestral-{month}-{student_name}"
 
         buffer = BytesIO()
         doc = SimpleDocTemplate(

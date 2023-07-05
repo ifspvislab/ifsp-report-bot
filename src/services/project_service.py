@@ -5,8 +5,16 @@ project_service
 This module provides the classes and exceptions for managing project data.
 
 Classes:
-
+    - InvalidCoordinator: Exception raised when coordinator does not manage any projects.
+    - EqualOrSmallerDateError: Exception raised when the end date is equal or 
+    less than the start date.
+    - InvalidTimeInterval: Exception raised when the time interval 
+    between the end date and the start date is less than than 1 month.
+    - InvalidEndDate: Exception raised when the end date is less than the current data.
+    - DiscordServerIdError: Exception raised when the Discord Server ID is invalid.
+    - ProjectAlreadyExists: Exception raised when the project already exists.
 """
+
 import settings
 from data.project_data import ProjectData
 
@@ -26,6 +34,7 @@ class ProjectService:
             project_data (ProjectData): The project data object for managing project data.
         """
         self.project_data = project_data
+
         self.database = self.project_data.load_projects()
 
     def find_project_by_type(self, attr_type, value):

@@ -15,11 +15,19 @@ from discord.ext import commands
 
 import settings
 from reports import SemesterReport, SemesterReportData
-from services.member_service import MemberService
-from services.project_service import ProjectService
-from services.report_service import ReportService
+from services import (
+    CoordinatorService,
+    MemberService,
+    ParticipationService,
+    ProjectService,
+)
+from services.report_service import InvalidRequestPeriod, ReportService
 
 logger = settings.logging.getLogger(__name__)
+
+
+class ReturnValuesIsNone(Exception):
+    """Handles the exception of the returned values of return_values being none."""
 
 
 class SemesterReportCog(commands.Cog):
@@ -29,16 +37,21 @@ class SemesterReportCog(commands.Cog):
         - send_modal: Sends the SemesterReportForm as a modal in response to an interaction.
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         member_service: MemberService,
         project_service: ProjectService,
         report_service: ReportService,
+        coordinator_service: CoordinatorService,
+        participation_service: ParticipationService,
     ):
         super().__init__()
         self.member_service = member_service
         self.project_service = project_service
         self.report_service = report_service
+        self.coordinator_service = coordinator_service
+        self.participation_service = participation_service
 
     @app_commands.command(
         name="relatorio-semestral",
@@ -52,36 +65,36 @@ class SemesterReportCog(commands.Cog):
         :type interaction: discord.Interaction
 
         """
-        student = self.member_service.find_member_by_type(
-            "discord_id", interaction.user.id
-        )
-
-        errors = []
-        if student is None:
-            errors.append("Você não tem permissão para gerar relatório semestral")
-            logger.warning(
-                "User %s without permission tried to generate semester report",
-                interaction.user.name,
+        try:
+            student = self.member_service.find_member_by_type(
+                "discord_id", interaction.user.id
             )
 
-        project = self.project_service.find_project_by_type(
-            "discord_server_id", interaction.channel_id
-        )
+            errors = []
+            if student is None:
+                errors.append("Você não tem permissão para gerar relatório semestral")
+                logger.warning(
+                    "User %s without permission tried to generate semester report",
+                    interaction.user.name,
+                )
 
-        if project is None:
-            errors.append("Projeto não encontrado no database.")
-            logger.warning(
-                "Project not found for server ID %s",
-                interaction.channel_id,
+            project = self.project_service.find_project_by_type(
+                "discord_server_id", interaction.channel_id
             )
 
-        if self.report_service.invalid_request_period():
-            errors.append(
-                "O período de submissões ocorre entre os dias 23 a 31 "
-                "de julho e 01 a 10 de dezembro."
-            )
+            if project is None:
+                errors.append("Projeto não encontrado no database.")
+                logger.warning(
+                    "Project not found for server ID %s",
+                    interaction.channel_id,
+                )
+
+            self.report_service.invalid_request_period()
+
+        except InvalidRequestPeriod as error:
+            errors.append(error)
             logger.warning(
-                "User %s attempted to generate the semester report outside the allowed period.",
+                "User %s tried to generate semester report outside of allowed period.",
                 interaction.user.name,
             )
 
@@ -90,7 +103,11 @@ class SemesterReportCog(commands.Cog):
             # pylint: disable=too-many-function-args
             await interaction.response.send_modal(
                 SemesterReportForm(
-                    self.member_service, self.project_service, self.report_service
+                    self.member_service,
+                    self.project_service,
+                    self.report_service,
+                    self.coordinator_service,
+                    self.participation_service,
                 )
             )
         else:
@@ -140,8 +157,14 @@ class SemesterReportForm(ui.Modal):
         max_length=600,
     )
 
+    # pylint: disable=too-many-arguments
     def __init__(
-        self, member_service: MemberService, project_service: ProjectService
+        self,
+        member_service: MemberService,
+        project_service: ProjectService,
+        report_service: ReportService,
+        coordinator_service: CoordinatorService,
+        participation_service: ParticipationService,
     ) -> None:
         """
         Initialize the SemesterReportForm instance.
@@ -150,10 +173,19 @@ class SemesterReportForm(ui.Modal):
         :type member_service: MemberService
         :param project_service: An instance of the ProjectService class.
         :type project_service: ProjectService
+        :param coordinator_service: An instance of the CoordinatorService class.
+        :type coordinator_service: CoordinatorService
+        :param participation_service: An instance of the ParticipationService class.
+        :type participation_service: ParticipationService
+        :param report_service: An instance of the ReportService class.
+        :type report_service: ReportService
         """
         super().__init__(title="Relatório Semestral")
         self.member_service = member_service
         self.project_service = project_service
+        self.coordinator_service = coordinator_service
+        self.participation_service = participation_service
+        self.report_service = report_service
 
     async def on_submit(self, interaction: discord.Interaction, /):
         """
@@ -166,23 +198,53 @@ class SemesterReportForm(ui.Modal):
         :type interaction: discord.Interaction
 
         """
-        student = self.member_service.find_member_by_type(
-            "discord_id", interaction.user.id
-        )
 
         project = self.project_service.find_project_by_type(
             "discord_server_id", interaction.channel_id
         )
+        student = self.member_service.find_member_by_type(
+            "discord_id", interaction.user.id
+        )
+        coordinator = self.coordinator_service.find_coordinator_by_type(
+            "coord_id", project.coordinator_id
+        )
 
-        if student is None:
-            await interaction.response.send_message(
-                "Você não tem permissão para gerar relatório semestral!"
+        if student:
+            total_participations = (
+                self.participation_service.find_participations_by_type(
+                    "registration", student.registration
+                )
             )
-        else:
+        return_values = None
+
+        if total_participations:
+            for participation in total_participations:
+                if participation.registration == student.registration:
+                    if participation.project_id == project.project_id:
+                        if project.coordinator_id == coordinator.coord_id:
+                            return_values = (
+                                project.project_title,
+                                coordinator.name,
+                                student.name,
+                            )
+                            break
+
+        if return_values is None:
+            logger.warning(
+                "User %s tried to generate semester report in incorrect server",
+                interaction.user.name,
+            )
+            raise ReturnValuesIsNone(
+                await interaction.response.send_message(
+                    "Verifique se você está no servidor correto!"
+                )
+            )
+
+        if return_values is not None:
             data = SemesterReportData(
-                project_title=project.titulo,
-                project_manager=project.coordenador,
-                student_name=student.name,
+                project_title=return_values[0],
+                project_manager=return_values[1],
+                student_name=return_values[2],
                 planned_activities=self.planned_activities.value.strip(),
                 performed_activities=self.performed_activities.value.strip(),
                 results=self.results.value.strip(),
