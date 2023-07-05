@@ -110,6 +110,7 @@ class SemesterReport:
             bytes: The generated report in bytes format.
 
         """
+
         semester = self.current_semester()
         student_name = self.data.student_name
         proj_name = self.data.project_title

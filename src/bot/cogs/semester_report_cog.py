@@ -26,8 +26,9 @@ from services.report_service import InvalidRequestPeriod, ReportService
 logger = settings.logging.getLogger(__name__)
 
 
-class ReturnValuesIsNone(Exception):
-    """Handles the exception of the returned values of return_values being none."""
+class WrongServerError(Exception):
+    """Handles the exception of when the semester report request is mande
+    in the wrong server."""
 
 
 class SemesterReportCog(commands.Cog):
@@ -234,7 +235,7 @@ class SemesterReportForm(ui.Modal):
                 "User %s tried to generate semester report in incorrect server",
                 interaction.user.name,
             )
-            raise ReturnValuesIsNone(
+            raise WrongServerError(
                 await interaction.response.send_message(
                     "Verifique se você está no servidor correto!"
                 )
@@ -257,14 +258,13 @@ class SemesterReportForm(ui.Modal):
             name_of_report += (f"_{student.name}").upper() + ".pdf"
 
             student_first_name = student.name.split()[0]
-            report_name = name_of_report
             content = f"Sucesso, {student_first_name}! Aqui está"
             content += " o relatório semestral em formato PDF:"
             await interaction.response.send_message(
                 content=content,
                 file=discord.File(
                     BytesIO(report.generate()),
-                    filename=report_name,
+                    filename=name_of_report,
                     spoiler=False,
                 ),
             )

@@ -39,6 +39,23 @@ class ReportService:
             valid request period.
     """
 
+    # def __init__(
+    #     self,
+    #     member_data: MemberData,
+    #     member_service: MemberService,
+    #     participation_data: ParticipationData,
+    # ) -> None:
+    #     """ """
+    #     self.member_data = member_data
+
+    #     self.participation_data = participation_data
+
+    #     self.database = self.participation_data.load_participations()
+
+    #     self.members = self.member_data.load_members()
+
+    #     self.member_service = member_service
+
     def invalid_request_period(self):
         """
         Checks if the current date is within the valid request period.

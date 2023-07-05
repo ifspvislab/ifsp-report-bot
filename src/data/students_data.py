@@ -60,7 +60,7 @@ def _load_projects() -> list[dict]:
     :return: A list of project dictionaries.
     :rtype: list[dict]
     """
-    with open("assets/data/proj.csv", "r", encoding="utf-8") as file:
+    with open("assets/data/pprojects.csv", "r", encoding="utf-8") as file:
         projects = []
         for row in file:
             projects.append(_row_to_project(row))
@@ -74,7 +74,7 @@ def _load_students() -> list[dict]:
     :return: A list of student dictionaries.
     :rtype: list[dict]
     """
-    with open("assets/data/stu.csv", "r", encoding="utf-8") as file:
+    with open("assets/data/students.csv", "r", encoding="utf-8") as file:
         students = []
         for row in file:
             students.append(_row_to_student(row))
