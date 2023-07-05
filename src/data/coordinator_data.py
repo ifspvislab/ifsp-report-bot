@@ -1,6 +1,7 @@
-#pylint: skip-file
+# pylint: skip-file
 
 from dataclasses import dataclass
+
 
 @dataclass
 class Coordinator:

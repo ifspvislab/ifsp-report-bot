@@ -15,15 +15,16 @@ from discord.ext import commands
 
 import settings
 from services import (
+    CoordinatorService,
     MemberService,
     ParticipationService,
     ProjectService,
     StudentService,
-    CoordinatorService,
 )
 
-from .modals import MonthyReportForm
 from .cogs import TerminationStatementCog
+from .modals import MonthyReportForm
+
 logger = settings.logging.getLogger(__name__)
 
 
@@ -32,7 +33,7 @@ def start_bot(
     member_service: MemberService,
     participation_service: ParticipationService,
     project_service: ProjectService,
-    coordinator_service: CoordinatorService
+    coordinator_service: CoordinatorService,
 ):
     """
     Start bot.
@@ -58,12 +59,14 @@ def start_bot(
          the latest information about all available commands and their respective settings.
 
         """
-        await bot.add_cog(TerminationStatementCog(
-            member_service,
-            project_service,
-            participation_service,
-            coordinator_service
-        ))
+        await bot.add_cog(
+            TerminationStatementCog(
+                member_service,
+                project_service,
+                participation_service,
+                coordinator_service,
+            )
+        )
         # updates the bot's command representation
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)

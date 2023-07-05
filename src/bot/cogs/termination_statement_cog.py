@@ -5,16 +5,23 @@ from datetime import datetime
 from io import BytesIO
 
 import discord
-from discord import ui, app_commands
+from discord import app_commands, ui
 from discord.ext import commands
 
 from reports import TerminationStatement, TerminationStatementData
-from services import MemberService, ProjectService, ParticipationService, CoordinatorService
+from services import (
+    CoordinatorService,
+    MemberService,
+    ParticipationService,
+    ProjectService,
+)
 
 locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
 
+
 class TerminationStatementCog(commands.Cog):
-    """ . """
+    """."""
+
     def __init__(
         self,
         member_service: MemberService,
@@ -30,10 +37,10 @@ class TerminationStatementCog(commands.Cog):
 
     @app_commands.command(
         name="termo-encerramento",
-        description="Gera um termo de encerramento das atividades em um projeto."
+        description="Gera um termo de encerramento das atividades em um projeto.",
     )
     async def open_termination_statement_form(self, interaction: discord.Interaction):
-        """ . """
+        """."""
 
         member = self.member_service.find_member_by_type(
             "discord_id", interaction.user.id
@@ -46,11 +53,13 @@ class TerminationStatementCog(commands.Cog):
         else:
             await interaction.response.send_modal(
                 TerminationStatementForm(
-                self.member_service,
-                self.project_service,
-                self.participation_service,
-                self.coordinator_service)
+                    self.member_service,
+                    self.project_service,
+                    self.participation_service,
+                    self.coordinator_service,
                 )
+            )
+
 
 class TerminationStatementForm(ui.Modal):
     """
@@ -72,19 +81,18 @@ class TerminationStatementForm(ui.Modal):
     )
 
     def __init__(
-            self,
-            member_service: MemberService,
-            project_service: ProjectService,
-            participation_service: ParticipationService,
-            coordinator_service: CoordinatorService
-            ) -> None:
+        self,
+        member_service: MemberService,
+        project_service: ProjectService,
+        participation_service: ParticipationService,
+        coordinator_service: CoordinatorService,
+    ) -> None:
 
         super().__init__(title="Termo de Encerramento")
         self.member_service = member_service
         self.project_service = project_service
         self.participation_service = participation_service
         self.coordinator_service = coordinator_service
-
 
     async def on_submit(self, interaction: discord.Interaction, /):
         """
@@ -96,18 +104,15 @@ class TerminationStatementForm(ui.Modal):
         )
 
         participations = self.participation_service.find_participation_by_type(
-            "registration",
-            member.registration
+            "registration", member.registration
         )
 
         project = self.project_service.find_project_by_type(
-            "discord_server_id",
-            interaction.guild_id
+            "discord_server_id", interaction.guild_id
         )
 
         coordinator = self.coordinator_service.find_coordinator_by_type(
-            "coord_id",
-            project.coordinator_id
+            "coord_id", project.coordinator_id
         )
         print(participations)
         if (
@@ -134,7 +139,7 @@ class TerminationStatementForm(ui.Modal):
                 termination_date = datetime(
                     int(termination_date[2]),
                     int(termination_date[1]),
-                    int(termination_date[0])
+                    int(termination_date[0]),
                 ).date()
 
                 days_difference = project.end_date - project.start_date

@@ -9,9 +9,8 @@ Modules:
     - student_service: Module for managing student data.
 
 """
-
+from .coordinator_service import CoordinatorService
 from .member_service import MemberService
 from .participation_service import ParticipationService
-from .student_service import StudentService
 from .project_service import ProjectService
-from .coordinator_service import CoordinatorService
+from .student_service import StudentService
