@@ -13,7 +13,15 @@ Classes:
 import settings
 from data import Coordinator, CoordinatorData
 
+from .validation import verify_discord_id, verify_email, verify_registration
+
 logger = settings.logging.getLogger(__name__)
+
+
+class CoordinatorAlreadyExists(Exception):
+    """
+    Exception raised when a coordinator already exists.
+    """
 
 
 class CoordinatorService:
@@ -47,16 +55,33 @@ class CoordinatorService:
 
         return None
 
+    def check_ocurrance(self, registration):
+        """
+        Check if a coordinator with the given prontuario already exists.
+
+        :param prontuario: The prontuario to check for existence.
+        :raises ValueError: If a coordinator with the given prontuario already exists.
+        """
+        for coordinator in self.database:
+            if registration == coordinator.registration:
+                raise CoordinatorAlreadyExists(
+                    "ERRO: Já há um coordenador com este prontuário!"
+                )
+
     def create(self, coordenador: Coordinator):
         """
         Create a new coordinator.
 
-        :param coordinator: The Coordinator object representing the new coordinator.
-        :raises ProntuarioError: If the registration is incorrect.
+        :param coordenador: The Coordinator object representing the new coordinator.
+        :raises ProntuarioError: If the prontuario is incorrect.
         :raises EmailError: If the email address is invalid.
         :raises DiscordIdError: If the Discord ID is invalid.
-        :raises ValueError: If a coordinator with the given registration already exists.
+        :raises ValueError: If a coordinator with the given prontuario already exists.
         """
+        verify_registration(coordenador.registration)
+        verify_email(coordenador.email)
+        verify_discord_id(coordenador.discord_id)
+        self.check_ocurrance(coordenador.registration)
         coordinator = Coordinator(
             coordenador.coord_id,
             coordenador.registration,

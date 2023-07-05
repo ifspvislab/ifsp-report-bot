@@ -1,30 +1,46 @@
 """
-    Data for students
-"""
+:mod: student_data
+==================
 
+Module for managing student data stored in a CSV file.
+
+Module Dependencies:
+    - ``csv``: A module for working with CSV files.
+    - ``project_data``: A module for accessing project data.
+
+Classes:
+    - :class:`StudentData`: Class for managing student data.
+"""
 from .project_data import ProjectData
 
 
+# pylint: disable=too-few-public-methods
 class StudentData:
     """
-    A class for managing student data.
+    Class for managing student data stored in a CSV file.
+
+    Module Dependencies:
+        - csv: A module for working with CSV files.
+        - project_data: A module for accessing project data.
 
     Methods:
-        _row_to_student(row: str) -> dict:
-            Convert a row of student data to a dictionary.
-
-        _load_students() -> list[dict]:
-            Load students from the CSV file.
-
-        load_students() -> list[dict]:
-            Load students and associate them with their respective projects.
+        - _row_to_student(row: str) -> dict: Convert a row of student data to a dictionary.
+        - _load_students() -> list[dict]: Load students from the CSV file.
+        - load_students() -> list[dict]: Load students and associate them
+          with their respective projects.
 
     """
 
     def __init__(self) -> None:
+        """
+        Initialize the StudentData instance.
+
+        :return: None
+        :rtype: None
+        """
         self.project_data = ProjectData()
 
-    def row_to_student(self, row: str) -> dict:
+    def _row_to_student(self, row: str) -> dict:
         """
         Convert a row of student data to a dictionary.
 
@@ -33,7 +49,6 @@ class StudentData:
         :return: A dictionary representing the student.
         :rtype: dict
         """
-
         fields = [field.strip() for field in row.split(sep=",")]
         return {
             "discord_id": int(fields[0]),
@@ -49,11 +64,10 @@ class StudentData:
         :return: A list of student dictionaries.
         :rtype: list[dict]
         """
-
         with open("assets/data/students.csv", "r", encoding="utf-8") as file:
             students = []
             for row in file:
-                students.append(self.row_to_student(row))
+                students.append(self._row_to_student(row))
             return students
 
     def load_students(self) -> list[dict]:
@@ -63,7 +77,6 @@ class StudentData:
         :return: A list of student dictionaries with associated project information.
         :rtype: list[dict]
         """
-
         projects = self.project_data.load_projects()
         students = self._load_students()
 

@@ -14,17 +14,19 @@ import discord
 from discord.ext import commands
 
 import settings
-from services import ProjectService, StudentService
+from services import CoordinatorService, MemberService, ProjectService, StudentService
 
-from .cogs import ProjectCog
+from .cogs import CoordinatorCog, MemberCog, ProjectCog
 from .modals import MonthyReportForm
 
 logger = settings.logging.getLogger(__name__)
 
 
 def start_bot(
-    project_service: ProjectService,
     student_service: StudentService,
+    member_service: MemberService,
+    coordinator_service: CoordinatorService,
+    project_service: ProjectService,
 ):
     """
     Start bot.
@@ -51,6 +53,8 @@ def start_bot(
 
         """
 
+        await bot.add_cog(MemberCog(member_service, coordinator_service))
+        await bot.add_cog(CoordinatorCog(coordinator_service))
         await bot.add_cog(ProjectCog(project_service))
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)

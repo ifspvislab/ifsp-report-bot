@@ -12,7 +12,6 @@ on:
     types: 
       - completed
     branches:
-      - "feature/initial-monthly-report"
       - develop
 jobs:
   on-success:
@@ -23,7 +22,7 @@ jobs:
       run: |
         echo "$PRIVATE_KEY" > ${PRIVATE_KEY_NAME}
         chmod 600 ${PRIVATE_KEY_NAME}
-        ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR -i "$PRIVATE_KEY_NAME" ${SERVER_URL} "$SCRIPT feature/initial-monthly-report $ENV_VARS"
+        ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR -i "$PRIVATE_KEY_NAME" ${SERVER_URL} "$SCRIPT develop $ENV_VARS"
   
   on-failure:
     runs-on: ubuntu-latest

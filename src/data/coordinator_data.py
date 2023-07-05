@@ -8,7 +8,6 @@ Classes:
     CoordinatorData: A class for managing coordinator data.
 
 """
-
 from dataclasses import dataclass
 
 
