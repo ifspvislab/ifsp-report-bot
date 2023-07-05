@@ -47,7 +47,7 @@ def verify_email(value):
     Raises:
         EmailError: If the email address is invalid.
     """
-    if not validate_email(value, check_mx=True):
+    if not validate_email(value, check_mx=False):
         raise EmailError("Email inválido")
 
 

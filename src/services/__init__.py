@@ -17,5 +17,15 @@ from .coordinator_service import (
     CoordinatorService,
 )
 from .member_service import MemberService
+from .project_service import (
+    DiscordServerIdError,
+    EqualOrSmallerDateError,
+    InvalidCoordinator,
+    InvalidEndDate,
+    InvalidTimeInterval,
+    Project,
+    ProjectAlreadyExists,
+    ProjectService,
+)
 from .student_service import StudentService
 from .validation import DiscordIdError, EmailError, RegistrationError

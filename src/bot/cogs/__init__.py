@@ -9,3 +9,4 @@ Package Structure
 
 from .add_coordinator import CoordinatorCog
 from .add_member import MemberCog
+from .add_project import ProjectCog
