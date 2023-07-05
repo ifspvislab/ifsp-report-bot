@@ -168,17 +168,15 @@ class AttendanceCog(commands.Cog):
         Get all attendances for a student, dividing them for each project and then create each
         sheet
         """
-        all_participations = (
-            self.participation_service.find_participation_by_discord_id(
-                student.discord_id
-            )
+        all_participations = self.participation_service.find_participations_by_type(
+            "registration", student.registration
         )
         if all_participations is None:
             return []
 
         all_projects_id = set()
-        for part in all_participations:
-            all_projects_id.add(part.project)
+        for participation in all_participations:
+            all_projects_id.add(participation.project_id)
 
         first_name = student.name.split()[0]
         month_str = MONTHS[datetime.now().month - 1]
@@ -204,17 +202,16 @@ class AttendanceCog(commands.Cog):
                 continue
 
             file = self.attendance_service.create_sheet(
-                student_registration=student.prontuario,
+                student_registration=student.registration,
                 student_name=student.name,
-                project_name=project.titulo,
+                project_name=project.project_title,
                 attendances=proj_attends,
             )
 
             # Breaking line to not exceed 100 characters
             sheet_name = "folha-de-frequencia-"
-            sheet_name += (
-                f"{month_str}-{first_name}-{student.prontuario}-{project.titulo}.pdf"
-            )
+            sheet_name += f"{month_str}-{first_name}-{student.registration}"
+            sheet_name += f"-{project.project_title}.pdf"
 
             files.append(
                 File(
@@ -278,16 +275,45 @@ class AttendanceSheetForm(ui.Modal):
                 proj_id=project.project_id,
             )
 
+            log_msg = f"Success: user {interaction.user.name} created a new attendance"
+            logger.info(log_msg)
             await interaction.response.send_message("Tudo certo! Presença cadastrada")
 
-        except (
-            ServerNotFound,
-            InvalidDate,
-            InvalidTime,
-            DayOutOfRange,
-            TimeOutOfRange,
-            EntryTimeAfterExitTime,
-        ) as exception:
-            log_msg = f"Error during attendance creation: {exception}"
+        except ServerNotFound as exception:
+            # Splitting string to not exceed 100 chars
+            log_msg = "Error during attendance creation: The server where the request was made"
+            log_msg += " isn't related to any project"
             logger.error(log_msg)
-            await interaction.response.send_message(exception.args[0])
+            await interaction.response.send_message(exception)
+
+        except InvalidDate as exception:
+            log_msg = "Error during attendance creation: The date sent couldn't be recognized as"
+            log_msg += (
+                " a valid date (in numbers, between 1 and the last day of the month)"
+            )
+            logger.error(log_msg)
+            await interaction.response.send_message(exception)
+
+        except InvalidTime as exception:
+            log_msg = "Error during attendance creation: The time sent couldn't be recognized as"
+            log_msg += " a valid time (HH:MM between 00:00 and 23:59)"
+            logger.error(log_msg)
+            await interaction.response.send_message(exception)
+
+        except DayOutOfRange as exception:
+            log_msg = "Error during attendance creation: The date sent was recognized as a date"
+            log_msg += " but isn't valid, since IFSP is closed (IFSP closes at sundays)"
+            logger.error(log_msg)
+            await interaction.response.send_message(exception)
+
+        except TimeOutOfRange as exception:
+            log_msg = "Error during attendance creation: The time sent was recognized as a time"
+            log_msg += " but isn't valid, since IFSP is closed (see IFSP working hours)"
+            logger.error(log_msg)
+            await interaction.response.send_message(exception)
+
+        except EntryTimeAfterExitTime as exception:
+            log_msg = "Error during attendance creation: The entry time sent was after"
+            log_msg += " the exit time"
+            logger.error(log_msg)
+            await interaction.response.send_message(exception)

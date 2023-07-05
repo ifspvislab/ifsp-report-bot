@@ -6,8 +6,8 @@ from datetime import date
 
 @dataclass
 class Participation:
-    uuid: str
+    participation_id: str
     registration: str
-    project: str
+    project_id: str
     initial_date: date
     final_date: date

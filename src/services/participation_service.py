@@ -6,8 +6,8 @@ from data import Participation
 
 
 class ParticipationService:
-    def find_participation_by_discord_id(
-        self, discord_id: int
+    def find_participations_by_type(
+        self, attr_type, value
     ) -> list[Participation] | None:
 
         return [

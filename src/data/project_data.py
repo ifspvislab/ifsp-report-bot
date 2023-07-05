@@ -1,13 +1,14 @@
 # pylint: skip-file
 
 from dataclasses import dataclass
+from datetime import date
 
 
 @dataclass
 class Project:
     project_id: str
-    coordenador: str
+    coordinator_id: str
     discord_server_id: int
-    titulo: str
-    data_inicio: int
-    data_fim: int
+    project_title: str
+    start_date: date
+    end_date: date

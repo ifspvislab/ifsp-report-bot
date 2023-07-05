@@ -57,10 +57,9 @@ class AttendanceService:
 
     Methods:
         - __init__(): Initialize the AttendanceService object.
-        - find_attendances_by_member_id(self, member_id: str) -> list[Attendance]:
-        Find all attendances associated with a member in the attendances database.
         - find_attends_by_member_and_project(self, member_id: str, proj_id: str) ->
-        list[Attendance]: Method that gets all attendances related to a specific member and project
+        Method that gets all attendances related to a specific member and project for the current
+        month
         - _validate_day(self, test_day: str) -> datetime:
         Verifies if the day passed by the user is valid.
         - _validate_time(self, weekday: int, param_time: str) -> time:
@@ -96,27 +95,12 @@ class AttendanceService:
         self.attend_data = AttendanceData()
         self.database = self.attend_data.load_attend()
 
-    def find_attendances_by_member_id(self, member_id: str) -> list[Attendance]:
-        """
-        Find all attendances associated with a member in the attendances database.
-
-        :param member_id: The member id of a student
-        :type member_id: str
-        :return: A list of all Attendances associated with a student's id
-        :rtype: list[Attendance]
-        """
-
-        student_attendances: list[Attendance] = []
-        for attendance in self.database:
-            if member_id == attendance.student_id:
-                student_attendances.append(attendance)
-        return student_attendances
-
     def find_attends_by_member_and_project(
         self, member_id: str, proj_id: str
     ) -> list[Attendance]:
         """
-        Method that gets all attendances related to a specific member and project
+        Method that gets all attendances related to a specific member and project for the current
+        month
 
         :param member_id: The member uuid of a student
         :type member_id: str
@@ -129,7 +113,8 @@ class AttendanceService:
         for attendance in self.database:
             if member_id == attendance.student_id:
                 if proj_id == attendance.project_id:
-                    student_attendances.append(attendance)
+                    if attendance.day.month == datetime.now().month:
+                        student_attendances.append(attendance)
         return student_attendances
 
     def _validate_day(self, test_day: str) -> datetime:
@@ -172,7 +157,7 @@ class AttendanceService:
         # if the time is invalid (ex: hour > 23), it will raise a ValueError
         except ValueError as exc:
             raise InvalidTime(
-                "Tempo inválido (passe no formato HH:MM de 24 horas)"
+                "Tempo inválido (utilize o formato HH:MM de 00:00 até 23:59)"
             ) from exc
         except Exception as ex:
             raise ex
