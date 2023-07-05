@@ -8,7 +8,7 @@ from data import Project
 class ProjectService:
     def find_project_by_type(self, attr_type, value) -> Project:
         return Project(
-            "abc",
+            "aabbcc",
             "Domingos Latorre",
             1111997040906469426,
             "VisLab: Laboratório de Visão Computacional",

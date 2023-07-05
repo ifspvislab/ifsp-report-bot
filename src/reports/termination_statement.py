@@ -31,7 +31,10 @@ MONTHS = [
 
 @dataclass
 class TerminationStatementData:
-    """."""
+    """
+    Dataclass that represents the data for the termination statement
+
+    """
 
     student_name: str
     student_code: str
@@ -42,14 +45,44 @@ class TerminationStatementData:
 
 
 class TerminationStatement:
-    """."""
+    """
+    Class for generating a termination statement
+
+    Attributes:
+        data (TerminationStatementData): The data for the termination statement.
+        content (list): List to store the content of the termination statement
+
+    Methods:
+        generate(): Generates the termination statement.
+        create_header(): Creates the header of the termination statement
+        create_date_text(): Creates the text where the student name,
+        student code, project name, project manager and termination date
+        will be inserted.
+        create_terminate_reason_text(): Creates the text associated with
+        termination reason.
+        create_agreement_text(): Creates the agreement text.
+        create_generation_date_text(): Creates the generation date text.
+
+
+    """
 
     def __init__(self, data: TerminationStatementData) -> None:
+        """
+        Initializes the TerminationStatement object.
+
+        Args:
+            data (TerminationStatementData): The data for the termination
+            statement.
+        """
         self.content = []
         self.data = data
 
     def generate(self):
-        """."""
+        """
+        Generates the termination statement.
+
+        Returns the bytes of the generated termination statement
+        """
         student_name = self.data.student_name
         student_code = self.data.student_code
         project_name = self.data.project_name
@@ -81,7 +114,11 @@ class TerminationStatement:
         return buffer.getvalue()
 
     def create_header(self) -> list:
-        """."""
+        """
+        Creates the header section of the termination statement
+        :return: list of all header contents
+        :rtype: list
+        """
         header_content = []
         header_spacer = Spacer(1, 10)
         header_content += setup_header()
@@ -98,7 +135,12 @@ class TerminationStatement:
         return header_content
 
     def create_date_text(self):
-        """."""
+        """
+        Creates the text associated with student name,
+        student code, project name, project manager and
+        termination date.
+
+        """
         date_paragraph = Paragraph(
             f"""Eu, {self.data.student_name}, prontuário {self.data.student_code}, 
             Voluntário(a) de Ensino vinculado(a) ao Projeto 
@@ -112,7 +154,9 @@ class TerminationStatement:
         self.content.append(date_paragraph)
 
     def create_terminate_reason_text(self):
-        """."""
+        """
+        Creates the termination reason text.
+        """
         termination_reason_paragraph = Paragraph(
             f"O motivo deste pedido é {self.data.termination_reason}.",
             styles.termination_text_style,
@@ -120,7 +164,9 @@ class TerminationStatement:
         self.content.append(termination_reason_paragraph)
 
     def create_agreement_text(self):
-        """."""
+        """
+        Creates the agreement text.
+        """
         agreement_paragraph = Paragraph(
             """ 
             Estou ciente de que um retorno ao Programa de Projetos de Ensino com Participação
@@ -131,7 +177,9 @@ class TerminationStatement:
         self.content.append(agreement_paragraph)
 
     def create_generation_date_text(self):
-        """."""
+        """
+        Creates the generation date text of the termination statement
+        """
         current_date = datetime.now()
         date_text = current_date.strftime("%d/%m/%Y")
         date_text = date_text.split(sep="/")
