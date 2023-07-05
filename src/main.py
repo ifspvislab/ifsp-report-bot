@@ -6,7 +6,7 @@ This module contains the main function to start the IFSP Report Bot.
 
 from bot import start_bot
 from data import CoordinatorData, ProjectData
-from services import CoordinatorService, ProjectService, StudentService
+from services import ProjectService, StudentService
 
 
 def main():
@@ -17,11 +17,8 @@ def main():
     """
 
     coordinator_data = CoordinatorData()
-    coordinator_service = CoordinatorService(coordinator_data)
     project_data = ProjectData()
-    project_service = ProjectService(
-        project_data, coordinator_data, coordinator_service
-    )
+    project_service = ProjectService(project_data, coordinator_data)
     student_service = StudentService()
     start_bot(project_service, student_service)
 

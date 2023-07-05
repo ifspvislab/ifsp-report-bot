@@ -20,8 +20,6 @@ from datetime import datetime, timedelta
 import settings
 from data import CoordinatorData, Project, ProjectData
 
-from .coordinator_service import CoordinatorService
-
 logger = settings.logging.getLogger(__name__)
 
 
@@ -71,7 +69,6 @@ class ProjectService:
         self,
         project_data: ProjectData,
         coordinator_data: CoordinatorData,
-        coordinator_service: CoordinatorService,
     ):
         """
         Initializes the ProjectService instance.
@@ -84,8 +81,6 @@ class ProjectService:
 
         self.database = self.project_data.load_projects()
         self.coordinators = self.coordinator_data.load_coordinators()
-
-        self.coordinator_service = coordinator_service
 
     def find_project_by_type(self, attr_type, value):
         """
@@ -106,25 +101,20 @@ class ProjectService:
 
     def verify_coordinator(self, coordinator_id):
         """
-        Verifies if the coordinator exists.
+        #     Verifies if the coordinator exists.
 
-        Args:
-            coordinator_id (str): The coordinator to verify.
+        #     Args:
+        #         coordinator_id (str): The coordinator to verify.
 
-        Raises:
-            InvalidCoordinator: If the coordinator does not manage any projects.
-        """
+        #     Raises:
+        #         InvalidCoordinator: If the coordinator does not manage any projects.
+        #"""
+        discord_id = coordinator_id
+        coordinators = self.coordinators
 
-        for project in self.project_data.load_projects():
-            if coordinator_id != project.coordinator_id:
-                raise InvalidCoordinator("O coordenador não administra nenhum projeto!")
-
-        # coordinator = self.coordinator_service.find_coordinator_by_type(
-        #     "discord_id", value
-        # )
-        # for project in self.database:
-        #     if project.coordinator_id != coordinator.discord_id:
-        #         raise InvalidCoordinator("O coordenador não administra nenhum projeto!")
+        for coordinator in coordinators:
+            if str(coordinator.discord_id) != str(discord_id):
+                raise InvalidCoordinator("O coordenador não está cadastrado no bot!")
 
     def verify_data(self, start_date, end_date):
         """

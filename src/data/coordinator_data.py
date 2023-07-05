@@ -96,6 +96,6 @@ class CoordinatorData:
             "assets/data/coordinators.csv", "a", encoding="UTF-8"
         ) as coordinator_data:
             coordinator_data.write(
-                f"{coord.coord_id}, {coord.registration},"
-                + f" {coord.discord_id}, {coord.name}, {coord.email}\n"
+                f"{coord.coord_id},{coord.registration},"
+                + f"{coord.discord_id},{coord.name},{coord.email}\n"
             )
