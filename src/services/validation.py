@@ -55,11 +55,11 @@ def verify_email(value):
     Raises:
         EmailError: If the email address is invalid.
     """
-    if not validate_email(value):
+    if not validate_email(value, check_mx=False):
         raise EmailError("Email inválido")
 
 
-def verify_discord_id(value: str):
+def verify_discord_id(value):
     """Verify the correctness of the Discord ID.
 
     Args:

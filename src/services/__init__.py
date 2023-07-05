@@ -22,6 +22,15 @@ from .participation_service import (
     ParticipationAlreadyExists,
     ParticipationService,
 )
-from .project_service import ProjectService
+from .project_service import (
+    DiscordServerIdError,
+    EqualOrSmallerDateError,
+    InvalidCoordinator,
+    InvalidEndDate,
+    InvalidTimeInterval,
+    Project,
+    ProjectAlreadyExists,
+    ProjectService,
+)
 from .student_service import StudentService
 from .validation import DiscordIdError, EmailError, MemberError, RegistrationError

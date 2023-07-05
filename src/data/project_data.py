@@ -1,15 +1,12 @@
-"""
-:mod: project_data
-==================
+""" 
 
-Module for managing project data stored in a CSV file.
-
-Module Dependencies:
-    - ``csv``: A module for working with CSV files.
-    - ``datetime``: A module for working with dates and times.
+This module contains the definition of the 'Project' and 'ProjectData' classes,
+which are used for managing project data.
 
 Classes:
-    - :class:`ProjectData`: Class for managing project data.
+    Project: A class that represents a Project.
+    ProjectData: A class for managing project data
+
 """
 
 from dataclasses import dataclass
@@ -23,11 +20,11 @@ class Project:
 
     Attributes:
         project_id (str): the project's uuid.
-        coordenador (str): the projects's coordinator.
+        coordinator_id (str): the projects's coordinator_id.
         discord_server_id (int): the project's Discord Server ID.
-        titulo (str): the project's title.
-        data_inicio (int): the project's start date.
-        data_fim (int): the project's end date.
+        project_title (str): the project's title.
+        start_date (int): the project's start date.
+        end_date (int): the project's end date.
     """
 
     project_id: str
@@ -38,21 +35,20 @@ class Project:
     end_date: date
 
 
-# pylint: disable=too-few-public-methods
 class ProjectData:
     """
-    :class: ProjectData
-    ===================
+    A class for managing project data.
 
-    Class for managing project data stored in a CSV file.
+    Methods
+    -------
+    _row_to_porject(row: str) -> dict
+        Converts a row of data from the projects.csv file into a dictionary format.
 
-    Module Dependencies:
-        - ``csv``: A module for working with CSV files.
-        - ``datetime``: A module for working with dates and times.
+    load_projects() -> list[dict]
+        Loads project data from the projects.csv file and returns a list of dictionaries.
 
-    Methods:
-        - ``_row_to_project(row: str) -> dict``: Convert a row of project data to a dictionary.
-        - ``load_projects() -> list[dict]``: Load projects from the CSV file.
+    add_project(project_id, coordinator, discord_server_id, title, start_date, end_date)
+        Adds a new project to the projects.csv file.
     """
 
     def _row_to_project(self, row: str) -> dict:
@@ -61,8 +57,8 @@ class ProjectData:
 
         :param row: The row of project data.
         :type row: str
-        :return: A dictionary representing the project's coordenador,
-        discord_server_id, titulo, data_inicio and data_fim.
+        :return: A dictionary representing the project's coordinator,
+        discord_server_id, title, start_date and end_date.
         :rtype: dict
         """
 
@@ -79,15 +75,36 @@ class ProjectData:
 
     def load_projects(self) -> list[Project]:
         """
-        .. method:: load_projects() -> list[dict]
+        Load projects from the CSV file and return a list of dictionaries.
 
-        Load projects from the CSV file.
-
-        :return: A list of project dictionaries.
+        :return: A list of project dictionaries, where each dictionary represents a project.
         :rtype: list[dict]
         """
+
         with open("assets/data/projects.csv", "r", encoding="utf-8") as file:
             projects = []
             for row in file:
                 projects.append(self._row_to_project(row))
             return projects
+
+    def add_project(self, project: Project) -> None:
+        """
+        Add project data to the CVS file
+
+        :param coordinator: project coordinator
+        :type coordinator: str
+        :param discord_server_id: project discord_server_id
+        :type discord_server_id: int
+        :param title: project title
+        :type title: str
+        :param start_date: project start_date
+        :type start_date: int
+        :param end_date: project end_date
+        :type end_date: int
+        """
+
+        with open("assets/data/projects.csv", "a", encoding="UTF-8") as project_data:
+            project_data.write(
+                f"{project.project_id},{project.coordinator_id},{project.discord_server_id},"
+                + f"{project.project_title},{project.start_date},{project.end_date}\n"
+            )

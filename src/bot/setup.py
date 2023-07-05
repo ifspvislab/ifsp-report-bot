@@ -22,7 +22,7 @@ from services import (
     StudentService,
 )
 
-from .cogs import CoordinatorCog, MemberCog, ParticipationCog
+from .cogs import CoordinatorCog, MemberCog, ParticipationCog, ProjectCog
 from .modals import MonthyReportForm
 
 logger = settings.logging.getLogger(__name__)
@@ -32,8 +32,8 @@ def start_bot(
     student_service: StudentService,
     member_service: MemberService,
     coordinator_service: CoordinatorService,
-    participation_service: ParticipationService,
     project_service: ProjectService,
+    participation_service: ParticipationService,
 ):
     """
     Start bot.
@@ -66,6 +66,7 @@ def start_bot(
         )
         await bot.add_cog(MemberCog(member_service, coordinator_service))
         await bot.add_cog(CoordinatorCog(coordinator_service))
+        await bot.add_cog(ProjectCog(project_service))
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
 

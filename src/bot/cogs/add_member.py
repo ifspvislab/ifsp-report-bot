@@ -114,11 +114,8 @@ class MemberCog(commands.Cog):
         Sends the AddMemberModal as a modal in response to an interaction.
         """
 
-        if (
-            self.coordinator_service.find_coordinator_by_type(
-                "discord_id", interaction.user.id
-            )
-            is not None
+        if self.coordinator_service.find_coordinator_by_type(
+            "discord_id", interaction.user.id
         ):
             modal = ModalAddMember(self.member_service, self.coordinator_service)
             if member is not None:

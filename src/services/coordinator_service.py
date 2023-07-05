@@ -3,7 +3,7 @@ This module provides classes and exceptions for managing coordinators.
 
 Classes:
     CoordinatorAlreadyExists: Exception raised when a coordinator already exists.
-    ProntuarioError: Exception raised when an incorrect prontuario is encountered.
+    ProntuarioError: Exception raised when an incorrect registration is encountered.
     EmailError: Exception raised when an invalid email is encountered.
     DiscordIdError: Exception raised when an invalid Discord ID is encountered.
     CoordinatorService: A service for managing coordinators.

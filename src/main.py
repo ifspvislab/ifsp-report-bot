@@ -23,22 +23,22 @@ def main():
     """
 
     coordinator_data = CoordinatorData()
+    project_data = ProjectData()
+    project_service = ProjectService(project_data, coordinator_data)
     coordinator_service = CoordinatorService(coordinator_data)
     member_data = MemberData()
     member_service = MemberService(member_data)
-    project_data = ProjectData()
-    project_service = ProjectService(project_data)
+    student_service = StudentService()
     participation_data = ParticipationData()
     participation_service = ParticipationService(
         participation_data, member_data, project_service, member_service
     )
-    student_service = StudentService()
     start_bot(
         student_service,
         member_service,
         coordinator_service,
-        participation_service,
         project_service,
+        participation_service,
     )
 
 
