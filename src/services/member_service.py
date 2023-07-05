@@ -27,7 +27,7 @@ Use the imported modules to manage student data.
 import settings
 from data import Member, MemberData
 
-from .validation import verify_discord_id, verify_email, verify_registration
+from .validation import verify_discord_id, verify_email, verify_registration_format
 
 logger = settings.logging.getLogger(__name__)
 
@@ -88,7 +88,7 @@ class MemberService:
         Args:
             member (Member): Member object.
         """
-        verify_registration(member.registration)
+        verify_registration_format(member.registration)
         verify_email(member.email)
         verify_discord_id(member.discord_id)
         self.check_ocurrance(member.registration)

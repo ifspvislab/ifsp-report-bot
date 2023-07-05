@@ -16,6 +16,8 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s --- [%(filename)s | %(funcName)s] : %(message)s",
 )
 
+DISCORD_BOT_TOKEN = 'MTExNjA5NDgwMDM5NjAyNTkzOA.GueiH_.DsW-wESRvTlYrDEjgZhUbYiihXOBoiBhF-_66E'
+ADMIN_DISCORD_ID = '485131474597576724'
 
 def get_discord_bot_token() -> str:
     """
@@ -26,7 +28,7 @@ def get_discord_bot_token() -> str:
 
     :raises KeyError: If the 'DISCORD_BOT_TOKEN' environment variable does not exist.
     """
-    discord_bot_token = os.getenv('DISCORD_BOT_TOKEN')
+    discord_bot_token = DISCORD_BOT_TOKEN
     if discord_bot_token is None:
         raise KeyError(
             "The requested environment variable 'DISCORD_BOT_TOKEN' does not exist"
@@ -41,7 +43,7 @@ def get_admin_id() -> int:
     :rtype: int
     :raises KeyError: If the 'ADMIN_DISCORD_ID' environment variable does not exist.
     """
-    discord_admin_id = os.getenv("ADMIN_DISCORD_ID")
+    discord_admin_id = ADMIN_DISCORD_ID
     if discord_admin_id is None:
         raise KeyError(
             "The requested environment variable 'ADMIN_DISCORD_ID' does not exist"

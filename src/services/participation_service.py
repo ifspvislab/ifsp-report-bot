@@ -10,7 +10,7 @@ from data import MemberData, Participation, ParticipationData
 
 from .member_service import MemberService
 from .project_service import ProjectService
-from .validation import verify_member, verify_registration
+from .validation import verify_member_exists, verify_registration_format
 
 
 class ParticipationAlreadyExists(Exception):
@@ -86,7 +86,7 @@ class ParticipationService:
 
         return None
 
-    def check_ocurrence(self, value, second_value, third_value):
+    def check_ocurrence(self, project_id, registration, initial_date):
         """
         Check if a participation with the given registration in the given project is open.
 
@@ -96,17 +96,17 @@ class ParticipationService:
         :raises ParticipationAlreadyExists: If a participation with the given prontuario
         and project already exists.
         """
-        project = self.project_service.find_project_by_type("project_id", value)
-        member = self.member_service.find_member_by_type("registration", second_value)
+        project = self.project_service.find_project_by_type("project_id", project_id)
+        member = self.member_service.find_member_by_type("registration", registration)
         for participation in self.database:
             if (
-                participation.project_title == project.project_title
+                participation.project_id == project.project_id
                 and participation.registration == member.registration
             ):
-                if third_value < participation.final_date:
+                if initial_date < participation.final_date:
                     raise ParticipationAlreadyExists("Essa participação já existe!")
 
-    def verify_date(self, value, value_):
+    def verify_date(self, initial_date, project_id):
         """
         Verifies if the date is valid.
 
@@ -118,12 +118,12 @@ class ParticipationService:
             DateError: If the date is invalid.
         """
 
-        project = self.project_service.find_project_by_type("project_id", value_)
-        if not value > project.start_date:
+        project = self.project_service.find_project_by_type("project_id", project_id)
+        if not initial_date > project.start_date:
             raise DateError(
                 "A data inserida é inválida! Ela fica antes do início do projeto."
             )
-        if not value < project.end_date:
+        if not initial_date < project.end_date:
             raise DateError(
                 "A data inserida é inválida! Ela fica após o fim do projeto."
             )
@@ -134,8 +134,8 @@ class ParticipationService:
 
         :param participation: The participation dataclass.
         """
-        verify_registration(participation.registration)
-        verify_member(participation.registration, self.members)
+        verify_registration_format(participation.registration)
+        verify_member_exists(participation.registration, self.members)
         self.verify_date(participation.initial_date, participation.project_id)
         self.check_ocurrence(
             participation.project_id,

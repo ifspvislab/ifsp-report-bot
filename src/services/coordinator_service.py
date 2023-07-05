@@ -13,7 +13,7 @@ Classes:
 import settings
 from data import Coordinator, CoordinatorData
 
-from .validation import verify_discord_id, verify_email, verify_registration
+from .validation import verify_discord_id, verify_email, verify_registration_format
 
 logger = settings.logging.getLogger(__name__)
 
@@ -78,7 +78,7 @@ class CoordinatorService:
         :raises DiscordIdError: If the Discord ID is invalid.
         :raises ValueError: If a coordinator with the given prontuario already exists.
         """
-        verify_registration(coordenador.registration)
+        verify_registration_format(coordenador.registration)
         verify_email(coordenador.email)
         verify_discord_id(coordenador.discord_id)
         self.check_ocurrance(coordenador.registration)

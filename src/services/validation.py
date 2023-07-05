@@ -30,7 +30,7 @@ class MemberError(Exception):
     """
 
 
-def verify_registration(value):
+def verify_registration_format(registration):
     """
     Verify the correctness of a prontuario.
 
@@ -38,10 +38,10 @@ def verify_registration(value):
     :raises ProntuarioError: If the prontuario is incorrect.
     """
     if not (
-        value[:1].isalpha()
-        and value[2:-2].isnumeric()
-        and value[-1].isalnum()
-        and len(value) == 9
+        registration[:1].isalpha()
+        and registration[2:-2].isnumeric()
+        and registration[-1].isalnum()
+        and len(registration) == 9
     ):
         raise RegistrationError("ERRO: Prontuario incorreto")
 
@@ -72,7 +72,7 @@ def verify_discord_id(value: str):
         raise DiscordIdError("Discord ID inválido")
 
 
-def verify_member(value, membros: list[Member]):
+def verify_member_exists(value, membros: list[Member]):
     """
     Verify if the member exists in the registers.
     Args:
