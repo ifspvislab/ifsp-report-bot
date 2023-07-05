@@ -14,16 +14,25 @@ import discord
 from discord.ext import commands
 
 import settings
-from bot.modals import MonthyReportForm
-from services import StudentService
+from services import (
+    MemberService,
+    ParticipationService,
+    ProjectService,
+    StudentService,
+    CoordinatorService,
+)
 
-from .termination_statement_cog import TerminationStatementForm
-
+from .modals import MonthyReportForm
+from .cogs import TerminationStatementCog
 logger = settings.logging.getLogger(__name__)
 
 
 def start_bot(
     student_service: StudentService,
+    member_service: MemberService,
+    participation_service: ParticipationService,
+    project_service: ProjectService,
+    coordinator_service: CoordinatorService
 ):
     """
     Start bot.
@@ -49,7 +58,12 @@ def start_bot(
          the latest information about all available commands and their respective settings.
 
         """
-
+        await bot.add_cog(TerminationStatementCog(
+            member_service,
+            project_service,
+            participation_service,
+            coordinator_service
+        ))
         # updates the bot's command representation
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
@@ -120,13 +134,5 @@ def start_bot(
                 embed.add_field(name=f"Erro {index+1}", value=error, inline=False)
 
             await interaction.response.send_message(embed=embed)
-
-    @bot.tree.command(
-        name="termo-encerramento",
-        description="Gera documento de encerramento nas atividades do projeto.",
-    )
-    async def open_termination_statement_form(interaction: discord.Interaction):
-        """ """
-        await interaction.response.send_modal(TerminationStatementForm(student_service))
 
     bot.run(settings.get_discord_bot_token())
