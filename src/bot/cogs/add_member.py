@@ -127,7 +127,7 @@ class MemberCog(commands.Cog):
             "Você não tem permissão para adicionar membro."
         )
         logger.error(
-            "Usuário (dicord_id: %s)"
+            "Usuário (discord_id: %s)"
             + "tentou adicionar membro, porém não possui permissão.",
             interaction.user.id,
         )

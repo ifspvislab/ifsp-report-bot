@@ -17,6 +17,11 @@ from .coordinator_service import (
     CoordinatorService,
 )
 from .member_service import MemberService
+from .participation_service import (
+    DateError,
+    ParticipationAlreadyExists,
+    ParticipationService,
+)
 from .project_service import (
     DiscordServerIdError,
     EqualOrSmallerDateError,
@@ -28,4 +33,4 @@ from .project_service import (
     ProjectService,
 )
 from .student_service import StudentService
-from .validation import DiscordIdError, EmailError, RegistrationError
+from .validation import DiscordIdError, EmailError, MemberError, RegistrationError

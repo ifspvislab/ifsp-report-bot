@@ -13,5 +13,6 @@ Package Structure
 
 from .coordinator_data import Coordinator, CoordinatorData
 from .member_data import Member, MemberData
+from .participation_data import Participation, ParticipationData
 from .project_data import Project, ProjectData
 from .student_data import StudentData
