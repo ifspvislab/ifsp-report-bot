@@ -113,18 +113,6 @@ class AttendanceCog(commands.Cog):
                 )
             )
 
-    # TODO: This should be commented before pushing
-    @app_commands.command(
-        name="criar-attendances",
-        description="Cria as folhas de presença de todos os alunos (para TESTES)",
-    )
-    async def test_attendance_sheets(self, interaction: discord.Interaction) -> None:
-        """
-        Create all attendance sheets for test purpouses
-        """
-        await self.create_all_attendance_sheets()
-        await interaction.response.send_message("Enviado.")
-
     @tasks.loop(time=time(hour=12, minute=0, tzinfo=current_timezone))
     async def is_last_day(self):
         """
