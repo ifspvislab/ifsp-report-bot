@@ -14,14 +14,16 @@ from discord import app_commands, ui
 from discord.ext import commands
 
 import settings
-from reports import SemesterReport, SemesterReportData
+
+# from reports import SemesterReport, SemesterReportData
 from services import (
     CoordinatorService,
     MemberService,
     ParticipationService,
     ProjectService,
+    ReportService,
 )
-from services.report_service import InvalidRequestPeriod, ReportService
+from services.report_service import InvalidRequestPeriod
 
 logger = settings.logging.getLogger(__name__)
 
@@ -207,72 +209,35 @@ class SemesterReportForm(ui.Modal):
         :type interaction: discord.Interaction
 
         """
-
-        project = self.project_service.find_project_by_type(
-            "discord_server_id", interaction.channel_id
-        )
         student = self.member_service.find_member_by_type(
             "discord_id", interaction.user.id
         )
-        coordinator = self.coordinator_service.find_coordinator_by_type(
-            "coord_id", project.coordinator_id
+
+        generated_report = self.report_service.generate_semester_report(
+            project_title="",  # the following fields are empty because the implementation
+            # they depend on has not yet been resolved
+            project_manager="",
+            student_name="",
+            planned_activities=self.planned_activities.value.strip(),
+            performed_activities=self.performed_activities.value.strip(),
+            results=self.results.value.strip(),
         )
 
-        if student:
-            total_participations = (
-                self.participation_service.find_participations_by_type(
-                    "registration", student.registration
-                )
-            )
-        return_values = None
+        report = generated_report
 
-        if total_participations:
-            for participation in total_participations:
-                if participation.registration == student.registration:
-                    if participation.project_id == project.project_id:
-                        if project.coordinator_id == coordinator.coord_id:
-                            return_values = (
-                                project.project_title,
-                                coordinator.name,
-                                student.name,
-                            )
-                            break
+        month = datetime.now().strftime("%B")
 
-        if return_values is None:
-            logger.warning(
-                "User %s tried to generate semester report in incorrect server",
-                interaction.user.name,
-            )
-            raise WrongServerError(
-                await interaction.response.send_message(
-                    "Verifique se você está no servidor correspondente ao seu projeto!"
-                )
-            )
+        name_of_report = (f"RelatorioSemestral_Ensino_{month}").upper()
+        name_of_report += (f"_{student.name}").upper() + ".pdf"
 
-        if return_values is not None:
-            data = SemesterReportData(
-                project_title=return_values[0],
-                project_manager=return_values[1],
-                student_name=return_values[2],
-                planned_activities=self.planned_activities.value.strip(),
-                performed_activities=self.performed_activities.value.strip(),
-                results=self.results.value.strip(),
-            )
-
-            report = SemesterReport(data)
-            month = datetime.now().strftime("%B")
-
-            name_of_report = (f"RelatorioSemestral_Ensino_{month}").upper()
-            name_of_report += (f"_{student.name}").upper() + ".pdf"
-
-            student_first_name = student.name.split()[0]
-            content = f"Sucesso, {student_first_name}! Aqui está"
-            content += " o relatório semestral em formato PDF:"
-            await interaction.response.send_message(
-                content=content,
-                file=discord.File(
-                    BytesIO(report.generate()),
-                    filename=name_of_report,
-                    spoiler=False,
-                ),
-            )
+        student_first_name = student.name.split()[0]
+        content = f"Sucesso, {student_first_name}! Aqui está"
+        content += " o relatório semestral em formato PDF:"
+        await interaction.response.send_message(
+            content=content,
+            file=discord.File(
+                BytesIO(report),
+                filename=name_of_report,
+                spoiler=False,
+            ),
+        )
