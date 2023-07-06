@@ -27,8 +27,10 @@ logger = settings.logging.getLogger(__name__)
 
 
 class WrongServerError(Exception):
-    """Handles the exception of when the semester report request is mande
-    in the wrong server."""
+    """
+    Handles the exception of when the semester report request is made
+    in the wrong server.
+    """
 
 
 class SemesterReportCog(commands.Cog):
@@ -56,7 +58,7 @@ class SemesterReportCog(commands.Cog):
 
     @app_commands.command(
         name="relatorio-semestral",
-        description="Gera um relatório de ensino semestral",
+        description="Abre o formulário para gerar um relatório de ensino semestral",
     )
     async def open_semester_report_form(self, interaction: discord.Interaction):
         """
@@ -67,13 +69,17 @@ class SemesterReportCog(commands.Cog):
 
         """
         try:
+            errors = []
+
             student = self.member_service.find_member_by_type(
                 "discord_id", interaction.user.id
             )
 
-            errors = []
             if student is None:
-                errors.append("Você não tem permissão para gerar relatório semestral")
+                errors.append(
+                    "Você não tem permissão para gerar relatório semestral,"
+                    " pois não está cadastrado em nenhum projeto de ensino!"
+                )
                 logger.warning(
                     "User %s without permission tried to generate semester report",
                     interaction.user.name,
@@ -84,7 +90,7 @@ class SemesterReportCog(commands.Cog):
             )
 
             if project is None:
-                errors.append("Projeto não encontrado no database.")
+                errors.append("Este projeto não está cadastrado no database.")
                 logger.warning(
                     "Project not found for server ID %s",
                     interaction.channel_id,
@@ -112,7 +118,9 @@ class SemesterReportCog(commands.Cog):
                 )
             )
         else:
-            embed = discord.Embed(title=":sob: Problemas com a sua requisição")
+            embed = discord.Embed(
+                title=":sob: Problemas com a sua requisição", color=0xFF0000
+            )
             for index, error in enumerate(errors):
                 embed.add_field(name=f"Erro {index+1}", value=error, inline=False)
 
@@ -237,7 +245,7 @@ class SemesterReportForm(ui.Modal):
             )
             raise WrongServerError(
                 await interaction.response.send_message(
-                    "Verifique se você está no servidor correto!"
+                    "Verifique se você está no servidor correspondente ao seu projeto!"
                 )
             )
 
