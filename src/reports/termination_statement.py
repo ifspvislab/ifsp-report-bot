@@ -142,12 +142,12 @@ class TerminationStatement:
 
         """
         date_paragraph = Paragraph(
-            f"""Eu, {self.data.student_name}, prontuário {self.data.student_code}, 
-            Voluntário(a) de Ensino vinculado(a) ao Projeto 
-            {self.data.project_name},
-            coordenado pelo(a) Professor(a) {self.data.project_manager}, 
-            solicito o encerramento da minha participação, 
-            a partir de {self.data.termination_date}.""",
+            f"""Eu, <u>{self.data.student_name}</u>, prontuário <u>
+            {self.data.student_code}</u>, Voluntário(a) de Ensino vinculado(a)
+            ao Projeto <u>{self.data.project_name}</u>, coordenado pelo(a) 
+            Professor(a) <u>{self.data.project_manager}</u>, solicito
+            o encerramento da minha participação, a partir de
+            <u>{self.data.termination_date}</u>.""",
             styles.termination_text_style,
         )
 

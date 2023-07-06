@@ -10,7 +10,7 @@ class ProjectService:
         database = [
             Project(
                 "asdqsweq",
-                "Domingos Latorre",
+                "123",
                 1111997040906469426,
                 "VisLab: Laboratório de Visão Computacional",
                 datetime(2023, 5, 2).date(),
@@ -18,7 +18,7 @@ class ProjectService:
             ),
             Project(
                 "bcaeq",
-                "Sabados Latorre",
+                "321",
                 111199704090646942,
                 "CodeLabs",
                 datetime(2023, 7, 12).date(),

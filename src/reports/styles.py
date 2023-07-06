@@ -83,7 +83,7 @@ termination_text_style = ParagraphStyle(
     spaceBefore=5,
     spaceAfter=5,
     fontName="Calibri",
-    alignment=enums.TA_LEFT,
+    alignment=enums.TA_JUSTIFY,
     textColor=colors.black,
 )
 

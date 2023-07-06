@@ -179,13 +179,16 @@ class TerminationStatementForm(ui.Modal):
         if participations is None:
             return []
 
-        projects_id = []
-        for participation in participations:
-            projects_id.append(participation.project_id)
-
         coordinator = self.coordinator_service.find_coordinator_by_type(
             "coord_id", project.coordinator_id
         )
+
+        if coordinator is None:
+            return []
+
+        projects_id = []
+        for participation in participations:
+            projects_id.append(participation.project_id)
 
         if (
             self.termination_date.value[2] != "/"
