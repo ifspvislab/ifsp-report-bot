@@ -38,7 +38,7 @@ def main():
 
     participation_data = ParticipationData()
     participation_service = ParticipationService(participation_data, member_data)
-    report_service = ReportService()
+    report_service = ReportService(member_data, member_service)
 
     start_bot(
         student_service,

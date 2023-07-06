@@ -20,11 +20,14 @@ Functions:
 
 from datetime import datetime
 
-# from data import MemberData, ParticipationData
+from data import MemberData
+
+# ParticipationData
 from reports import SemesterReport, SemesterReportData
 
 # from .coordinator_service import CoordinatorService
-# from .member_service import MemberService
+from .member_service import MemberService
+
 # from .project_service import ProjectService
 
 
@@ -34,7 +37,7 @@ class InvalidRequestPeriod(Exception):
     """
 
 
-class MemberDoesNotExist(Exception):
+class InvalidMember(Exception):
     """
     Exception for handling a member who doesn't exist
     """
@@ -54,33 +57,47 @@ class ParticipationDoesNotExist(Exception):
 
 # pylint: disable=too-few-public-methods
 class ReportService:
-
-    # def __init__(
-    #     self,
-    #     #participation_data: ParticipationData,
-    #     member_data: MemberData,
-    #     project_service: ProjectService,
-    #     member_service: MemberService,
-    # ) -> None:
-    #     """ """
-    #     self.member_data = member_data
-    #     #self.participation_data = participation_data
-
-    #     #self.database = self.participation_data.load_participations()
-    #     self.members = self.member_data.load_members()
-
-    #     self.member_service = member_service
-    #     self.project_service = project_service
-
     """
+    Service class for managing report data.
+
+    This class provides methods for generating semester reports, verifying member validity,
+    and checking the request period.
+
     Attributes:
-    member_data (MemberData): An instance of the MemberData class for accessing member data.
+        member_data (MemberData): An instance of the MemberData class for accessing member data.
+        member_service (MemberService): An instance of the MemberService class for
+        managing member interactions.
+
+    Exceptions:
+        InvalidRequestPeriod: Custom exception class for handling requests made during an
+        invalid date period.
+        MemberDoesNotExist: Custom exception for handling invalid member.
 
     Methods:
-        __init__(self): Initializes the ReportService object.
-        invalid_request_period(self): Checks if the current date is within the
-            valid request period.
+        __init__(self, member_data, member_service): Initializes the ReportService object.
+        invalid_request_period(self): Checks if the current date is within the valid
+        request period.
+        verifiy_member_validity(self, member_discord_id): Checks if the student can
+
+        request the semester report.
+        generate_semester_report(self, project_title, project_manager, student_name,
+        planned_activities, performed_activities, results):
+        Creates the semester report in bytes format.
     """
+
+    def __init__(self, member_data: MemberData, member_service: MemberService) -> None:
+        """
+        Initializes the ReportService class.
+
+        Args:
+            member_data (MemberData): An instance of the MemberData class for
+            accessing member data.
+            member_service (MemberService): An instance of the MemberService class for
+            managing member interactions.
+        """
+        self.member_data = member_data
+        self.members = self.member_data.load_members()
+        self.member_service = member_service
 
     def invalid_request_period(self):
         """
@@ -96,7 +113,7 @@ class ReportService:
         current_month = current_date.month
         current_day = current_date.day
 
-        if current_month == 7 and 23 <= current_day <= 31:
+        if current_month == 7 and 6 <= current_day <= 31:
             return False
 
         if current_month == 12 and 1 <= current_day <= 10:
@@ -107,6 +124,21 @@ class ReportService:
             "de julho e 01 a 10 de dezembro."
         )
         raise error
+
+    def verifiy_member_validity(self, member_discord_id: int):
+        """
+        Checks if the student can request the semester report
+        """
+        # this is the first step to return the student's name, their project's name and
+        # coordinator's name
+
+        student = self.member_service.find_member_by_type(
+            "discord_id", member_discord_id
+        )
+
+        if student is None:
+            raise InvalidMember("Você não é membro!")
+        return student
 
     # pylint: disable=too-many-arguments
     def generate_semester_report(

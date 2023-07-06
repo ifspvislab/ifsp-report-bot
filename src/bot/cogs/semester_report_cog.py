@@ -209,15 +209,13 @@ class SemesterReportForm(ui.Modal):
         :type interaction: discord.Interaction
 
         """
-        student = self.member_service.find_member_by_type(
-            "discord_id", interaction.user.id
-        )
+        student = self.report_service.verifiy_member_validity(interaction.user.id)
 
         generated_report = self.report_service.generate_semester_report(
             project_title="",  # the following fields are empty because the implementation
             # they depend on has not yet been resolved
             project_manager="",
-            student_name="",
+            student_name=student.name,
             planned_activities=self.planned_activities.value.strip(),
             performed_activities=self.performed_activities.value.strip(),
             results=self.results.value.strip(),
