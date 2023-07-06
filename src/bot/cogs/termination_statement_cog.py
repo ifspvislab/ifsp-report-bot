@@ -24,7 +24,10 @@ from services import (
     ParticipationService,
     ProjectService,
 )
-from services.validation import verify_termination_date_format_error
+from services.validation import (
+    verify_termination_date_format_error,
+    verify_termination_date_period,
+)
 
 locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
 
@@ -170,11 +173,15 @@ class TerminationStatementForm(ui.Modal):
             return []
 
         participations = self.participation_service.find_participation_by_type(
-            "project_id", project.project_id
+            "registration", member.registration
         )
 
         if participations is None:
             return []
+
+        projects_id = []
+        for participation in participations:
+            projects_id.append(participation.project_id)
 
         coordinator = self.coordinator_service.find_coordinator_by_type(
             "coord_id", project.coordinator_id
@@ -197,24 +204,17 @@ class TerminationStatementForm(ui.Modal):
                     int(termination_date[0]),
                 ).date()
 
-                days_difference = project.end_date - project.start_date
+                check_period = verify_termination_date_period(
+                    project.start_date, project.end_date, termination_date
+                )
 
-                input_days_difference = project.end_date - termination_date
-
-                current_time = datetime.now().date()
-
-                if (
-                    input_days_difference >= days_difference
-                    or input_days_difference.days <= 0
-                ):
-                    await interaction.response.send_message(
-                        "Insira uma data dentro do período de execução do projeto!"
-                    )
-                elif current_time > termination_date:
-                    await interaction.response.send_message(
-                        "Insira o dia de hoje ou uma data futura!"
-                    )
+                if check_period is not None:
+                    await interaction.response.send_message(check_period)
                 else:
+                    self.participation_service.write_termination_date_in_participations(
+                        projects_id, project.project_id, termination_date
+                    )
+
                     data = TerminationStatementData(
                         student_name=member.name,
                         student_code=member.registration,
