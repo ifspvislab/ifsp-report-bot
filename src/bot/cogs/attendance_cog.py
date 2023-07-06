@@ -113,17 +113,17 @@ class AttendanceCog(commands.Cog):
                 )
             )
 
-    # This should be commented before pushing
-    # @app_commands.command(
-    #     name="criar-attendances",
-    #     description="Cria as folhas de presença de todos os alunos (para TESTES)",
-    # )
-    # async def test_attendance_sheets(self, interaction: discord.Interaction) -> None:
-    #     """
-    #     Create all attendance sheets for test purpouses
-    #     """
-    #     await self.create_all_attendance_sheets()
-    #     await interaction.response.send_message("Enviado.")
+    # TODO: This should be commented before pushing
+    @app_commands.command(
+        name="criar-attendances",
+        description="Cria as folhas de presença de todos os alunos (para TESTES)",
+    )
+    async def test_attendance_sheets(self, interaction: discord.Interaction) -> None:
+        """
+        Create all attendance sheets for test purpouses
+        """
+        await self.create_all_attendance_sheets()
+        await interaction.response.send_message("Enviado.")
 
     @tasks.loop(time=time(hour=12, minute=0, tzinfo=current_timezone))
     async def is_last_day(self):
@@ -248,7 +248,7 @@ class AttendanceSheetForm(ui.Modal):
     """
 
     day_field = ui.TextInput(
-        label="Data da presença",
+        label="Dia da presença",
         placeholder="Dia do mês (ex: 01, 16 etc.)",
         required=False,
     )
@@ -281,7 +281,7 @@ class AttendanceSheetForm(ui.Modal):
 
         try:
             project = self.project_service.find_project_by_type(
-                "discord_server_id", interaction.channel_id
+                "discord_server_id", interaction.guild_id
             )
             member = self.member_service.find_member_by_type(
                 "discord_id", interaction.user.id

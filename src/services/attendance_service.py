@@ -222,11 +222,11 @@ class AttendanceService:
         :type exit_time: str
         """
 
-        test_day = day
+        test_day = day.strip()
         test_entry_time = entry_time
         test_exit_time = exit_time
 
-        if test_day is None:
+        if test_day == "":
             test_day = datetime.now()
         else:
             test_day = self._validate_day(test_day)
