@@ -157,6 +157,8 @@ class ReportService:
     ):
         """
         Checks if the student can request the semester report.
+        If they can, returns the coordinator's name, the project's title and
+        the student's name.
         """
 
         student = self.member_service.find_member_by_type(
@@ -189,7 +191,11 @@ class ReportService:
                 "Você não tem permissão para gerar o relatório deste projeto!"
             )
 
-        return project
+        return (
+            coordinator.name,
+            project.project_title,
+            student.name,
+        )
 
     # pylint: disable=too-many-arguments
     def generate_semester_report(

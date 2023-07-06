@@ -224,12 +224,15 @@ class SemesterReportForm(ui.Modal):
             project.project_id,
             project.coordinator_id,
         )
+
         if validity:
 
+            project_title, coordinator_name, student_name = validity
+
             generated_report = self.report_service.generate_semester_report(
-                project_title=validity.project_title,
-                project_manager=validity.coordinator_id,  # just testing if the field is filled
-                student_name=student.name,
+                project_title=project_title,
+                project_manager=coordinator_name,
+                student_name=student_name,
                 planned_activities=self.planned_activities.value.strip(),
                 performed_activities=self.performed_activities.value.strip(),
                 results=self.results.value.strip(),
@@ -242,7 +245,7 @@ class SemesterReportForm(ui.Modal):
             name_of_report = (f"RelatorioSemestral_Ensino_{month}").upper()
             name_of_report += (f"_{student.name}").upper() + ".pdf"
 
-            student_first_name = student.name.split()[0]
+            student_first_name = student_name.split()[0]
             content = f"Sucesso, {student_first_name}! Aqui está"
             content += " o relatório semestral em formato PDF:"
             await interaction.response.send_message(
