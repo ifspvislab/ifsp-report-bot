@@ -20,13 +20,17 @@ Functions:
 
 from datetime import datetime
 
-from data import MemberData
+from data import MemberData, ParticipationData
 
 # ParticipationData
 from reports import SemesterReport, SemesterReportData
 
+from .coordinator_service import CoordinatorService
+
 # from .coordinator_service import CoordinatorService
 from .member_service import MemberService
+from .participation_service import ParticipationService
+from .project_service import ProjectService
 
 # from .project_service import ProjectService
 
@@ -56,6 +60,7 @@ class ParticipationDoesNotExist(Exception):
 
 
 # pylint: disable=too-few-public-methods
+# pylint: disable=too-many-instance-attributes
 class ReportService:
     """
     Service class for managing report data.
@@ -85,7 +90,16 @@ class ReportService:
         Creates the semester report in bytes format.
     """
 
-    def __init__(self, member_data: MemberData, member_service: MemberService) -> None:
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self,
+        member_data: MemberData,
+        member_service: MemberService,
+        participation_data: ParticipationData,
+        project_service: ProjectService,
+        participation_service: ParticipationService,
+        coordinator_service: CoordinatorService,
+    ) -> None:
         """
         Initializes the ReportService class.
 
@@ -96,8 +110,15 @@ class ReportService:
             managing member interactions.
         """
         self.member_data = member_data
+        self.participation_data = participation_data
+
+        self.database = self.participation_data.load_participations()
         self.members = self.member_data.load_members()
+
         self.member_service = member_service
+        self.project_service = project_service
+        self.participation_service = participation_service
+        self.coordinator_service = coordinator_service
 
     def invalid_request_period(self):
         """
@@ -113,7 +134,7 @@ class ReportService:
         current_month = current_date.month
         current_day = current_date.day
 
-        if current_month == 7 and 6 <= current_day <= 31:
+        if current_month == 7 and 23 <= current_day <= 31:
             return False
 
         if current_month == 12 and 1 <= current_day <= 10:
@@ -125,12 +146,18 @@ class ReportService:
         )
         raise error
 
-    def verifiy_member_validity(self, member_discord_id: int):
+    # pylint: disable=too-many-arguments
+    def verifiy_member_validity(
+        self,
+        member_discord_id: int,
+        student_registration: str,
+        project_server_id: int,
+        project_id: str,
+        coordinator_id: str,
+    ):
         """
-        Checks if the student can request the semester report
+        Checks if the student can request the semester report.
         """
-        # this is the first step to return the student's name, their project's name and
-        # coordinator's name
 
         student = self.member_service.find_member_by_type(
             "discord_id", member_discord_id
@@ -138,7 +165,31 @@ class ReportService:
 
         if student is None:
             raise InvalidMember("Você não é membro!")
-        return student
+
+        participations = self.participation_service.find_participations_by_type(
+            "registration", student_registration
+        )
+        participation_exists = any(p.project_id == project_id for p in participations)
+
+        if not participation_exists:
+            raise ParticipationDoesNotExist(
+                "Você não participa de nenhum projeto no momento!"
+            )
+
+        project = self.project_service.find_project_by_type(
+            "discord_server_id", project_server_id
+        )
+
+        coordinator = self.coordinator_service.find_coordinator_by_type(
+            "coord_id", coordinator_id
+        )
+
+        if project.coordinator_id != coordinator.coord_id:
+            raise ParticipationDoesNotExist(
+                "Você não tem permissão para gerar o relatório deste projeto!"
+            )
+
+        return project
 
     # pylint: disable=too-many-arguments
     def generate_semester_report(

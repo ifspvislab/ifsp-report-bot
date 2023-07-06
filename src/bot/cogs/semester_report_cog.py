@@ -209,33 +209,47 @@ class SemesterReportForm(ui.Modal):
         :type interaction: discord.Interaction
 
         """
-        student = self.report_service.verifiy_member_validity(interaction.user.id)
-
-        generated_report = self.report_service.generate_semester_report(
-            project_title="",  # the following fields are empty because the implementation
-            # they depend on has not yet been resolved
-            project_manager="",
-            student_name=student.name,
-            planned_activities=self.planned_activities.value.strip(),
-            performed_activities=self.performed_activities.value.strip(),
-            results=self.results.value.strip(),
+        student = self.member_service.find_member_by_type(
+            "discord_id", interaction.user.id
         )
 
-        report = generated_report
-
-        month = datetime.now().strftime("%B")
-
-        name_of_report = (f"RelatorioSemestral_Ensino_{month}").upper()
-        name_of_report += (f"_{student.name}").upper() + ".pdf"
-
-        student_first_name = student.name.split()[0]
-        content = f"Sucesso, {student_first_name}! Aqui está"
-        content += " o relatório semestral em formato PDF:"
-        await interaction.response.send_message(
-            content=content,
-            file=discord.File(
-                BytesIO(report),
-                filename=name_of_report,
-                spoiler=False,
-            ),
+        project = self.project_service.find_project_by_type(
+            "discord_server_id", interaction.channel_id
         )
+
+        validity = self.report_service.verifiy_member_validity(
+            interaction.user.id,
+            student.registration,
+            interaction.channel_id,
+            project.project_id,
+            project.coordinator_id,
+        )
+        if validity:
+
+            generated_report = self.report_service.generate_semester_report(
+                project_title=validity.project_title,
+                project_manager=validity.coordinator_id,  # just testing if the field is filled
+                student_name=student.name,
+                planned_activities=self.planned_activities.value.strip(),
+                performed_activities=self.performed_activities.value.strip(),
+                results=self.results.value.strip(),
+            )
+
+            report = generated_report
+
+            month = datetime.now().strftime("%B")
+
+            name_of_report = (f"RelatorioSemestral_Ensino_{month}").upper()
+            name_of_report += (f"_{student.name}").upper() + ".pdf"
+
+            student_first_name = student.name.split()[0]
+            content = f"Sucesso, {student_first_name}! Aqui está"
+            content += " o relatório semestral em formato PDF:"
+            await interaction.response.send_message(
+                content=content,
+                file=discord.File(
+                    BytesIO(report),
+                    filename=name_of_report,
+                    spoiler=False,
+                ),
+            )
