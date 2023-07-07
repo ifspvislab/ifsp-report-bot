@@ -239,7 +239,7 @@ class SemesterReportForm(ui.Modal):
             "discord_server_id", interaction.channel_id
         )
 
-        validity = self.report_service.verifiy_member_validity(
+        valid_data_for_report = self.report_service.verifiy_member_validity(
             interaction.user.id,
             student.registration,
             interaction.channel_id,
@@ -247,9 +247,9 @@ class SemesterReportForm(ui.Modal):
             project.coordinator_id,
         )
 
-        if validity:
+        if valid_data_for_report:
 
-            project_title, coordinator_name, student_name = validity
+            project_title, coordinator_name, student_name = valid_data_for_report
 
             generated_report = self.report_service.generate_semester_report(
                 project_title=project_title,

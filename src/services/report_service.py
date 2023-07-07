@@ -2,19 +2,26 @@
 report_service
 =======================
 
-This module provides the ReportService class for
-    managing interactions with the semester report.
+This module provides the ReportService class for managing interactions with 
+the semester report.
 
 Classes:
 - ReportService: Service class for managing report data.
 
 Exceptions:
-- InvalidRequestPeriod: Custom exception class for handling requests
-    made during an invalid date period.
+- InvalidRequestPeriod: Custom exception for handling requests made during 
+    an invalid date period.
+- InvalidMember: Custom exception for handling a member who doesn't exist.
+- ProjectDoesNotExist: Custom exception for handling a project that doesn't exist.
+- ParticipationDoesNotExist: Custom exception for handling a participation that doesn't exist.
+- ParticipationDoesNotExisInServer: Custom exception for when a student participates 
+    in a project but is in the wrong project server.
+- CoordinatorDoesNotExist: Custom exception for when a coordinator does not exist.
 
-Functions:
+Methods:
 - invalid_request_period: Checks if the current date is within the valid request period.
-
+- verifiy_member_validity: Checks if the student can request the semester report.
+- generate_semester_report: Creates the semester report in bytes format.
 """
 
 
@@ -35,31 +42,31 @@ from .project_service import ProjectService
 
 class InvalidRequestPeriod(Exception):
     """
-    Custom class for handling requests made during an invalid date period.
+    Custom exception for handling requests made during an invalid date period.
     """
 
 
 class InvalidMember(Exception):
     """
-    Exception for handling a member who doesn't exist
+    Custom exception for handling an invalid member requesting the semester report.
     """
 
 
 class ProjectDoesNotExist(Exception):
     """
-    Exception for handling a project that doesn't exist
+    Custom exception for handling a project that does not exist.
     """
 
 
 class ParticipationDoesNotExist(Exception):
     """
-    Exception for handling a participation that doesn't exist
+    Custom exception for handling when a member doesn't participate of any projects.
     """
 
 
 class ParticipationDoesNotExisInServer(Exception):
     """
-    Handles the exception of when a student participates of a project, but
+    Custom exception for handling when a student participates of a project, but
     is in the wrong project server.
     """
 
@@ -80,28 +87,39 @@ class ReportService:
     and checking the request period.
 
     Attributes:
-        member_data (MemberData): An instance of the MemberData class for accessing member data.
-        member_service (MemberService): An instance of the MemberService class for
-        managing member interactions.
+        member_data (MemberData):
+        An instance of the MemberData class for accessing member data.
+        member_service (MemberService):
+        An instance of the MemberService class for managing member interactions.
+        participation_data (ParticipationData):
+        An instance of the ParticipationData class for accessing participation data.
+        participation_service (ParticipationService):
+        An instance of the ParticipationService class for managing participation interactions.
+        project_service (ProjectService):
+        An instance of the ProjectService class for managing project interactions.
+        project_data (ProjectData):
+        An instance of the ProjectData class for accessing project data.
+        coordinator_service (CoordinatorService):
+        An instance of the CoordinatorService class for managing coordinator interactions.
+        coordinator_data (CoordinatorData):
+        An instance of the CoordinatorData class for accessing coordinator data.
 
-    Exceptions:
-        InvalidRequestPeriod: Custom exception class for handling requests made during an
-        invalid date period.
-        MemberDoesNotExist: Custom exception for handling invalid member.
-
-    Methods:
-        __init__(self, member_data, member_service): Initializes the ReportService object.
-        invalid_request_period(self): Checks if the current date is within the valid
-        request period.
-        verifiy_member_validity(self, member_discord_id): Checks if the student can
-
-        request the semester report.
+        Methods:
+        __init__(self, member_data, member_service, participation_data,
+        participation_service, project_service, project_data, coordinator_service,
+        coordinator_data): Initializes the ReportService object.
+        invalid_request_period(self):
+        Checks if the current date is within the valid request period.
+        verifiy_member_validity(self, member_discord_id, student_registration,
+        project_server_id, project_id, coordinator_id):
+        Checks if the student can request the semester report.
         generate_semester_report(self, project_title, project_manager, student_name,
         planned_activities, performed_activities, results):
-        Creates the semester report in bytes format.
+        Generates the semester report in bytes format.
     """
 
     # pylint: disable=too-many-arguments
+
     def __init__(
         self,
         member_data: MemberData,
@@ -117,10 +135,22 @@ class ReportService:
         Initializes the ReportService class.
 
         Args:
-            member_data (MemberData): An instance of the MemberData class for
-            accessing member data.
-            member_service (MemberService): An instance of the MemberService class for
-            managing member interactions.
+            member_data (MemberData):
+            An instance of the MemberData class for accessing member data.
+            member_service (MemberService):
+            An instance of the MemberService class for managing member interactions.
+            participation_data (ParticipationData):
+            An instance of the ParticipationData class for accessing participation data.
+            participation_service (ParticipationService):
+            An instance of the ParticipationService class for managing participation interactions.
+            project_service (ProjectService):
+            An instance of the ProjectService class for managing project interactions.
+            project_data (ProjectData):
+            An instance of the ProjectData class for accessing project data.
+            coordinator_service (CoordinatorService):
+            An instance of the CoordinatorService class for managing coordinator interactions.
+            coordinator_data (CoordinatorData):
+            An instance of the CoordinatorData class for accessing coordinator data.
         """
         self.member_data = member_data
         self.participation_data = participation_data
@@ -173,8 +203,25 @@ class ReportService:
     ):
         """
         Checks if the student can request the semester report.
-        If they can, returns the coordinator's name, the project's title and
-        the student's name.
+
+        Args:
+            member_discord_id (int): The Discord ID of the student.
+            student_registration (str): The registration number of the student.
+            project_server_id (int): The Discord server ID of the project.
+            project_id (str): The ID of the project.
+            coordinator_id (str): The ID of the coordinator.
+
+        Raises:
+            CoordinatorDoesNotExist:
+            If the coordinator of the project does not exist.
+            ParticipationDoesNotExist:
+            If the student does not participate in any project.
+            ParticipationDoesNotExisInServer:
+            If the student does not participate in the project registered in the channel.
+
+        Returns:
+            tuple: A tuple containing the coordinator's name, project's title,
+            and student's name.
         """
 
         student = self.member_service.find_member_by_type(
@@ -235,7 +282,18 @@ class ReportService:
         results: str,
     ) -> bytes:
         """
-        Creates the semester report in bytes format
+        Generates the semester report in bytes format.
+
+        Args:
+            project_title (str): The title of the project.
+            project_manager (str): The name of the project manager.
+            student_name (str): The name of the student.
+            planned_activities (str): The planned activities of the semester.
+            performed_activities (str): The performed activities of the semester.
+            results (str): The results of the performed activites.
+
+        Returns:
+            bytes: The semester report in bytes format.
         """
 
         data = SemesterReportData(
