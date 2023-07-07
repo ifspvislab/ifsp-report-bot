@@ -4,9 +4,6 @@ Classes:
     - SemesterReportForm: A form that allows the user to send the needed data to create
     the semester report.
 """
-
-
-from datetime import datetime
 from io import BytesIO
 
 import discord
@@ -14,8 +11,6 @@ from discord import app_commands, ui
 from discord.ext import commands
 
 import settings
-
-# from reports import SemesterReport, SemesterReportData
 from services import (
     CoordinatorService,
     MemberService,
@@ -250,7 +245,7 @@ class SemesterReportForm(ui.Modal):
             project_title, coordinator_name, student_name = valid_data_for_report
 
             generated_report = self.report_service.generate_semester_report(
-                project_title=project_title,  # verificar se os dados estão no lugar certo!!
+                project_title=project_title,
                 project_manager=coordinator_name,
                 student_name=student_name,
                 planned_activities=self.planned_activities.value.strip(),
@@ -260,14 +255,10 @@ class SemesterReportForm(ui.Modal):
 
             report = generated_report
 
-            month = datetime.now().strftime("%B")
+            name_of_report, content = self.report_service.generate_report_info(
+                student_name
+            )
 
-            name_of_report = (f"RelatorioSemestral_Ensino_{month}").upper()
-            name_of_report += (f"_{student.name}").upper() + ".pdf"
-
-            student_first_name = student_name.split()[0]
-            content = f"Sucesso, {student_first_name}! Aqui está"
-            content += " o relatório semestral em formato PDF:"
             await interaction.response.send_message(
                 content=content,
                 file=discord.File(
@@ -276,6 +267,3 @@ class SemesterReportForm(ui.Modal):
                     spoiler=False,
                 ),
             )
-
-
-# verificar se deveria usar try-except aqui?

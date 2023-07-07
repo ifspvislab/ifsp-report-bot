@@ -180,7 +180,7 @@ class ReportService:
         current_date = datetime.now().date()
         current_month = current_date.month
         current_day = current_date.day
-        july_day_range = range(6, 8)
+        july_day_range = range(23, 32)
         december_day_range = range(1, 11)
 
         if not (
@@ -228,9 +228,15 @@ class ReportService:
             "discord_id", member_discord_id
         )
 
+        if student is None:
+            raise InvalidMember("Você não está cadastrado como membro!")
+
         project = self.project_service.find_project_by_type(
             "discord_server_id", project_server_id
         )
+
+        if project is None:
+            raise ProjectDoesNotExist("Este servidor não está cadastrado como projeto.")
 
         coordinator = self.coordinator_service.find_coordinator_by_type(
             "coord_id", coordinator_id
@@ -303,3 +309,25 @@ class ReportService:
         report = SemesterReport(data)
 
         return report.generate()
+
+    def generate_report_info(self, student_name):
+        """
+        Generates the information for the report.
+
+        Args:
+            student_name (str): The name of the student.
+
+        Returns:
+            tuple: A tuple containing the name of the report file and the content message.
+
+        Example:
+            ("RELATORIOSEMESTRAL_ENSINO_MONTH_STUDENTNAME.PDF",
+            "Sucesso, Student! Aqui está o relatório semestral em formato PDF:")
+
+        """
+        month = datetime.now().strftime("%B")
+        name_of_report = (f"RelatorioSemestral_Ensino_{month}").upper()
+        name_of_report += (f"_{student_name}").upper() + ".pdf"
+        student_first_name = student_name.split()[0]
+        content = f"Sucesso, {student_first_name}! Aqui está o relatório semestral em formato PDF:"
+        return name_of_report, content
