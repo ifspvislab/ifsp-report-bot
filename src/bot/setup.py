@@ -34,7 +34,7 @@ from .modals import MonthyReportForm
 
 logger = settings.logging.getLogger(__name__)
 
-#pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments
 def start_bot(
     student_service: StudentService,
     member_service: MemberService,
