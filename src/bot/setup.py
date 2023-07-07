@@ -20,6 +20,7 @@ from services import (
     ProjectService,
     ReportService,
     StudentService,
+    TerminationStatementService,
 )
 
 from .cogs import (
@@ -29,6 +30,7 @@ from .cogs import (
     ParticipationCog,
     ProjectCog,
     SemesterReportCog,
+    TerminationStatementCog,
 )
 from .modals import MonthyReportForm
 
@@ -42,6 +44,7 @@ def start_bot(
     project_service: ProjectService,
     participation_service: ParticipationService,
     report_service: ReportService,
+    termination_service: TerminationStatementService,
 ):
     """
     Start bot.
@@ -67,6 +70,11 @@ def start_bot(
          the latest information about all available commands and their respective settings.
 
         """
+        await bot.add_cog(
+            TerminationStatementCog(
+                termination_service,
+            )
+        )
         await bot.add_cog(
             ParticipationCog(
                 participation_service, coordinator_service, project_service
@@ -158,7 +166,7 @@ def start_bot(
 
         if not errors:
             logger.info("Monthy report user %s", interaction.user.name)
-            await interaction.response.send_modal(MonthyReportForm(student_service))
+            await interaction.response.send_modal(MonthyReportForm(StudentService()))
         else:
             embed = discord.Embed(title=":cry: Problemas com a sua requisição")
             for index, error in enumerate(errors):

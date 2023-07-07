@@ -34,4 +34,18 @@ from .project_service import (
 )
 from .report_service import ReportService
 from .student_service import StudentService
+from .termination_service import (
+    CoordinatorNotFound,
+    InvalidDayForMonth,
+    InvalidLiteralTerminationDate,
+    InvalidMonth,
+    MemberNotFound,
+    OutofRangeTerminationDate,
+    ParticipationNotFound,
+    ParticipationNotFoundInServer,
+    ProjectNotFound,
+    SlashAbsence,
+    TerminationStatementService,
+    YearOutOfRange,
+)
 from .validation import DiscordIdError, EmailError, MemberError, RegistrationError

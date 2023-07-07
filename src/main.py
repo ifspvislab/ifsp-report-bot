@@ -13,6 +13,7 @@ from services import (
     ProjectService,
     ReportService,
     StudentService,
+    TerminationStatementService,
 )
 
 
@@ -43,6 +44,12 @@ def main():
         coordinator_service,
         coordinator_data,
     )
+    termination_service = TerminationStatementService(
+        member_service,
+        project_service,
+        participation_service,
+        coordinator_service,
+    )
     start_bot(
         student_service,
         member_service,
@@ -50,6 +57,7 @@ def main():
         project_service,
         participation_service,
         report_service,
+        termination_service,
     )
 
 
