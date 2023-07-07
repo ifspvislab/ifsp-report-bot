@@ -24,6 +24,7 @@ from services import (
     ReportService,
 )
 from services.report_service import (
+    CoordinatorDoesNotExist,
     InvalidMember,
     InvalidRequestPeriod,
     ParticipationDoesNotExisInServer,
@@ -142,6 +143,12 @@ class SemesterReportCog(commands.Cog):
         except ProjectDoesNotExist as exception:
             logger.error("No project found for server %s", interaction.channel_id)
             await interaction.response.send_message(str(exception))
+
+        except CoordinatorDoesNotExist as exception:
+            logger.error(
+                "No coordinator for this project was found in the coordinators database."
+            )
+            await interaction.response.send_message(exception)
 
 
 class SemesterReportForm(ui.Modal):

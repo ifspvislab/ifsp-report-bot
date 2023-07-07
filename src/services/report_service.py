@@ -20,14 +20,12 @@ Functions:
 
 from datetime import datetime
 
-from data import MemberData, ParticipationData, ProjectData
+from data import CoordinatorData, MemberData, ParticipationData, ProjectData
 
 # ParticipationData
 from reports import SemesterReport, SemesterReportData
 
 from .coordinator_service import CoordinatorService
-
-# from .coordinator_service import CoordinatorService
 from .member_service import MemberService
 from .participation_service import ParticipationService
 from .project_service import ProjectService
@@ -63,6 +61,12 @@ class ParticipationDoesNotExisInServer(Exception):
     """
     Handles the exception of when a student participates of a project, but
     is in the wrong project server.
+    """
+
+
+class CoordinatorDoesNotExist(Exception):
+    """
+    Handles the exception of when a coordinator does not exist.
     """
 
 
@@ -107,6 +111,7 @@ class ReportService:
         project_service: ProjectService,
         project_data: ProjectData,
         coordinator_service: CoordinatorService,
+        coordinator_data: CoordinatorData,
     ) -> None:
         """
         Initializes the ReportService class.
@@ -120,10 +125,12 @@ class ReportService:
         self.member_data = member_data
         self.participation_data = participation_data
         self.project_data = project_data
+        self.coordinator_data = coordinator_data
 
         self.database = self.participation_data.load_participations()
         self.members = self.member_data.load_members()
         self.projects = self.project_data.load_projects()
+        self.coordinators = self.coordinator_data.load_coordinators()
 
         self.member_service = member_service
         self.project_service = project_service
@@ -151,7 +158,7 @@ class ReportService:
             or (current_month == 12 and current_day in december_day_range)
         ):
             raise InvalidRequestPeriod(
-                "O período de submissões ocorre entre os dias 6 a 31 de julho e"
+                "O período de submissões ocorre entre os dias 23 a 31 de julho e"
                 " 1 a 10 de dezembro."
             )
 
@@ -182,6 +189,11 @@ class ReportService:
             "coord_id", coordinator_id
         )
 
+        if coordinator is None:
+            raise CoordinatorDoesNotExist(
+                "O coordenador deste projeto não está cadastrado no database!"
+            )
+
         if project.coordinator_id != coordinator.coord_id:
             raise ParticipationDoesNotExist(
                 "Você não tem permissão para gerar o relatório deste projeto!"
@@ -196,9 +208,11 @@ class ReportService:
                 "Você não participa de nenhum projeto de ensino atualmente!"
             )
 
-        participation_exists = any(p.project_id == project_id for p in participations)
+        participation_exists_in_server = any(
+            p.project_id == project_id for p in participations
+        )
 
-        if not participation_exists:
+        if not participation_exists_in_server:
             raise ParticipationDoesNotExisInServer(
                 "Você não participa do projeto cadastrado neste canal!"
                 " Verifique se você está no canal correto e tente novamente."
@@ -233,6 +247,6 @@ class ReportService:
             results=results,
         )
 
-        report = SemesterReport(data)  # Create a SemesterReport object with the data
+        report = SemesterReport(data)
 
         return report.generate()

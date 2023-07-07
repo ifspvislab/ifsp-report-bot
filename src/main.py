@@ -46,6 +46,7 @@ def main():
         project_service,
         project_data,
         coordinator_service,
+        coordinator_data,
     )
 
     start_bot(
