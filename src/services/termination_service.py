@@ -1,4 +1,9 @@
-""" . """
+"""
+Termination Service
+
+Module responsible for handling termination statement generation, overwriting participations.csv
+
+"""
 
 import csv
 from datetime import datetime
@@ -90,7 +95,7 @@ class OutofRangeTerminationDate(Exception):
 
 class TerminationStatementService:
     """
-    Service class for mananing termination statement data, providing methods for
+    Service class for managing termination statement data, providing methods for
     generating the termination statement, overwriting participations.csv with the
     termination date inserted by the user and verifying validations.
 

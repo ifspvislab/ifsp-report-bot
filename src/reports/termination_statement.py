@@ -1,4 +1,10 @@
-""" . """
+""" 
+Termination Statement
+
+Module to receive the termination statement data and generate a PDF
+file with the termination statement and his form.
+
+"""
 
 import locale
 from dataclasses import dataclass
