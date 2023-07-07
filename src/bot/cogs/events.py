@@ -34,13 +34,13 @@ class Events(commands.Cog):
                 student_id=message.author.id,
                 date=message.created_at,
             )
-
-        action = f"{message.author} - {message.channel} - {message.content}"
-        self.log_service.generate_log(
-            action=action,
-            student_id=message.author.id,
-            date=message.created_at,
-        )
+        else:
+            action = f"{message.author} - {message.channel} - {message.content}"
+            self.log_service.generate_log(
+                action=action,
+                student_id=message.author.id,
+                date=message.created_at,
+            )
 
     @Cog.listener()
     async def on_message_delete(self, message: discord.Message) -> None:
