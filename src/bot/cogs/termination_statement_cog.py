@@ -9,7 +9,6 @@ Classes:
 """
 
 import locale
-from datetime import datetime
 from io import BytesIO
 
 import discord
@@ -17,16 +16,15 @@ from discord import app_commands, ui
 from discord.ext import commands
 
 import settings
-from reports import TerminationStatement, TerminationStatementData
 from services import (
-    CoordinatorService,
-    MemberService,
-    ParticipationService,
-    ProjectService,
-)
-from services.validation import (
-    verify_termination_date_format_error,
-    verify_termination_date_period,
+    CoordinatorNotFound,
+    MemberNotFound,
+    OutofRangeTerminationDate,
+    ParticipationNotFound,
+    ParticipationNotFoundInServer,
+    ProjectNotFound,
+    SlashAbsence,
+    TerminationStatementService,
 )
 
 locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
@@ -42,19 +40,13 @@ class TerminationStatementCog(commands.Cog):
 
     def __init__(
         self,
-        member_service: MemberService,
-        project_service: ProjectService,
-        participation_service: ParticipationService,
-        coordinator_service: CoordinatorService,
+        termination_service: TerminationStatementService,
     ):
         """
         Loads the services needed to create the termination statement form
         """
         super().__init__()
-        self.member_service = member_service
-        self.project_service = project_service
-        self.participation_service = participation_service
-        self.coordinator_service = coordinator_service
+        self.termination_service = termination_service
 
     @app_commands.command(
         name="termo-encerramento",
@@ -68,39 +60,72 @@ class TerminationStatementCog(commands.Cog):
         :type interaction: discord.Interaction
         """
 
-        member = self.member_service.find_member_by_type(
-            "discord_id", interaction.user.id
-        )
+        try:
 
-        project = self.project_service.find_project_by_type(
-            "discord_server_id", interaction.guild_id
-        )
+            member = self.termination_service.verify_member(
+                "discord_id", interaction.user.id
+            )
 
-        if member is None:
+            project = self.termination_service.verify_project(
+                "discord_server_id", interaction.guild_id
+            )
+
+            participations = self.termination_service.verify_participation(
+                "registration", member.registration
+            )
+
+            self.termination_service.verify_if_member_in_participation(
+                project.project_id, participations
+            )
+
+            coordinator = self.termination_service.verify_coordinator(
+                "coord_id", project.coordinator_id
+            )
+            await interaction.response.send_modal(
+                TerminationStatementForm(
+                    self.termination_service,
+                    member,
+                    project,
+                    participations,
+                    coordinator,
+                )
+            )
+
+        except MemberNotFound as exception:
             logger.warning(
                 "User %s without permission tried to generate termination statement",
                 interaction.user.name,
             )
-            await interaction.response.send_message(
-                "Você não tem permissão para gerar o termo de encerramento."
+            await interaction.response.send_message(exception)
+
+        except ProjectNotFound as exception:
+            logger.error(
+                "Project not found while doing termination statement requested by user %s",
+                interaction.user.name,
             )
-        elif project is None:
+            await interaction.response.send_message(exception)
+
+        except ParticipationNotFound as exception:
+            logger.error(
+                "Participation not found while doing termination statement requested by user %s",
+                interaction.user.name,
+            )
+            await interaction.response.send_message(exception)
+
+        except CoordinatorNotFound as exception:
+            logger.error(
+                "Coordinator not found while doing termination statement requested by user %s",
+                interaction.user.name,
+            )
+            await interaction.response.send_message(exception)
+
+        except ParticipationNotFoundInServer as exception:
             logger.warning(
-                "Project not found for server ID %s",
-                interaction.channel_id,
+                "User %s does not have a participation on server %s",
+                interaction.user.name,
+                interaction.guild,
             )
-            await interaction.response.send_message(
-                "Projeto não encontrado no sistema."
-            )
-        else:
-            await interaction.response.send_modal(
-                TerminationStatementForm(
-                    self.member_service,
-                    self.project_service,
-                    self.participation_service,
-                    self.coordinator_service,
-                )
-            )
+            await interaction.response.send_message(exception)
 
 
 class TerminationStatementForm(ui.Modal):
@@ -122,13 +147,14 @@ class TerminationStatementForm(ui.Modal):
         min_length=60,
         max_length=250,
     )
-
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
-        member_service: MemberService,
-        project_service: ProjectService,
-        participation_service: ParticipationService,
-        coordinator_service: CoordinatorService,
+        termination_service,
+        member,
+        project,
+        participations,
+        coordinator,
     ) -> None:
         """
         Initialize the TerminationStatementForm instance
@@ -145,10 +171,11 @@ class TerminationStatementForm(ui.Modal):
         """
 
         super().__init__(title="Termo de Encerramento")
-        self.member_service = member_service
-        self.project_service = project_service
-        self.participation_service = participation_service
-        self.coordinator_service = coordinator_service
+        self.termination_service = termination_service
+        self.member = member
+        self.project = project
+        self.participations = participations
+        self.coordinator = coordinator
 
     async def on_submit(self, interaction: discord.Interaction, /):
         """
@@ -158,106 +185,69 @@ class TerminationStatementForm(ui.Modal):
         :type interaction: discord.Interaction
         """
 
-        member = self.member_service.find_member_by_type(
-            "discord_id", interaction.user.id
-        )
-
-        if member is None:
-            return []
-
-        project = self.project_service.find_project_by_type(
-            "discord_server_id", interaction.guild_id
-        )
-
-        if project is None:
-            return []
-
-        participations = self.participation_service.find_participation_by_type(
-            "registration", member.registration
-        )
-
-        if participations is None:
-            return []
-
-        coordinator = self.coordinator_service.find_coordinator_by_type(
-            "coord_id", project.coordinator_id
-        )
-
-        if coordinator is None:
-            return []
-
-        projects_id = []
-        for participation in participations:
-            projects_id.append(participation.project_id)
-
-        if (
-            self.termination_date.value[2] != "/"
-            or self.termination_date.value[5] != "/"
-        ):
-            await interaction.response.send_message(
-                "Coloque as barras da data, conforme no modelo dd/mm/aaaa"
+        try:
+            self.termination_service.verify_termination_date_slashes(
+                self.termination_date.value
             )
-        else:
-            try:
-                termination_date = self.termination_date.value.split(sep="/")
 
-                termination_date = datetime(
-                    int(termination_date[2]),
-                    int(termination_date[1]),
-                    int(termination_date[0]),
-                ).date()
+            self.termination_service.verify_termination_date_period(
+                self.project.start_date,
+                self.project.end_date,
+                self.termination_date.value,
+            )
 
-                check_period = verify_termination_date_period(
-                    project.start_date, project.end_date, termination_date
+            self.termination_service.write_termination_date_in_participations(
+                self.participations,
+                self.project.project_id,
+                self.termination_date.value,
+            )
+
+            termination_statement = self.termination_service.generate_document(
+                self.member,
+                self.project,
+                self.coordinator,
+                self.termination_date.value,
+                self.termination_reason.value,
+            )
+
+            document_name = f"""termo-encerramento-{self.member.name}-
+                {self.member.registration}-{self.project.title}.pdf"""
+
+            logger.info(
+                "Termination statement successfully created by user %s",
+                interaction.user.name,
+            )
+
+            await interaction.response.send_message(
+                content="Termo de Encerramento gerado.",
+                file=discord.File(
+                    BytesIO(termination_statement),
+                    filename=document_name,
+                    spoiler=False,
+                ),
+            )
+
+        except SlashAbsence as exception:
+            await interaction.response.send_message(exception)
+
+        except ValueError as exception:
+            logger.warning(
+                " User %s inserted an invalid termination date format",
+                interaction.user.name,
+            )
+            date_format_error = (
+                self.termination_service.verify_termination_date_format_error(
+                    str(exception)
                 )
-
-                if check_period is not None:
-                    await interaction.response.send_message(check_period)
-                else:
-                    self.participation_service.write_termination_date_in_participations(
-                        projects_id, project.project_id, termination_date
-                    )
-
-                    data = TerminationStatementData(
-                        student_name=member.name,
-                        student_code=member.registration,
-                        project_name=project.title,
-                        project_manager=coordinator.name,
-                        termination_date=self.termination_date.value,
-                        termination_reason=self.termination_reason.value,
-                    )
-
-                    termination_statement = TerminationStatement(data)
-
-                    document_name = f"""termo-encerramento-{member.name}-
-                        {member.registration}-{project.title}.pdf"""
-
-                    logger.info(
-                        "Termination statement successfully created by user %s",
-                        interaction.user.name,
-                    )
-
-                    await interaction.response.send_message(
-                        content="Termo de Encerramento gerado.",
-                        file=discord.File(
-                            BytesIO(termination_statement.generate()),
-                            filename=document_name,
-                            spoiler=False,
-                        ),
-                    )
-            except ValueError as expection:
-                logger.warning(
-                    " User %s inserted an invalid termination date format",
+            )
+            if date_format_error is not None:
+                await interaction.response.send_message(date_format_error)
+            else:
+                logger.error(
+                    "An unexpected error occurred in termination date input by user %s",
                     interaction.user.name,
                 )
-                date_format_error = verify_termination_date_format_error(str(expection))
-                if date_format_error is not None:
-                    await interaction.response.send_message(date_format_error)
-                else:
-                    logger.error(
-                        "An unexpected error occurred in termination date input by user %s",
-                        interaction.user.name,
-                    )
-                    await interaction.response.send_message(
-                        "Um erro inesperado ocorreu no sistema, tente novamente."
-                    )
+            await interaction.response.send_message(date_format_error)
+
+        except OutofRangeTerminationDate as exception:
+            await interaction.response.send_message(exception)

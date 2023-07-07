@@ -14,3 +14,17 @@ from .member_service import MemberService
 from .participation_service import ParticipationService
 from .project_service import ProjectService
 from .student_service import StudentService
+from .termination_service import (
+    CoordinatorNotFound,
+    InvalidDayForMonth,
+    InvalidLiteralTerminationDate,
+    InvalidMonth,
+    MemberNotFound,
+    OutofRangeTerminationDate,
+    ParticipationNotFound,
+    ParticipationNotFoundInServer,
+    ProjectNotFound,
+    SlashAbsence,
+    TerminationStatementService,
+    YearOutOfRange,
+)

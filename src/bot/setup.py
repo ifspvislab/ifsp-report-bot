@@ -14,13 +14,7 @@ import discord
 from discord.ext import commands
 
 import settings
-from services import (
-    CoordinatorService,
-    MemberService,
-    ParticipationService,
-    ProjectService,
-    StudentService,
-)
+from services import StudentService, TerminationStatementService
 
 from .cogs import TerminationStatementCog
 from .modals import MonthyReportForm
@@ -30,10 +24,7 @@ logger = settings.logging.getLogger(__name__)
 
 def start_bot(
     student_service: StudentService,
-    member_service: MemberService,
-    participation_service: ParticipationService,
-    project_service: ProjectService,
-    coordinator_service: CoordinatorService,
+    termination_service: TerminationStatementService,
 ):
     """
     Start bot.
@@ -61,10 +52,7 @@ def start_bot(
         """
         await bot.add_cog(
             TerminationStatementCog(
-                member_service,
-                project_service,
-                participation_service,
-                coordinator_service,
+                termination_service,
             )
         )
         # updates the bot's command representation
