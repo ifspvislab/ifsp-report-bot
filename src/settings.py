@@ -32,3 +32,18 @@ def get_discord_bot_token() -> str:
             "The requested environment variable 'DISCORD_BOT_TOKEN' does not exist"
         )
     return discord_bot_token
+
+
+def get_admin_id() -> int:
+    """
+    Retrieve the admin bot id from the environment variables.
+    :return: ADMIN_DISCORD_ID.
+    :rtype: int
+    :raises KeyError: If the 'ADMIN_DISCORD_ID' environment variable does not exist.
+    """
+    discord_admin_id = os.getenv("ADMIN_DISCORD_ID")
+    if discord_admin_id is None:
+        raise KeyError(
+            "The requested environment variable 'ADMIN_DISCORD_ID' does not exist"
+        )
+    return discord_admin_id

@@ -106,3 +106,7 @@ signature_content_style = ParagraphStyle(
     leading=12,
     fontName="Calibri",
 )
+
+attend_table_style = ParagraphStyle(
+    name="AttendSheetHeaderText", alignment=1, wordWrap=True
+)

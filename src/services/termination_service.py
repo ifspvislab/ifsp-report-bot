@@ -166,7 +166,7 @@ class TerminationStatementService:
         Raises:
             ParticipationNotFound if the project isn't cataloged in the system
         """
-        participations = self.participation_service.find_participation_by_type(
+        participations = self.participation_service.find_participations_by_type(
             attr_type, value
         )
         if participations:
@@ -296,7 +296,9 @@ class TerminationStatementService:
             )
 
         if current_time > termination_date:
-            raise OutofRangeTerminationDate("Insira a data de hoje ou uma data futura!")
+            raise OutofRangeTerminationDate(
+                "Insira a data de hoje ou uma data futura dentro do período de execução do projeto!"
+            )
 
     def write_termination_date_in_participations(
         self, participations, guild_project_id, termination_date
@@ -376,7 +378,7 @@ class TerminationStatementService:
         data = TerminationStatementData(
             student_name=member.name,
             student_code=member.registration,
-            project_name=project.title,
+            project_name=project.project_title,
             project_manager=coordinator.name,
             termination_date=termination_date,
             termination_reason=termination_reason,

@@ -11,7 +11,7 @@ Classes:
 
 """
 
-from data import load_students
+from data import StudentData
 
 
 # pylint: disable-next=too-few-public-methods
@@ -35,6 +35,7 @@ class StudentService:
         Sets up the initial state by creating an empty `database` list to store student data.
         """
         self.database = []
+        self.student_data = StudentData()
 
     def find_student_by_discord_id(self, discord_id: int) -> dict | None:
         """
@@ -48,10 +49,10 @@ class StudentService:
         :param discord_id: The Discord ID of the student to find.
         :type discord_id: int
         :return: A dictionary representing the student if found, or None if not found.
-        :rtype: dict | None
+        :rtype: dict or None
         """
         if not self.database:
-            self.database = load_students()
+            self.database = self.student_data.load_students()
 
         for student in self.database:
             if student["discord_id"] == discord_id:

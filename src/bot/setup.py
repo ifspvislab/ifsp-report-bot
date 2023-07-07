@@ -7,23 +7,43 @@ Functions:
 - start_bot: Starts the Discord bot.
 
 """
-
 from datetime import datetime
 
 import discord
 from discord.ext import commands
 
 import settings
-from services import StudentService, TerminationStatementService
+from services import (
+    CoordinatorService,
+    MemberService,
+    ParticipationService,
+    ProjectService,
+    ReportService,
+    StudentService,
+    TerminationStatementService,
+)
 
-from .cogs import TerminationStatementCog
+from .cogs import (
+    AttendanceCog,
+    CoordinatorCog,
+    MemberCog,
+    ParticipationCog,
+    ProjectCog,
+    SemesterReportCog,
+    TerminationStatementCog,
+)
 from .modals import MonthyReportForm
 
 logger = settings.logging.getLogger(__name__)
 
-
+# pylint: disable=too-many-arguments
 def start_bot(
     student_service: StudentService,
+    member_service: MemberService,
+    coordinator_service: CoordinatorService,
+    project_service: ProjectService,
+    participation_service: ParticipationService,
+    report_service: ReportService,
     termination_service: TerminationStatementService,
 ):
     """
@@ -55,7 +75,34 @@ def start_bot(
                 termination_service,
             )
         )
+        await bot.add_cog(
+            ParticipationCog(
+                participation_service, coordinator_service, project_service
+            )
+        )
+        await bot.add_cog(MemberCog(member_service, coordinator_service))
+        await bot.add_cog(CoordinatorCog(coordinator_service))
+        await bot.add_cog(ProjectCog(project_service))
+
+        await bot.add_cog(
+            AttendanceCog(
+                bot,
+                member_service,
+                participation_service,
+                project_service,
+            )
+        )
+
         # updates the bot's command representation
+        await bot.add_cog(
+            SemesterReportCog(
+                member_service,
+                project_service,
+                report_service,
+                coordinator_service,
+                participation_service,
+            )
+        )
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
 
@@ -68,6 +115,7 @@ def start_bot(
         :type interaction: discord.Interaction
 
         """
+        await bot.tree.sync(guild=interaction.guild)
         logger.info("Ping command user %s", interaction.user.name)
         await interaction.response.send_message(f":ping_pong: {interaction.user.name}")
 

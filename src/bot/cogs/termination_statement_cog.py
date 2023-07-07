@@ -211,7 +211,7 @@ class TerminationStatementForm(ui.Modal):
             )
 
             document_name = f"""termo-encerramento-{self.member.name}-
-                {self.member.registration}-{self.project.title}.pdf"""
+                {self.member.registration}-{self.project.project_title}.pdf"""
 
             logger.info(
                 "Termination statement successfully created by user %s",
