@@ -42,8 +42,9 @@ def main():
         member_data,
         member_service,
         participation_data,
-        project_service,
         participation_service,
+        project_service,
+        project_data,
         coordinator_service,
     )
 

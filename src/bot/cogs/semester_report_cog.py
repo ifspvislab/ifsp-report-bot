@@ -23,16 +23,15 @@ from services import (
     ProjectService,
     ReportService,
 )
-from services.report_service import InvalidRequestPeriod
+from services.report_service import (
+    InvalidMember,
+    InvalidRequestPeriod,
+    ParticipationDoesNotExisInServer,
+    ParticipationDoesNotExist,
+    ProjectDoesNotExist,
+)
 
 logger = settings.logging.getLogger(__name__)
-
-
-class WrongServerError(Exception):
-    """
-    Handles the exception of when the semester report request is made
-    in the wrong server.
-    """
 
 
 class SemesterReportCog(commands.Cog):
@@ -70,21 +69,17 @@ class SemesterReportCog(commands.Cog):
         :type interaction: discord.Interaction
 
         """
+        errors = []
+
         try:
-            errors = []
 
             student = self.member_service.find_member_by_type(
                 "discord_id", interaction.user.id
             )
 
             if student is None:
-                errors.append(
-                    "Você não tem permissão para gerar relatório semestral,"
-                    " pois não está cadastrado em nenhum projeto de ensino!"
-                )
-                logger.warning(
-                    "User %s without permission tried to generate semester report",
-                    interaction.user.name,
+                raise InvalidMember(
+                    "Você não está cadastrado em nenhum projeto de ensino!"
                 )
 
             project = self.project_service.find_project_by_type(
@@ -92,39 +87,70 @@ class SemesterReportCog(commands.Cog):
             )
 
             if project is None:
-                errors.append("Este projeto não está cadastrado no database.")
-                logger.warning(
-                    "Project not found for server ID %s",
-                    interaction.channel_id,
+                raise ProjectDoesNotExist(
+                    "Este canal não está cadastrado como projeto."
                 )
 
-            self.report_service.invalid_request_period()
+            invalid_request_period = self.report_service.invalid_request_period()
 
-        except InvalidRequestPeriod as error:
-            errors.append(error)
-            logger.warning(
-                "User %s tried to generate semester report outside of allowed period.",
+            valid_member_for_request = self.report_service.verifiy_member_validity(
+                interaction.user.id,
+                student.registration,
+                interaction.channel_id,
+                project.project_id,
+                project.coordinator_id,
+            )
+
+            if valid_member_for_request and not invalid_request_period:
+                logger.info("Semester report user %s", interaction.user.name)
+                # pylint: disable=too-many-function-args
+                await interaction.response.send_modal(
+                    SemesterReportForm(
+                        self.member_service,
+                        self.project_service,
+                        self.report_service,
+                        self.coordinator_service,
+                        self.participation_service,
+                    )
+                )
+
+        except ParticipationDoesNotExist as exception:
+            logger.error(
+                "User %s does not participate of any project", interaction.user.name
+            )
+            await interaction.response.send_message(exception)
+
+        except ParticipationDoesNotExisInServer as exception:
+            logger.error(
+                "User %s tried to generate the semester report in the wrong project server",
                 interaction.user.name,
             )
+            await interaction.response.send_message(exception)
 
-        if not errors:
-            logger.info("Semester report user %s", interaction.user.name)
-            # pylint: disable=too-many-function-args
-            await interaction.response.send_modal(
-                SemesterReportForm(
-                    self.member_service,
-                    self.project_service,
-                    self.report_service,
-                    self.coordinator_service,
-                    self.participation_service,
-                )
+        except InvalidMember as exception:
+            logger.error(
+                "User %s without permission tried to generate the semester report",
+                interaction.user.id,
             )
-        else:
+            await interaction.response.send_message(exception)
+
+        except InvalidRequestPeriod as exception:
+            logger.error(
+                "User %s tried to generate semester report outside of the allowed period",
+                interaction.user.id,
+            )
+            await interaction.response.send_message(exception)
+
+        except ProjectDoesNotExist as exception:
+            logger.error("No project found for server %s", interaction.channel_id)
+            await interaction.response.send_message(str(exception))
+
+        if errors:
             embed = discord.Embed(
                 title=":sob: Problemas com a sua requisição", color=0xFF0000
             )
             for index, error in enumerate(errors):
-                embed.add_field(name=f"Erro {index+1}", value=error, inline=False)
+                embed.add_field(name=f"Erro {index+1}", value=str(error), inline=False)
 
             await interaction.response.send_message(embed=embed)
 

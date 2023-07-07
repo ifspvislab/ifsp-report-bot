@@ -20,7 +20,7 @@ Functions:
 
 from datetime import datetime
 
-from data import MemberData, ParticipationData
+from data import MemberData, ParticipationData, ProjectData
 
 # ParticipationData
 from reports import SemesterReport, SemesterReportData
@@ -56,6 +56,13 @@ class ProjectDoesNotExist(Exception):
 class ParticipationDoesNotExist(Exception):
     """
     Exception for handling a participation that doesn't exist
+    """
+
+
+class ParticipationDoesNotExisInServer(Exception):
+    """
+    Handles the exception of when a student participates of a project, but
+    is in the wrong project server.
     """
 
 
@@ -96,8 +103,9 @@ class ReportService:
         member_data: MemberData,
         member_service: MemberService,
         participation_data: ParticipationData,
-        project_service: ProjectService,
         participation_service: ParticipationService,
+        project_service: ProjectService,
+        project_data: ProjectData,
         coordinator_service: CoordinatorService,
     ) -> None:
         """
@@ -111,9 +119,11 @@ class ReportService:
         """
         self.member_data = member_data
         self.participation_data = participation_data
+        self.project_data = project_data
 
         self.database = self.participation_data.load_participations()
         self.members = self.member_data.load_members()
+        self.projects = self.project_data.load_projects()
 
         self.member_service = member_service
         self.project_service = project_service
@@ -134,7 +144,7 @@ class ReportService:
         current_month = current_date.month
         current_day = current_date.day
 
-        if current_month == 7 and 23 <= current_day <= 31:
+        if current_month == 7 and 6 <= current_day <= 31:
             return False
 
         if current_month == 12 and 1 <= current_day <= 10:
@@ -168,19 +178,14 @@ class ReportService:
         if student is None:
             raise InvalidMember("Você não é membro!")
 
-        participations = self.participation_service.find_participations_by_type(
-            "registration", student_registration
-        )
-        participation_exists = any(p.project_id == project_id for p in participations)
-
-        if not participation_exists:
-            raise ParticipationDoesNotExist(
-                "Você não participa de nenhum projeto no momento!"
-            )
-
         project = self.project_service.find_project_by_type(
             "discord_server_id", project_server_id
         )
+
+        if project is None:
+            raise ProjectDoesNotExist(
+                "Este servidos não está cadastrado em nehum projeto!"
+            )
 
         coordinator = self.coordinator_service.find_coordinator_by_type(
             "coord_id", coordinator_id
@@ -189,6 +194,23 @@ class ReportService:
         if project.coordinator_id != coordinator.coord_id:
             raise ParticipationDoesNotExist(
                 "Você não tem permissão para gerar o relatório deste projeto!"
+            )
+
+        participations = self.participation_service.find_participations_by_type(
+            "registration", student_registration
+        )
+
+        if participations is None:
+            raise ParticipationDoesNotExist(
+                "Você não participa de nenhum projeto de ensino atualmente!"
+            )
+
+        participation_exists = any(p.project_id == project_id for p in participations)
+
+        if not participation_exists:
+            raise ParticipationDoesNotExisInServer(
+                "Você não participa do projeto cadastrado neste canal!"
+                " Verifique se você está no canal correto e tente novamente."
             )
 
         return (
