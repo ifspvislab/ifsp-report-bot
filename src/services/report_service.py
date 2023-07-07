@@ -180,7 +180,7 @@ class ReportService:
         current_date = datetime.now().date()
         current_month = current_date.month
         current_day = current_date.day
-        july_day_range = range(6, 32)
+        july_day_range = range(23, 32)
         december_day_range = range(1, 11)
 
         if not (
