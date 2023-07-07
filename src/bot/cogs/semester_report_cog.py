@@ -128,14 +128,14 @@ class SemesterReportCog(commands.Cog):
         except InvalidMember as exception:
             logger.error(
                 "User %s without permission tried to generate the semester report",
-                interaction.user.id,
+                interaction.user.name,
             )
             await interaction.response.send_message(exception)
 
         except InvalidRequestPeriod as exception:
             logger.error(
                 "User %s tried to generate semester report outside of the allowed period",
-                interaction.user.id,
+                interaction.user.name,
             )
             await interaction.response.send_message(exception)
 
