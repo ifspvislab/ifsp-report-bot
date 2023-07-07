@@ -40,8 +40,9 @@ class LogData:
         Returns:
         - A dictionary representing a Log object.
         """
-        fields = [field.strip() for field in row.split(sep="§")]
-        log = Log(int(fields[0]), fields[1], fields[2])
+        fields = [field.strip() for field in row.split(sep=",")]
+        action = ",".join(fields[2:])
+        log = Log(int(fields[0]), fields[1], str(action))
         return log
 
     def load_logs(self) -> list[dict]:
@@ -66,5 +67,5 @@ class LogData:
         """
         log_list = [log.discord_id, log.date, log.action]
         with open("assets/data/logs.csv", "a", newline="", encoding="utf-8") as csvfile:
-            writer = csv.writer(csvfile, delimiter="§")
+            writer = csv.writer(csvfile, delimiter=",")
             writer.writerow(log_list)
