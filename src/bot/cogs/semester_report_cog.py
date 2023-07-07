@@ -69,8 +69,6 @@ class SemesterReportCog(commands.Cog):
         :type interaction: discord.Interaction
 
         """
-        errors = []
-
         try:
 
             student = self.member_service.find_member_by_type(
@@ -144,15 +142,6 @@ class SemesterReportCog(commands.Cog):
         except ProjectDoesNotExist as exception:
             logger.error("No project found for server %s", interaction.channel_id)
             await interaction.response.send_message(str(exception))
-
-        if errors:
-            embed = discord.Embed(
-                title=":sob: Problemas com a sua requisição", color=0xFF0000
-            )
-            for index, error in enumerate(errors):
-                embed.add_field(name=f"Erro {index+1}", value=str(error), inline=False)
-
-            await interaction.response.send_message(embed=embed)
 
 
 class SemesterReportForm(ui.Modal):

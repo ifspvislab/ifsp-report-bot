@@ -144,7 +144,7 @@ class ReportService:
         current_month = current_date.month
         current_day = current_date.day
 
-        if current_month == 7 and 6 <= current_day <= 31:
+        if current_month == 7 and 23 <= current_day <= 31:
             return False
 
         if current_month == 12 and 1 <= current_day <= 10:
@@ -175,17 +175,9 @@ class ReportService:
             "discord_id", member_discord_id
         )
 
-        if student is None:
-            raise InvalidMember("Você não é membro!")
-
         project = self.project_service.find_project_by_type(
             "discord_server_id", project_server_id
         )
-
-        if project is None:
-            raise ProjectDoesNotExist(
-                "Este servidos não está cadastrado em nehum projeto!"
-            )
 
         coordinator = self.coordinator_service.find_coordinator_by_type(
             "coord_id", coordinator_id
