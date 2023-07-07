@@ -11,6 +11,7 @@ from discord import app_commands, ui
 from discord.ext import commands
 
 import settings
+from data import Member, Project
 from services import (
     CoordinatorService,
     MemberService,
@@ -86,11 +87,8 @@ class SemesterReportCog(commands.Cog):
             invalid_request_period = self.report_service.invalid_request_period()
 
             valid_member_for_request = self.report_service.verifiy_member_validity(
-                interaction.user.id,
-                student.registration,
-                interaction.guild_id,
-                project.project_id,
-                project.coordinator_id,
+                student,
+                project,
             )
 
             if valid_member_for_request and not invalid_request_period:
@@ -98,8 +96,8 @@ class SemesterReportCog(commands.Cog):
                 # pylint: disable=too-many-function-args
                 await interaction.response.send_modal(
                     SemesterReportForm(
-                        self.member_service,
-                        self.project_service,
+                        student,
+                        project,
                         self.report_service,
                         self.coordinator_service,
                         self.participation_service,
@@ -186,8 +184,8 @@ class SemesterReportForm(ui.Modal):
     # pylint: disable=too-many-arguments
     def __init__(
         self,
-        member_service: MemberService,
-        project_service: ProjectService,
+        member: Member,
+        project: Project,
         report_service: ReportService,
         coordinator_service: CoordinatorService,
         participation_service: ParticipationService,
@@ -207,8 +205,8 @@ class SemesterReportForm(ui.Modal):
         :type report_service: ReportService
         """
         super().__init__(title="Relatório Semestral")
-        self.member_service = member_service
-        self.project_service = project_service
+        self.member = member
+        self.project = project
         self.coordinator_service = coordinator_service
         self.participation_service = participation_service
         self.report_service = report_service
@@ -224,20 +222,10 @@ class SemesterReportForm(ui.Modal):
         :type interaction: discord.Interaction
 
         """
-        student = self.member_service.find_member_by_type(
-            "discord_id", interaction.user.id
-        )
-
-        project = self.project_service.find_project_by_type(
-            "discord_server_id", interaction.guild_id
-        )
 
         valid_data_for_report = self.report_service.verifiy_member_validity(
-            interaction.user.id,
-            student.registration,
-            interaction.guild_id,
-            project.project_id,
-            project.coordinator_id,
+            self.member,
+            self.project,
         )
 
         if valid_data_for_report:

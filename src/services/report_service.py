@@ -27,17 +27,16 @@ Methods:
 
 from datetime import datetime
 
-from data import CoordinatorData, MemberData, ParticipationData, ProjectData
-
-# ParticipationData
+from data import (
+    CoordinatorData,
+    Member,
+    ParticipationData,
+    Project,
+)
 from reports import SemesterReport, SemesterReportData
 
 from .coordinator_service import CoordinatorService
-from .member_service import MemberService
 from .participation_service import ParticipationService
-from .project_service import ProjectService
-
-# from .project_service import ProjectService
 
 
 class InvalidRequestPeriod(Exception):
@@ -122,12 +121,8 @@ class ReportService:
 
     def __init__(
         self,
-        member_data: MemberData,
-        member_service: MemberService,
         participation_data: ParticipationData,
         participation_service: ParticipationService,
-        project_service: ProjectService,
-        project_data: ProjectData,
         coordinator_service: CoordinatorService,
         coordinator_data: CoordinatorData,
     ) -> None:
@@ -152,18 +147,12 @@ class ReportService:
             coordinator_data (CoordinatorData):
             An instance of the CoordinatorData class for accessing coordinator data.
         """
-        self.member_data = member_data
         self.participation_data = participation_data
-        self.project_data = project_data
         self.coordinator_data = coordinator_data
 
         self.database = self.participation_data.load_participations()
-        self.members = self.member_data.load_members()
-        self.projects = self.project_data.load_projects()
         self.coordinators = self.coordinator_data.load_coordinators()
 
-        self.member_service = member_service
-        self.project_service = project_service
         self.participation_service = participation_service
         self.coordinator_service = coordinator_service
 
@@ -180,7 +169,7 @@ class ReportService:
         current_date = datetime.now().date()
         current_month = current_date.month
         current_day = current_date.day
-        july_day_range = range(23, 32)
+        july_day_range = range(6, 32)
         december_day_range = range(1, 11)
 
         if not (
@@ -195,11 +184,8 @@ class ReportService:
     # pylint: disable=too-many-arguments
     def verifiy_member_validity(
         self,
-        member_discord_id: int,
-        student_registration: str,
-        project_server_id: int,
-        project_id: str,
-        coordinator_id: str,
+        member: Member,
+        project: Project,
     ):
         """
         Checks if the student can request the semester report.
@@ -224,22 +210,8 @@ class ReportService:
             and student's name.
         """
 
-        student = self.member_service.find_member_by_type(
-            "discord_id", member_discord_id
-        )
-
-        if student is None:
-            raise InvalidMember("Você não está cadastrado como membro!")
-
-        project = self.project_service.find_project_by_type(
-            "discord_server_id", project_server_id
-        )
-
-        if project is None:
-            raise ProjectDoesNotExist("Este servidor não está cadastrado como projeto.")
-
         coordinator = self.coordinator_service.find_coordinator_by_type(
-            "coord_id", coordinator_id
+            "coord_id", project.coordinator_id
         )
 
         if coordinator is None:
@@ -248,7 +220,7 @@ class ReportService:
             )
 
         participations = self.participation_service.find_participations_by_type(
-            "registration", student_registration
+            "registration", member.registration
         )
 
         if participations is None:
@@ -257,7 +229,7 @@ class ReportService:
             )
 
         participation_exists_in_server = any(
-            p.project_id == project_id for p in participations
+            p.project_id == project.project_id for p in participations
         )
 
         if not participation_exists_in_server:
@@ -269,7 +241,7 @@ class ReportService:
         return (
             project.project_title,
             coordinator.name,
-            student.name,
+            member.name,
         )
 
     # pylint: disable=too-many-arguments
