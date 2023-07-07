@@ -37,14 +37,15 @@ class ParticipationData:
         :rtype: Dataclass.
         """
         fields = [field.strip() for field in row.split(sep=",")]
-        participation = Participation(
+        data = Participation(
             participation_id=fields[0],
             registration=fields[1],
             project_id=fields[2],
             initial_date=datetime.strptime(fields[3], "%d/%m/%Y").date(),
             final_date=datetime.strptime(fields[4], "%d/%m/%Y").date(),
         )
-        return participation
+
+        return data
 
     def load_participations(self) -> list[Participation]:
         """
@@ -54,8 +55,26 @@ class ParticipationData:
         :rtype: list.
         """
 
+        participations = []
         with open("assets/data/participations.csv", "r", encoding="utf-8") as file:
-            participations = []
             for row in file:
                 participations.append(self.row_to_participation(row))
         return participations
+
+    def add_participation(self, participation: Participation):
+        """
+        Add the participations to the database.
+
+        :param participation: the participation dataclass.
+        :type participation: Dataclass.
+        """
+        initial_date = datetime.strftime(participation.initial_date, "%d/%m/%Y")
+        final_date = datetime.strftime(participation.final_date, "%d/%m/%Y")
+        with open(
+            "assets/data/participations.csv", "a", encoding="UTF-8"
+        ) as participation_data:
+            participation_data.write(
+                f"{participation.participation_id},{participation.registration},"
+                + f"{participation.project_id},{initial_date},{final_date}\n"
+            )
+        participation_data.close()

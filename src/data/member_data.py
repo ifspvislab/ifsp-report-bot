@@ -33,7 +33,6 @@ class Member:
     email: str
 
 
-# pylint: disable=too-few-public-methods
 class MemberData:
     """
     :class: MemberData
@@ -65,6 +64,22 @@ class MemberData:
         fields = [field.strip() for field in row.split(sep=",")]
         member = Member(fields[0], fields[1], int(fields[2]), fields[3], fields[4])
         return member
+
+    def add_member(self, member: Member):
+        """
+        .. method:: add_member(member)
+
+        Add project member data to the CSV file.
+
+        :param member: An instance of the Member class representing the member.
+        :type member: Member
+
+        """
+        with open("assets/data/members.csv", "a", encoding="UTF-8") as member_data:
+            member_data.write(
+                f"{member.member_id},{member.registration},"
+                + f"{member.discord_id},{member.name},{member.email}\n"
+            )
 
     def load_members(self) -> list[Member]:
         """

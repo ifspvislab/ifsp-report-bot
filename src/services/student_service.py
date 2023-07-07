@@ -11,7 +11,7 @@ Classes:
 
 """
 
-from data.student_data import StudentData
+from data import StudentData
 
 
 # pylint: disable-next=too-few-public-methods

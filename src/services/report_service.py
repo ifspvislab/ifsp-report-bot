@@ -27,12 +27,7 @@ Methods:
 
 from datetime import datetime
 
-from data import (
-    CoordinatorData,
-    Member,
-    ParticipationData,
-    Project,
-)
+from data import CoordinatorData, Member, ParticipationData, Project
 from reports import SemesterReport, SemesterReportData
 
 from .coordinator_service import CoordinatorService

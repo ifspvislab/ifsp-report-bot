@@ -1,6 +1,7 @@
 """
 services
 =======
+========
 
 This package provides services for managing student data.
 
@@ -25,11 +26,19 @@ Use the imported modules to manage student data.
 
 """
 import settings
-from data.member_data import MemberData
+from data import Member, MemberData
+
+from .validation import verify_discord_id, verify_email, verify_registration_format
 
 logger = settings.logging.getLogger(__name__)
 
-# pylint: disable=too-few-public-methods
+
+class MemberAlreadyExists(Exception):
+    """Exception raised when a member already exists."""
+
+    print(Exception)
+
+
 class MemberService:
     """Class for managing member data.
 
@@ -60,3 +69,36 @@ class MemberService:
                 return member
 
         return None
+
+    def check_ocurrance(self, registration):
+        """Check if a member with the given prontuario already exists.
+
+        Args:
+            value (str): The prontuario value to check.
+
+        Raises:
+            OccurrenceError: If a member with the same prontuario already exists.
+        """
+
+        if self.find_member_by_type("registration", registration):
+            raise MemberAlreadyExists("Já existe esse membro")
+
+    def add_member(self, member):
+        """Add a new member.
+
+        Args:
+            member (Member): Member object.
+        """
+        verify_registration_format(member.registration)
+        verify_email(member.email)
+        verify_discord_id(member.discord_id)
+        self.check_ocurrance(member.registration)
+        member = Member(
+            member.member_id,
+            member.registration,
+            member.discord_id,
+            member.name,
+            member.email,
+        )
+        self.member_data.add_member(member)
+        self.database.append(member)

@@ -23,8 +23,8 @@ class Project:
         coordinator_id (str): the projects's coordinator_id.
         discord_server_id (int): the project's Discord Server ID.
         project_title (str): the project's title.
-        start_date (date): the project's start date.
-        end_date (date): the project's end date.
+        start_date (int): the project's start date.
+        end_date (int): the project's end date.
     """
 
     project_id: str
@@ -35,7 +35,6 @@ class Project:
     end_date: date
 
 
-# pylint: disable=too-few-public-methods
 class ProjectData:
     """
     A class for managing project data.
@@ -87,3 +86,25 @@ class ProjectData:
             for row in file:
                 projects.append(self._row_to_project(row))
             return projects
+
+    def add_project(self, project: Project) -> None:
+        """
+        Add project data to the CVS file
+
+        :param coordinator: project coordinator
+        :type coordinator: str
+        :param discord_server_id: project discord_server_id
+        :type discord_server_id: int
+        :param title: project title
+        :type title: str
+        :param start_date: project start_date
+        :type start_date: int
+        :param end_date: project end_date
+        :type end_date: int
+        """
+
+        with open("assets/data/projects.csv", "a", encoding="UTF-8") as project_data:
+            project_data.write(
+                f"{project.project_id},{project.coordinator_id},{project.discord_server_id},"
+                + f"{project.project_title},{project.start_date},{project.end_date}\n"
+            )
