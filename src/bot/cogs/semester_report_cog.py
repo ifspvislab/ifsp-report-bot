@@ -77,17 +77,15 @@ class SemesterReportCog(commands.Cog):
             )
 
             if student is None:
-                raise InvalidMember(
-                    "Você não está cadastrado em nenhum projeto de ensino!"
-                )
+                raise InvalidMember("Você não está cadastrado como membro!")
 
             project = self.project_service.find_project_by_type(
-                "discord_server_id", interaction.channel_id
+                "discord_server_id", interaction.guild_id
             )
 
             if project is None:
                 raise ProjectDoesNotExist(
-                    "Este canal não está cadastrado como projeto."
+                    "Este servidor não está cadastrado como projeto."
                 )
 
             invalid_request_period = self.report_service.invalid_request_period()
@@ -95,7 +93,7 @@ class SemesterReportCog(commands.Cog):
             valid_member_for_request = self.report_service.verifiy_member_validity(
                 interaction.user.id,
                 student.registration,
-                interaction.channel_id,
+                interaction.guild_id,
                 project.project_id,
                 project.coordinator_id,
             )
@@ -141,7 +139,7 @@ class SemesterReportCog(commands.Cog):
             await interaction.response.send_message(exception)
 
         except ProjectDoesNotExist as exception:
-            logger.error("No project found for server %s", interaction.channel_id)
+            logger.error("No project found for server %s", interaction.guild_id)
             await interaction.response.send_message(str(exception))
 
         except CoordinatorDoesNotExist as exception:
@@ -236,13 +234,13 @@ class SemesterReportForm(ui.Modal):
         )
 
         project = self.project_service.find_project_by_type(
-            "discord_server_id", interaction.channel_id
+            "discord_server_id", interaction.guild_id
         )
 
         valid_data_for_report = self.report_service.verifiy_member_validity(
             interaction.user.id,
             student.registration,
-            interaction.channel_id,
+            interaction.guild_id,
             project.project_id,
             project.coordinator_id,
         )
@@ -252,7 +250,7 @@ class SemesterReportForm(ui.Modal):
             project_title, coordinator_name, student_name = valid_data_for_report
 
             generated_report = self.report_service.generate_semester_report(
-                project_title=project_title,
+                project_title=project_title,  # verificar se os dados estão no lugar certo!!
                 project_manager=coordinator_name,
                 student_name=student_name,
                 planned_activities=self.planned_activities.value.strip(),
@@ -278,3 +276,6 @@ class SemesterReportForm(ui.Modal):
                     spoiler=False,
                 ),
             )
+
+
+# verificar se deveria usar try-except aqui?

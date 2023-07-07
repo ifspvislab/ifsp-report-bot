@@ -180,7 +180,7 @@ class ReportService:
         current_date = datetime.now().date()
         current_month = current_date.month
         current_day = current_date.day
-        july_day_range = range(23, 32)
+        july_day_range = range(6, 8)
         december_day_range = range(1, 11)
 
         if not (
@@ -256,13 +256,13 @@ class ReportService:
 
         if not participation_exists_in_server:
             raise ParticipationDoesNotExisInServer(
-                "Você não participa do projeto cadastrado neste canal!"
-                " Verifique se você está no canal correto e tente novamente."
+                "Você não participa do projeto cadastrado neste servidor!"
+                " Verifique se você está no servidor correto e tente novamente."
             )
 
         return (
-            coordinator.name,
             project.project_title,
+            coordinator.name,
             student.name,
         )
 
