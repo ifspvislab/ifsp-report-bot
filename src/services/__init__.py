@@ -8,6 +8,13 @@ Modules:
     - student_service: Module for managing student data.
 
 """
-from .log_service import IncorrectDateFilter, LogService, NotCoordiantor, is_coordinator
+from .is_coordinator import is_coordinator
+from .log_service import (
+    IdDoesNotExist,
+    IncorrectDateFilter,
+    InvalidReportSize,
+    LogService,
+    NoStartDate,
+)
 from .student_service import StudentService
 from .validation import DiscordIdError

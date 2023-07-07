@@ -3,12 +3,11 @@
 """
 
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from io import BytesIO
 
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import Paragraph, SimpleDocTemplate
-
-from services import LogService
 
 from .styles import events_header_style, events_text_style
 
@@ -33,8 +32,8 @@ class LogReportData:
     logs: list[dict]
     project_id: str
     value: int
-    start_date: str
-    end_date: str
+    start_date: datetime
+    end_date: datetime
     student_id: str
 
 
@@ -69,9 +68,7 @@ class LogReport:
             self.generate_id_and_date_report()
 
         doc.build(self.content)
-        if LogService().check_bytesio_size(bytes_io=buffer):
-            return buffer.getvalue()
-        return None
+        return buffer.getvalue()
 
     def generate_default_report(self):
         """
@@ -104,8 +101,7 @@ class LogReport:
         and includes relevant log entries in the report content.
         """
 
-        title = f"Log File - {self.data.start_date} to {self.data.end_date}"
-        title_report = Paragraph(title, events_header_style)
+        title_report = Paragraph("Log File", events_header_style)
         self.content.append(title_report)
 
         for student in self.data.students:
@@ -114,12 +110,12 @@ class LogReport:
                 self.content.append(user_title)
 
                 for log in self.data.logs:
-                    validation = LogService().date_validation(
-                        date=log.date,
-                        start_date=self.data.start_date,
-                        end_date=self.data.end_date,
-                    )
-                    if log.discord_id == student["discord_id"] and validation:
+                    date = datetime.strptime(log.date, "%d/%m/%Y %H:%M")
+                    if log.discord_id == student[
+                        "discord_id"
+                    ] and self.data.start_date <= date <= self.data.end_date + timedelta(
+                        days=1
+                    ):
                         log_event = Paragraph(log.action, events_text_style)
                         self.content.append(log_event)
 
@@ -155,8 +151,7 @@ class LogReport:
         and includes relevant log entries in the report content.
         """
 
-        title = f"Log File - {self.data.start_date} to {self.data.end_date}"
-        title_report = Paragraph(title, events_header_style)
+        title_report = Paragraph("Log File", events_header_style)
         self.content.append(title_report)
 
         for student in self.data.students:
@@ -166,11 +161,11 @@ class LogReport:
                     self.content.append(user_title)
 
         for log in self.data.logs:
-            validation = LogService().date_validation(
-                date=log.date,
-                start_date=self.data.start_date,
-                end_date=self.data.end_date,
-            )
-            if log.discord_id == int(self.data.student_id) and validation:
+            date = datetime.strptime(log.date, "%d/%m/%Y %H:%M")
+            if log.discord_id == int(
+                self.data.student_id
+            ) and self.data.start_date <= date <= self.data.end_date + timedelta(
+                days=1
+            ):
                 log_event = Paragraph(log.action, events_text_style)
                 self.content.append(log_event)

@@ -1,47 +1,36 @@
 """
 Services for log command.
 """
+import zoneinfo
 from datetime import datetime
-from io import BytesIO
-
-import discord
 
 import settings
-from data import CoordinatorData, ProjectData, StudentData
+from data import Log, LogData, ProjectData, StudentData
+from reports import LogReport, LogReportData
 
-zone = settings.get_time_zone()
-students_data = StudentData().load_students()
-projects_data = ProjectData().load_projects()
+from .validation import verify_discord_id
+
+logger = settings.logging.getLogger(__name__)
 
 
 class IncorrectDateFilter(Exception):
-    """Incorrect date filter"""
+    """Exception raised for incorrect date filters."""
 
 
-class NotCoordiantor(Exception):
-    """NotCoordinator"""
+class NotCoordinator(Exception):
+    """Exception raised when the user is not a coordinator."""
 
 
-def is_coordinator(interaction: discord.Interaction):
-    """
-    Check if the user is a coordinator.
+class IdDoesNotExist(Exception):
+    """Exception raised when an ID does not exist."""
 
-    This function checks if the user associated with the provided `discord.Interaction`
-    is a coordinator by comparing their Discord ID with the coordinators' Discord IDs
-    stored in the coordinator data.
 
-    :param interaction: The Discord interaction object.
-    :type interaction: discord.Interaction
-    :return: True if the user is a coordinator, False otherwise.
-    :rtype: bool
-    """
-    discord_id = interaction.user.id
-    coordinators = CoordinatorData.load_coordinators(self=CoordinatorData)
+class NoStartDate(Exception):
+    """Exception raised when there is no start date."""
 
-    for coordinator in coordinators:
-        if str(coordinator.discord_id) == str(discord_id):
-            return True
-    return False
+
+class InvalidReportSize(Exception):
+    """Exception raised for an invalid report size."""
 
 
 class LogService:
@@ -49,141 +38,244 @@ class LogService:
     Service class for log command.
     """
 
-    def check_student_in_project(
-        self, student_id: int, students: list[dict] = None
-    ) -> bool:
-        """
-        Checks if the given student ID is associated with a project.
+    def __init__(self):
+        self.database = []
+        self.log_data = LogData()
+        self.projects_data = ProjectData()
+        self.students_data = StudentData()
 
-        :param student_id: The student ID to be checked.
+    def check_student_in_project(self, student_id: int) -> bool:
+        """
+        Check if a student is part of a project.
+
+        This function checks if a student with the provided ID is part of a project.
+
+        :param student_id: The ID of the student to check.
         :type student_id: int
-        :param students: The list of student dictionaries.
-                        Defaults to None.
-        :type students: list[dict] or None
-        :return: True if the student ID is associated with a project, False otherwise.
+        :return: True if the student is part of a project, False otherwise.
         :rtype: bool
         """
-        if students is None:
-            students = students_data
+        self.database = self.students_data.load_students()
 
-        for student in students:
+        for student in self.database:
             if student["discord_id"] == student_id:
                 return True
         return False
 
-    def get_project_id_by_server_id(
-        self, server_id: int, projects: list[dict] = None
-    ) -> int:
+    def get_project_id_by_server_id(self, server_id: int) -> str:
         """
-        Get the project ID associated with the given server ID.
+        Get the project ID associated with a server ID.
+
+        This function retrieves the project ID associated with the provided server ID.
 
         :param server_id: The server ID.
         :type server_id: int
-        :param projects: The list of project dictionaries.
-        :type projects: list[dict]
-        :return: The project ID associated with the server ID.
-                 Returns None if no project is associated with the server.
-        :rtype: int or None
+        :return: The project ID associated with the server ID, or None if not found.
+        :rtype: str
         """
-        if projects is None:
-            projects = projects_data
+        self.database = self.projects_data.load_projects()
 
-        for project in projects:
+        for project in self.database:
             if project["discord_server_id"] == str(server_id):
                 return project["id"]
         return None
 
-    def date_validation(self, date: str, start_date: str, end_date: str) -> bool:
+    def datetime_format(self, date: str) -> datetime:
         """
-        Validates a date within a specified range.
+        Format a date string to a datetime object.
 
-        :param date: Date to be validated.
+        This function formats a date string to a datetime object.
+
+        :param date: The date string to format.
         :type date: str
-        :param start_date: Start date of the range.
-        :type start_date: str
-        :param end_date: End date of the range.
-        :type end_date: str
-        :return: True if the date is within the range, False otherwise.
-        :rtype: bool
+        :return: The formatted datetime object.
+        :rtype: datetime
         """
         split_date = date.split(" ")
-        correct_date = datetime.strptime(split_date[0], "%d/%m/%Y")
+        if len(split_date) == 2:
+            datetime.strptime(date, "%d/%m/%Y %H:%M")
+        formatted_date = datetime.strptime(split_date[0], "%d/%m/%Y")
 
-        formatted_start_date = datetime.strptime(start_date, "%d/%m/%Y")
-        split_end_date = end_date.split(" ")
-        formatted_end_date = datetime.strptime(split_end_date[0], "%d/%m/%Y")
+        return formatted_date
 
-        if formatted_start_date <= correct_date <= formatted_end_date:
-            return True
-        return False
+    def get_time_zone(self) -> zoneinfo.ZoneInfo:
+        """
+        Retrieve the time zone.
 
-    def filter_date_validation(self, date: str, start_date: str, end_date: str):
+        This function retrieves the time zone.
+
+        :return: The time zone representing 'America/Sao_Paulo'.
+        :rtype: zoneinfo.ZoneInfo
+        """
+        return zoneinfo.ZoneInfo("America/Sao_Paulo")
+
+    def filter_date_validation(self, date: str) -> None:
         """
         Validates the date filter based on the provided start and end dates.
 
-        Args:
-            date (str): The date to be validated.
-            start_date (str): The start date for the filter range.
-            end_date (str): The end date for the filter range.
+        This function validates the date filter based on the provided start and end dates.
 
-        Raises:
-            IncorrectDateFilter: If the date format is incorrect.
-
-        Returns:
-            None
+        :param date: The date to be validated.
+        :type date: str
+        :raises IncorrectDateFilter: If the date format is incorrect.
+        :return: None
         """
         try:
-            self.date_validation(date=date, start_date=start_date, end_date=end_date)
+            split_date = date.split(" ")
+            if len(split_date) == 2:
+                datetime.strptime(date, "%d/%m/%Y %H:%M")
+            datetime.strptime(split_date[0], "%d/%m/%Y")
         except Exception as exc:
             raise IncorrectDateFilter("Formato de data incorreto") from exc
 
-    def formatted_get_date(
-        self,
-        message: discord.Message = None,
-        before: discord.Message = None,
-        interaction: discord.Interaction = None,
-    ) -> str:
+    def get_event_date(self, datetime_obj: datetime = None) -> str:
         """
-        Retrieves the formatted date based on the provided message, before message, or interaction.
+        Get the event date in the formatted string.
 
-        :param message: Discord message object.
-        :type message: discord.Message or None
-        :param before: Discord message object before the edit.
-        :type before: discord.Message or None
-        :param interaction: Discord interaction object.
-        :type interaction: discord.Interaction or None
-        :return: Formatted date as a string.
+        This function retrieves the event date in the formatted string.
+
+        :param datetime_obj: The datetime object representing the event date.
+        :type datetime_obj: datetime, optional
+        :return: The formatted event date string.
         :rtype: str
         """
-        if message is not None:
-            formatted_date = message.created_at.astimezone(zone).strftime(
-                "%d/%m/%Y %H:%M"
-            )
-        elif before is not None:
-            formatted_date = before.created_at.astimezone(zone).strftime(
-                "%d/%m/%Y %H:%M"
-            )
-        elif interaction is not None:
-            formatted_date = interaction.created_at.astimezone(zone).strftime(
-                "%d/%m/%Y %H:%M"
-            )
+        zone = self.get_time_zone()
+        if datetime_obj is None:
+            date = datetime.now(zone).strftime("%d/%m/%Y %H:%M")
         else:
-            formatted_date = datetime.now(zone).strftime("%d/%m/%Y %H:%M")
+            date = datetime_obj.astimezone(zone).strftime("%d/%m/%Y %H:%M")
+        return date
 
-        return str(formatted_date)
-
-    def check_bytesio_size(
-        self, bytes_io: BytesIO, limit: int = 25 * 1024 * 1024
-    ) -> bool:
+    def generate_log(self, action: str, student_id: int, date: datetime = None):
         """
-        Checks if the size of the BytesIO object exceeds the specified limit.
+        Generate a log entry.
 
-        Args:
-            bytes_io: The BytesIO object to check the size of.
-            limit: The size limit in bytes.
+        This function generates a log entry with the provided action, student ID, and date.
 
-        Returns:
-            bool: True if the size is within the limit, False otherwise.
+        :param action: The action associated with the log entry.
+        :type action: str
+        :param student_id: The ID of the student associated with the log entry.
+        :type student_id: int
+        :param date: The date of the log entry.
+        :type date: datetime, optional
         """
-        size = len(bytes_io.getvalue())
-        return size <= limit
+        if self.check_student_in_project(student_id):
+            date_string = self.get_event_date(datetime_obj=date)
+            log_action = f"{date_string} - {action}"
+            log = Log(
+                discord_id=student_id,
+                date=date_string,
+                action=log_action,
+            )
+            self.log_data.add_log(log)
+
+    def check_size_log_report(self, report: LogReport):
+        """
+        Check the size of a log report.
+
+        This function checks the size of a log report. If the size exceeds the maximum limit,
+        an exception is raised.
+
+        :param report: The log report to check.
+        :type report: LogReport
+        :raises InvalidReportSize: If the report size is invalid.
+        :return: True if the report size is valid, False otherwise.
+        :rtype: bool
+        """
+        if report.generate() is None or len(report.generate()) > 26214400:
+            raise InvalidReportSize(
+                "Arquivo muito grande para o Discord. Utilize filtros."
+            )
+        return True
+
+    # pylint: disable=inconsistent-return-statements
+    def generate_log_report(
+        self,
+        server_id: int,
+        student_id: str = None,
+        start_date: str = None,
+        end_date: str = None,
+    ) -> LogReport:
+        """
+        Generate a log report.
+
+        This function generates a log report based on the provided parameters.
+
+        :param server_id: The ID of the server associated with the logreport.
+        :type server_id: int
+        :param student_id: The ID of the student to filter the report by, or None for all students.
+        :type student_id: str, optional
+        :param start_date: The start date of the report filter, or None for no start date.
+        :type start_date: str, optional
+        :param end_date: The end date of the report filter, or None for no end date.
+        :type end_date: str, optional
+        :return: The generated log report.
+        :rtype: LogReport
+        :raises IdDoesNotExist: If the provided student ID does not exist.
+        :raises NoStartDate: If no start date is provided when an end date is.
+        """
+        project_id = self.get_project_id_by_server_id(server_id)
+
+        if student_id is not None:
+            verify_discord_id(student_id)
+            if not self.check_student_in_project(student_id=int(student_id)):
+                raise IdDoesNotExist("ID não corresponde a nenhum estudante")
+
+        if start_date is None and end_date is None:
+            if student_id is not None:
+                data = LogReportData(
+                    students=self.students_data.load_students(),
+                    logs=self.log_data.load_logs(),
+                    project_id=project_id,
+                    value=3,
+                    start_date=None,
+                    end_date=None,
+                    student_id=str(student_id),
+                )
+            else:
+                data = LogReportData(
+                    students=self.students_data.load_students(),
+                    logs=self.log_data.load_logs(),
+                    project_id=project_id,
+                    value=1,
+                    start_date=None,
+                    end_date=None,
+                    student_id=None,
+                )
+
+        elif end_date is not None and start_date is None:
+            raise NoStartDate("É preciso de uma data inicial")
+
+        elif start_date is not None:
+            if end_date is None:
+                end_date = self.get_event_date()
+
+            self.filter_date_validation(start_date)
+            self.filter_date_validation(end_date)
+
+            if student_id is not None:
+                data = LogReportData(
+                    students=self.students_data.load_students(),
+                    logs=self.log_data.load_logs(),
+                    project_id=project_id,
+                    value=4,
+                    start_date=self.datetime_format(start_date),
+                    end_date=self.datetime_format(end_date),
+                    student_id=str(student_id),
+                )
+
+            else:
+                data = LogReportData(
+                    students=self.students_data.load_students(),
+                    logs=self.log_data.load_logs(),
+                    project_id=project_id,
+                    value=2,
+                    start_date=self.datetime_format(start_date),
+                    end_date=self.datetime_format(end_date),
+                    student_id=None,
+                )
+
+        report = LogReport(data)
+
+        if self.check_size_log_report(report):
+            return report

@@ -10,10 +10,6 @@ Functions:
 """
 import logging
 import os
-import zoneinfo
-
-# from decouple import config
-# DISCORD_BOT_TOKEN = config("DISCORD_BOT_TOKEN")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -51,13 +47,3 @@ def get_coordinator_id() -> int:
             "The requested environment variable 'COORDINATOR_DISCORD_ID' does not exist"
         )
     return discord_coordinator_id
-
-
-def get_time_zone():
-    """
-    Retrieve the time zone.
-
-    Returns:
-        zoneinfo.ZoneInfo: The time zone representing 'America/Sao_Paulo'.
-    """
-    return zoneinfo.ZoneInfo("America/Sao_Paulo")

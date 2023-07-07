@@ -5,7 +5,6 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Cog
 
-from data import Log, LogData
 from services import LogService
 
 
@@ -14,8 +13,8 @@ class Events(commands.Cog):
     Cog that handles various events and performs logging.
     """
 
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, log_service: LogService):
+        self.log_service = log_service
 
     @Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -26,28 +25,22 @@ class Events(commands.Cog):
         if not message.guild or message.author.bot:
             return
 
-        if LogService().check_student_in_project(student_id=int(message.author.id)):
-            if len(message.attachments) > 0:
-                date = LogService().formatted_get_date(message=message)
-                action = f"{date}-{message.author}-{message.channel}-{message.attachments[0].url}"
-                log = Log(
-                    discord_id=message.author.id,
-                    date=date,
-                    action=action,
-                )
-                LogData().add_log(log)
+        if len(message.attachments) > 0:
+            action = (
+                f"{message.author} - {message.channel} - {message.attachments[0].url}"
+            )
+            self.log_service.generate_log(
+                action=action,
+                student_id=message.author.id,
+                date=message.created_at,
+            )
 
-            else:
-                date = LogService().formatted_get_date(message=message)
-                action = (
-                    f"{date} - {message.author} - {message.channel} - {message.content}"
-                )
-                log = Log(
-                    discord_id=message.author.id,
-                    date=date,
-                    action=action,
-                )
-                LogData().add_log(log)
+        action = f"{message.author} - {message.channel} - {message.content}"
+        self.log_service.generate_log(
+            action=action,
+            student_id=message.author.id,
+            date=message.created_at,
+        )
 
     @Cog.listener()
     async def on_message_delete(self, message: discord.Message) -> None:
@@ -58,15 +51,12 @@ class Events(commands.Cog):
         if not message.guild or message.author.bot:
             return
 
-        if LogService().check_student_in_project(student_id=int(message.author.id)):
-            date = LogService().formatted_get_date(message=message)
-            action = f"{date} - {message.author} - {message.channel} - Deleted: {message.content}"
-            log = Log(
-                discord_id=message.author.id,
-                date=date,
-                action=action,
-            )
-            LogData().add_log(log)
+        action = f"{message.author} - {message.channel} - Deleted: {message.content}"
+        self.log_service.generate_log(
+            action=action,
+            student_id=message.author.id,
+            date=message.created_at,
+        )
 
     @Cog.listener()
     async def on_message_edit(
@@ -78,17 +68,13 @@ class Events(commands.Cog):
         """
         if before.author.bot or before.content == after.content:
             return
-
-        if LogService().check_student_in_project(student_id=int(before.author.id)):
-            date = LogService().formatted_get_date(before=before)
-            # pylint: disable=line-too-long
-            action = f"{date} - {before.author} - {before.channel} - Before: {before.content} - After: {after.content}"
-            log = Log(
-                discord_id=before.author.id,
-                date=date,
-                action=action,
-            )
-            LogData().add_log(log)
+        # pylint: disable=line-too-long
+        action = f"{before.author} - {before.channel} - Before: {before.content} - After: {after.content}"
+        self.log_service.generate_log(
+            action=action,
+            student_id=before.author.id,
+            date=before.created_at,
+        )
 
     @Cog.listener()
     async def on_interaction(self, interaction: discord.Interaction):
@@ -96,17 +82,12 @@ class Events(commands.Cog):
         Event handler for interaction events.
         Logs the user and the interaction name.
         """
-        if LogService().check_student_in_project(student_id=int(interaction.user.id)):
-            date = LogService().formatted_get_date(interaction=interaction)
-            action = (
-                f"{date} - {interaction.user} - Interaction: {interaction.data['name']}"
-            )
-            log = Log(
-                discord_id=interaction.user.id,
-                date=date,
-                action=action,
-            )
-            LogData().add_log(log)
+        action = f"{interaction.user} - Interaction: {interaction.data['name']}"
+        self.log_service.generate_log(
+            action=action,
+            student_id=interaction.user.id,
+            date=interaction.created_at,
+        )
 
     @Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
@@ -114,13 +95,10 @@ class Events(commands.Cog):
         Event handler for reaction add events.
         Logs the user, reacted emoji, and the reacted message's content.
         """
-        if LogService().check_student_in_project(student_id=int(user.id)):
-            date = LogService().formatted_get_date()
-            # pylint: disable=line-too-long
-            action = f"{date} - {user} - Reaction:{reaction.emoji} - Reacted:{reaction.message.content}"
-            log = Log(
-                discord_id=user.id,
-                date=date,
-                action=action,
-            )
-            LogData().add_log(log)
+        action = (
+            f"{user} - Reaction: {reaction.emoji} - Reacted: {reaction.message.content}"
+        )
+        self.log_service.generate_log(
+            action=action,
+            student_id=user.id,
+        )

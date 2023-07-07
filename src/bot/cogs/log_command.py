@@ -7,10 +7,10 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from data import LogData, StudentData
-from reports import LogReport, LogReportData
+import settings
 from services import LogService, is_coordinator
-from services.validation import verify_discord_id
+
+logger = settings.logging.getLogger(__name__)
 
 
 class LogCommand(commands.Cog):
@@ -18,8 +18,8 @@ class LogCommand(commands.Cog):
     Cog that handles log commands.
     """
 
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, log_service: LogService):
+        self.log_service = log_service
 
     @app_commands.command(name="log", description="Create the log file")
     @app_commands.describe(
@@ -48,86 +48,17 @@ class LogCommand(commands.Cog):
         Returns:
             None
         """
-        server_id = interaction.guild.id
-        project_id = LogService().get_project_id_by_server_id(server_id=server_id)
-
-        if student_id is not None:
-            verify_discord_id(student_id)
-            if not LogService().check_student_in_project(student_id=int(student_id)):
-                await interaction.response.send_message(
-                    "Este Discord ID não correponde a nenhum estudante",
-                    ephemeral=True,
-                )
-                return
-
-        if start_date is None and end_date is None:
-            if student_id is not None:
-                data = LogReportData(
-                    students=StudentData().load_students(),
-                    logs=LogData().load_logs(),
-                    project_id=project_id,
-                    value=3,
-                    start_date=None,
-                    end_date=None,
-                    student_id=str(student_id),
-                )
-            else:
-                data = LogReportData(
-                    students=StudentData().load_students(),
-                    logs=LogData().load_logs(),
-                    project_id=project_id,
-                    value=1,
-                    start_date=None,
-                    end_date=None,
-                    student_id=None,
-                )
-        elif end_date is not None and start_date is None:
-            await interaction.response.send_message(
-                "É preciso de uma data de inicio. Ex:01/09/2023",
-                ephemeral=True,
-            )
-        elif start_date is not None:
-            if end_date is None:
-                end_date = LogService().formatted_get_date()
-
-            LogService().filter_date_validation(
-                date="09/10/2023",
-                start_date=start_date,
-                end_date=end_date,
-            )
-
-            if student_id is not None:
-                data = LogReportData(
-                    students=StudentData().load_students(),
-                    logs=LogData().load_logs(),
-                    project_id=project_id,
-                    value=4,
-                    start_date=start_date,
-                    end_date=end_date,
-                    student_id=str(student_id),
-                )
-            else:
-                data = LogReportData(
-                    students=StudentData().load_students(),
-                    logs=LogData().load_logs(),
-                    project_id=project_id,
-                    value=2,
-                    start_date=start_date,
-                    end_date=end_date,
-                    student_id=None,
-                )
-
-        report = LogReport(data)
-
-        if report.generate() is not None:
-            await interaction.response.send_message(
-                file=discord.File(BytesIO(report.generate()), filename="log.pdf"),
-                ephemeral=True,
-            )
-        else:
-            await interaction.response.send_message(
-                "Arquivo muito grande para o Discord. Use filtros!", ephemeral=True
-            )
+        log_report = self.log_service.generate_log_report(
+            interaction.guild.id, student_id, start_date, end_date
+        )
+        await interaction.response.send_message(
+            file=discord.File(BytesIO(log_report.generate()), filename="log.pdf"),
+            ephemeral=True,
+        )
+        logger.info(
+            "Log File successfully created by '%s'",
+            interaction.user.name,
+        )
 
     @log_file.error
     async def log_file_error(self, interaction: discord.Interaction, error):
@@ -148,3 +79,6 @@ class LogCommand(commands.Cog):
         else:
             error_message = str(error).rsplit(":", maxsplit=1)[-1]
             await interaction.response.send_message(error_message, ephemeral=True)
+            logger.error(
+                "An error occurred while creating a log file: %s", error_message
+            )
