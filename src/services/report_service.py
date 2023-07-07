@@ -180,7 +180,7 @@ class ReportService:
         current_date = datetime.now().date()
         current_month = current_date.month
         current_day = current_date.day
-        july_day_range = range(23, 32)
+        july_day_range = range(6, 32)
         december_day_range = range(1, 11)
 
         if not (
@@ -239,11 +239,6 @@ class ReportService:
         if coordinator is None:
             raise CoordinatorDoesNotExist(
                 "O coordenador deste projeto não está cadastrado no database!"
-            )
-
-        if project.coordinator_id != coordinator.coord_id:
-            raise ParticipationDoesNotExist(
-                "Você não tem permissão para gerar o relatório deste projeto!"
             )
 
         participations = self.participation_service.find_participations_by_type(
