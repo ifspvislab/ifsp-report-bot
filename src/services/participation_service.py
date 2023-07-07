@@ -41,7 +41,6 @@ class ParticipationService:
         member_data (MemberData): An instance of MemberData class for accessing member data.
         project_service (ProjectService): An instance of ProjectService for acessing project data.
         member_service (MemberService): An instance of MemberService for acessing member data.
-
     Attributes:
         participation_data (ParticipationData): An instance of ParticipationData class for
     accessing participation data.

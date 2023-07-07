@@ -1,7 +1,6 @@
 """
 A package for managing project data and members
 ================================================
-
 Package Structure
 -----------------
 - ``member_data``: Module for managing member data.

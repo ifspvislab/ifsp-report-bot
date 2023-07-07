@@ -11,6 +11,7 @@ from services import (
     MemberService,
     ParticipationService,
     ProjectService,
+    ReportService,
     StudentService,
 )
 
@@ -19,7 +20,10 @@ def main():
     """
     Main function to start the IFSP Report Bot.
 
-    It initializes the StudentService and starts the bot by calling the start_bot function.
+    It initializes the StudentService,
+    MemberService, ProjectService, ReportService, CoordinatorService
+    and ParticipationService and starts the bot by
+    calling the start_bot function.
     """
 
     coordinator_data = CoordinatorData()
@@ -33,12 +37,19 @@ def main():
     participation_service = ParticipationService(
         participation_data, member_data, project_service, member_service
     )
+    report_service = ReportService(
+        participation_data,
+        participation_service,
+        coordinator_service,
+        coordinator_data,
+    )
     start_bot(
         student_service,
         member_service,
         coordinator_service,
         project_service,
         participation_service,
+        report_service,
     )
 
 

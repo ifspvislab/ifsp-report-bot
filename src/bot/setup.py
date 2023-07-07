@@ -7,7 +7,6 @@ Functions:
 - start_bot: Starts the Discord bot.
 
 """
-
 from datetime import datetime
 
 import discord
@@ -19,21 +18,30 @@ from services import (
     MemberService,
     ParticipationService,
     ProjectService,
+    ReportService,
     StudentService,
 )
 
-from .cogs import AttendanceCog, CoordinatorCog, MemberCog, ParticipationCog, ProjectCog
+from .cogs import (
+    AttendanceCog,
+    CoordinatorCog,
+    MemberCog,
+    ParticipationCog,
+    ProjectCog,
+    SemesterReportCog,
+)
 from .modals import MonthyReportForm
 
 logger = settings.logging.getLogger(__name__)
 
-
+# pylint: disable=too-many-arguments
 def start_bot(
     student_service: StudentService,
     member_service: MemberService,
     coordinator_service: CoordinatorService,
     project_service: ProjectService,
     participation_service: ParticipationService,
+    report_service: ReportService,
 ):
     """
     Start bot.
@@ -78,6 +86,15 @@ def start_bot(
         )
 
         # updates the bot's command representation
+        await bot.add_cog(
+            SemesterReportCog(
+                member_service,
+                project_service,
+                report_service,
+                coordinator_service,
+                participation_service,
+            )
+        )
         await bot.tree.sync()
         logger.info("Bot %s is ready", bot.user)
 

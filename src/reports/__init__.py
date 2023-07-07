@@ -14,12 +14,15 @@ Functions:
 Classes:
 - MonthlyReportData: Represents the data for a monthly report.
 - MonthlyReport: Generates monthly reports.
+- SemesterReportData: Represents the data for a semester report.
+- SemesterReport: Generates semester reports.
 
 """
 
 from . import styles
 from .attendance_sheet import AttendanceSheet, AttendanceSheetData
 from .monthly_report import MonthlyReport, MonthlyReportData
+from .semester_report import SemesterReport, SemesterReportData
 from .setup import setup_reports_module
 
 setup_reports_module()
