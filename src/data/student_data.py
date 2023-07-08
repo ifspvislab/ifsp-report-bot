@@ -72,7 +72,7 @@ class StudentData:
 
         for student in students:
             for project in projects:
-                if student["project_id"] == project["id"]:
+                if student["project_id"] == project.project_id:
                     student["project"] = project
                     break
 

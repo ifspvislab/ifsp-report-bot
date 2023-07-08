@@ -9,11 +9,13 @@ from io import BytesIO
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import Paragraph, SimpleDocTemplate
 
+from data import Member, Participation
+
 from .styles import events_header_style, events_text_style
 
 
 @dataclass
-# pylint: disable-next=too-many-arguments
+# pylint: disable=too-many-instance-attributes
 class LogReportData:
     """
     Data class to store log report data.
@@ -28,13 +30,14 @@ class LogReportData:
     - student_id: The ID of the student for filtering log entries.
     """
 
-    students: list[dict]
+    members: list[Member]
+    participations: list[Participation]
     logs: list[dict]
     project_id: str
     value: int
     start_date: datetime
     end_date: datetime
-    student_id: str
+    discord_id: str
 
 
 class LogReport:
@@ -82,13 +85,13 @@ class LogReport:
         title_report = Paragraph("Log File", events_header_style)
         self.content.append(title_report)
 
-        for student in self.data.students:
-            if student["project"]["id"] == str(self.data.project_id):
-                user_title = Paragraph(student["name"], events_header_style)
+        for participation, member in zip(self.data.participations, self.data.members):
+            if participation.project_id == str(self.data.project_id):
+                user_title = Paragraph(member.name, events_header_style)
                 self.content.append(user_title)
 
                 for log in self.data.logs:
-                    if log.discord_id == student["discord_id"]:
+                    if log.discord_id == member.discord_id:
                         log_event = Paragraph(log.action, events_text_style)
                         self.content.append(log_event)
 
@@ -104,17 +107,18 @@ class LogReport:
         title_report = Paragraph("Log File", events_header_style)
         self.content.append(title_report)
 
-        for student in self.data.students:
-            if student["project"]["id"] == str(self.data.project_id):
-                user_title = Paragraph(student["name"], events_header_style)
+        for participation, member in zip(self.data.participations, self.data.members):
+            if participation.project_id == str(self.data.project_id):
+                user_title = Paragraph(member.name, events_header_style)
                 self.content.append(user_title)
 
                 for log in self.data.logs:
                     date = datetime.strptime(log.date, "%d/%m/%Y %H:%M")
-                    if log.discord_id == student[
-                        "discord_id"
-                    ] and self.data.start_date <= date <= self.data.end_date + timedelta(
-                        days=1
+                    if (
+                        log.discord_id == member.discord_id
+                        and self.data.start_date
+                        <= date
+                        <= self.data.end_date + timedelta(days=1)
                     ):
                         log_event = Paragraph(log.action, events_text_style)
                         self.content.append(log_event)
@@ -131,14 +135,14 @@ class LogReport:
         title_report = Paragraph("Log File", events_header_style)
         self.content.append(title_report)
 
-        for student in self.data.students:
-            if student["project"]["id"] == self.data.project_id:
-                if student["discord_id"] == int(self.data.student_id):
-                    user_title = Paragraph(student["name"], events_header_style)
+        for participation, member in zip(self.data.participations, self.data.members):
+            if participation.project_id == self.data.project_id:
+                if member.discord_id == int(self.data.discord_id):
+                    user_title = Paragraph(member.name, events_header_style)
                     self.content.append(user_title)
 
         for log in self.data.logs:
-            if log.discord_id == int(self.data.student_id):
+            if log.discord_id == int(self.data.discord_id):
                 log_event = Paragraph(log.action, events_text_style)
                 self.content.append(log_event)
 
@@ -154,16 +158,16 @@ class LogReport:
         title_report = Paragraph("Log File", events_header_style)
         self.content.append(title_report)
 
-        for student in self.data.students:
-            if student["project"]["id"] == self.data.project_id:
-                if student["discord_id"] == int(self.data.student_id):
-                    user_title = Paragraph(student["name"], events_header_style)
+        for participation, member in zip(self.data.participations, self.data.members):
+            if participation.project_id == self.data.project_id:
+                if member.discord_id == int(self.data.discord_id):
+                    user_title = Paragraph(member.name, events_header_style)
                     self.content.append(user_title)
 
         for log in self.data.logs:
             date = datetime.strptime(log.date, "%d/%m/%Y %H:%M")
             if log.discord_id == int(
-                self.data.student_id
+                self.data.discord_id
             ) and self.data.start_date <= date <= self.data.end_date + timedelta(
                 days=1
             ):

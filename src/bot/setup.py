@@ -49,8 +49,6 @@ def start_bot(student_service: StudentService, log_service: LogService):
         """
 
         # updates the bot's command representation
-        # await load_cogs()
-        # await load_cogs(bot)
         await bot.add_cog(Events(log_service))
         await bot.add_cog(LogCommand(log_service))
         await bot.tree.sync()

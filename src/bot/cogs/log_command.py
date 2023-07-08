@@ -25,7 +25,7 @@ class LogCommand(commands.Cog):
     @app_commands.describe(
         start_date="Data inicial para a procura de registros. Ex:01/09/2023",
         end_date="Data final para a procura de registros. Ex:01/09/2023",
-        student_id="Registros apenas com o ID inserido",
+        discord_id="Registros apenas com o ID inserido",
     )
     @app_commands.check(is_coordinator)
     # pylint: disable=too-many-branches
@@ -34,7 +34,7 @@ class LogCommand(commands.Cog):
         interaction: discord.Interaction,
         start_date: str = None,
         end_date: str = None,
-        student_id: str = None,
+        discord_id: str = None,
     ):
         """
         Command for creating a log file.
@@ -49,7 +49,7 @@ class LogCommand(commands.Cog):
             None
         """
         log_report = self.log_service.generate_log_report(
-            interaction.guild.id, student_id, start_date, end_date
+            interaction.guild.id, discord_id, start_date, end_date
         )
         await interaction.response.send_message(
             file=discord.File(BytesIO(log_report.generate()), filename="log.pdf"),
