@@ -16,6 +16,14 @@ from .coordinator_service import (
     CoordinatorAlreadyExists,
     CoordinatorService,
 )
+from .is_coordinator import is_coordinator
+from .log_service import (
+    IdDoesNotExist,
+    IncorrectDateFilter,
+    InvalidReportSize,
+    LogService,
+    NoStartDate,
+)
 from .member_service import MemberService
 from .participation_service import (
     DateError,

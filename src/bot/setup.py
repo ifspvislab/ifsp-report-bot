@@ -15,6 +15,7 @@ from discord.ext import commands
 import settings
 from services import (
     CoordinatorService,
+    LogService,
     MemberService,
     ParticipationService,
     ProjectService,
@@ -26,6 +27,8 @@ from services import (
 from .cogs import (
     AttendanceCog,
     CoordinatorCog,
+    Events,
+    LogCommand,
     MemberCog,
     ParticipationCog,
     ProjectCog,
@@ -45,6 +48,7 @@ def start_bot(
     participation_service: ParticipationService,
     report_service: ReportService,
     termination_service: TerminationStatementService,
+    log_service: LogService,
 ):
     """
     Start bot.
@@ -94,6 +98,8 @@ def start_bot(
         )
 
         # updates the bot's command representation
+        await bot.add_cog(Events(log_service))
+        await bot.add_cog(LogCommand(log_service))
         await bot.add_cog(
             SemesterReportCog(
                 member_service,

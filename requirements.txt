@@ -5,3 +5,4 @@ reportlab==4.0.0
 discord.py==2.2.3
 validate_email_address==1
 py3dns==3.2.1
+tzdata==2023.3

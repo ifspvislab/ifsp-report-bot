@@ -107,6 +107,24 @@ signature_content_style = ParagraphStyle(
     fontName="Calibri",
 )
 
+events_text_style = ParagraphStyle(
+    name="EventsText",
+    fontSize=12,
+    leading=10,
+    spaceAfter=3,
+    fontName="Segoe",
+    textColor=colors.black,
+)
+
+events_header_style = ParagraphStyle(
+    name="EventsHeader",
+    fontSize=16,
+    leading=12,
+    fontName="Calibri-Bold",
+    spaceAfter=3,
+    textColor=colors.black,
+)
+
 attend_table_style = ParagraphStyle(
     name="AttendSheetHeaderText", alignment=1, wordWrap=True
 )

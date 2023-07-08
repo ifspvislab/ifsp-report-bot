@@ -70,7 +70,6 @@ class CoordinatorData:
         :return: A list of dictionaries, where each dictionary represents a coordinator.
         :rtype: list[dict]
         """
-
         with open("assets/data/coordinators.csv", "r", encoding="utf-8") as file:
             coordinators = []
             for row in file:

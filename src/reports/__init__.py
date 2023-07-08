@@ -21,6 +21,7 @@ Classes:
 
 from . import styles
 from .attendance_sheet import AttendanceSheet, AttendanceSheetData
+from .log_report import LogReport, LogReportData
 from .monthly_report import MonthlyReport, MonthlyReportData
 from .semester_report import SemesterReport, SemesterReportData
 from .setup import setup_reports_module

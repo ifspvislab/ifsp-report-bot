@@ -50,4 +50,5 @@ def _register_fonts():
     pdfmetrics.registerFont(
         TTFont("Calibri-Bold-Italic", "./assets/fonts/calibri/calibri-bold-italic.ttf")
     )
+    pdfmetrics.registerFont(TTFont("Segoe", "./assets/fonts/segoe/segoe-ui-emoji.ttf"))
     logger.info("register fonts executed")
