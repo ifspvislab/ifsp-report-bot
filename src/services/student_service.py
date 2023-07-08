@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 """
 student_service
 =======================
@@ -47,7 +49,7 @@ class StudentService:
         :param discord_id: The Discord ID of the student to find.
         :type discord_id: int
         :return: A dictionary representing the student if found, or None if not found.
-        :rtype: dict | None
+        :rtype: dict or None
         """
         if not self.database:
             self.database = self.student_data.load_students()

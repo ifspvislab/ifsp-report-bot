@@ -1,6 +1,6 @@
 # IFSP Report Bot  VisLab
 
-# How to run
+# How to run the project
 
 Make sure you have python 3.11 installed:
 

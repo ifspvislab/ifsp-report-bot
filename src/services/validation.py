@@ -1,6 +1,7 @@
 """
 validation module
 """
+from validate_email_address import validate_email
 
 from data import Member
 
@@ -43,6 +44,19 @@ def verify_registration_format(registration):
         and len(registration) == 9
     ):
         raise RegistrationError("ERRO: Prontuario incorreto")
+
+
+def verify_email(value):
+    """Verify the correctness of the email address.
+
+    Args:
+        value (str): The email address value to be verified.
+
+    Raises:
+        EmailError: If the email address is invalid.
+    """
+    if not validate_email(value, check_mx=False):
+        raise EmailError("Email inválido")
 
 
 def verify_discord_id(value):
