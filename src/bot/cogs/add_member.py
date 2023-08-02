@@ -73,7 +73,7 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
         self.member_service.add_member(member)
         await interaction.response.send_message("Membro cadastrado com sucesso!")
         logger.info(
-            "Membro %s adicionado por %s",
+            "Member %s added by %s",
             member.registration,
             self.coordinator_service.find_coordinator_by_type(
                 "discord_id", interaction.user.id
@@ -82,7 +82,7 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
 
     async def on_error(self, interaction: Interaction, error: Exception, /):
         logger.error(
-            "Erro: %s na tentativa do usuário %s de adicionar membro",
+            "Error: %s on user %s attempt to add member",
             error,
             self.coordinator_service.find_coordinator_by_type(
                 "discord_id", interaction.user.id
@@ -131,7 +131,7 @@ class MemberCog(commands.Cog):
             "Você não tem permissão para adicionar membro."
         )
         logger.error(
-            "Usuário (discord_id: %s)"
-            + "tentou adicionar membro, porém não possui permissão.",
+            "User (discord_id: %s)"
+            + "tried to add a member, but does not have permission.",
             interaction.user.id,
         )

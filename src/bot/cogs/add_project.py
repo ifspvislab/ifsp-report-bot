@@ -172,7 +172,7 @@ class ProjectCog(commands.Cog):
             "Você não tem permissão para adicionar projetos."
         )
         logger.error(
-            "Usuário (discord_id: %s)"
-            + "tentou adicionar um projeto, porém não possui permissão.",
+            "User (discord_id: %s)"
+            + "tried to add a project, but does not have permission.",
             interaction.user.id,
         )

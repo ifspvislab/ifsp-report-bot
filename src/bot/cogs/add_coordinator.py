@@ -156,7 +156,7 @@ class CoordinatorCog(commands.Cog):
             "Você não tem permissão para adicionar coordenador."
         )
         logger.error(
-            "Usuário (discord_id: %s)"
-            + "tentou adicionar coordenador, porém não possui permissão.",
+            "User (discord_id: %s)"
+            + "tried to add a coordinator, but does not have permission.",
             interaction.user.id,
         )

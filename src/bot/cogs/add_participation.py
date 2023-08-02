@@ -91,7 +91,7 @@ class AddParticipationModal(ui.Modal):
                 "project_title", self.project_title.value
             )
             if project is None:
-                logger.error("O projeto inserido inexiste nos registros.")
+                logger.error("The inserted project does not exist in the records.")
                 await interaction.response.send_message(
                     "O projeto inexiste nos registros!"
                 )
@@ -145,7 +145,7 @@ class ParticipationCog(commands.Cog):
     async def add_participation_modal_error(self, interaction: discord.Interaction):
         """Treating error if it's not a coordinator."""
         logger.warning(
-            "Usuário %s sem autorização tentou adicionar participação.",
+            "User %s tried to add a participation, but does not have permission.",
             interaction.user.name,
         )
         await interaction.response.send_message(
