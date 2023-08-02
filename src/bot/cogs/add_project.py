@@ -121,7 +121,9 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
                 )
             )
 
-            await interaction.response.send_message("O projeto foi adicionado com sucesso!")
+            await interaction.response.send_message(
+                "O projeto foi adicionado com sucesso!"
+            )
 
         except (
             EqualOrSmallerDateError,

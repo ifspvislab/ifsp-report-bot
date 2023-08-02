@@ -46,7 +46,7 @@ class CoordinatorData:
         Adds a new coordinator to the coordinators.csv file.
     """
 
-    def _row_to_coordinator(self, row: str) -> dict:
+    def _row_to_coordinator(self, row: str):
         """
         Converts a row of data from the coordinators.csv file into a dictionary.
 

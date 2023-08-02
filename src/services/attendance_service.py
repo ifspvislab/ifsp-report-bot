@@ -111,7 +111,7 @@ class AttendanceService:
         """
         student_attendances: list[Attendance] = []
         for attendance in self.database:
-            if member_id == attendance.student_id:
+            if member_id == attendance.member_id:
                 if proj_id == attendance.project_id:
                     if attendance.day.month == datetime.now().month:
                         student_attendances.append(attendance)
@@ -200,7 +200,7 @@ class AttendanceService:
         :rtype: int
         """
         for index, attendance in enumerate(self.database):
-            if attendance.student_id == new_attendance.student_id:
+            if attendance.member_id == new_attendance.member_id:
                 if attendance.day.day == new_attendance.day.day:
                     return index
 
@@ -241,7 +241,7 @@ class AttendanceService:
 
         new_attend = Attendance(
             attendance_id=str(uuid.uuid4()),
-            student_id=user_id,
+            member_id=user_id,
             project_id=proj_id,
             day=test_day,
             entry_time=test_entry_time,
@@ -264,7 +264,7 @@ class AttendanceService:
         """
         all_students = set()
         for attendance in self.database:
-            all_students.add(attendance.student_id)
+            all_students.add(attendance.member_id)
 
         return all_students
 
