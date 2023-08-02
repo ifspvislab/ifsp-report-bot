@@ -40,7 +40,7 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
     This modal adds a project.
 
     Attributes:
-        coordinador_id (ui.TextInput): Input field for the coordinator_id.
+        coordinator_id (ui.TextInput): Input field for the coordinator_id.
         discord_server_id (ui.TextInput): Input field for the discord_server_id.
         title (ui.TextInput): Input field for the title.
         start_date (ui.TextInput): Input field for the start_date.
@@ -54,21 +54,21 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
     coordinator_id = ui.TextInput(
         label="Coordenador",
         style=discord.TextStyle.short,
-        placeholder="Insira o Discord ID do Coordenador",
+        placeholder="Digite o Discord Id do Coordenador",
         required=True,
         max_length=30,
     )
     discord_server_id = ui.TextInput(
         label="Discord Server ID",
         style=discord.TextStyle.short,
-        placeholder="Insira o Discord Server ID",
+        placeholder="Digite o Discord Server ID",
         required=True,
         max_length=30,
     )
     project_title = ui.TextInput(
         label="Título",
         style=discord.TextStyle.short,
-        placeholder="Insira o título do projeto",
+        placeholder="Digite o título do projeto",
         required=True,
         min_length=5,
         max_length=150,
@@ -76,14 +76,14 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
     start_date = ui.TextInput(
         label="Data do Início",
         style=discord.TextStyle.short,
-        placeholder="Insira a data de início (dia/mês/ano completo)",
+        placeholder="Digite a data de início (dd/mm/aaaa)",
         required=True,
         max_length=10,
     )
     end_date = ui.TextInput(
         label="Data do Fim",
         style=discord.TextStyle.short,
-        placeholder="Insira a data do fim (dia/mês/ano completo)",
+        placeholder="Digite a data do fim (dd/mm/aaaa)",
         required=True,
         max_length=10,
     )
@@ -115,13 +115,15 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
                     str(uuid4()),
                     self.coordinator_id.value,
                     self.discord_server_id.value,
-                    self.project_title.value,
+                    self.project_title.value.upper(),
                     self.start_date.value,
                     self.end_date.value,
                 )
             )
 
-            await interaction.response.send_message("O projeto foi adicionado com sucesso!")
+            await interaction.response.send_message(
+                "O projeto foi adicionado com sucesso!"
+            )
 
         except (
             EqualOrSmallerDateError,
@@ -150,7 +152,7 @@ class ProjectCog(commands.Cog):
         self.project_service = project_service
 
     @app_commands.command(
-        name="adicionar-projeto", description="cadastrar projeto via modal"
+        name="adicionar-projeto", description="comando para registrar projeto via modal"
     )
     async def add_project(self, interaction: discord.Interaction):
         """

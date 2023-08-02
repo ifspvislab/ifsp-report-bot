@@ -1,11 +1,13 @@
 """
-add_participation.py
+add_participation
+============
 
-Este módulo contém a definição da classe AddParticipationModal.
-que é um que registra a participação na database.
+This module displays the definition of AddParticipationModal class, 
+that is a modal to register a participation in the database.
 
 Classes:
-AddParticipationModal: Um modal para adicionar participação.
+    - AddParticipationModal: a modal that add a participation.
+    
 """
 # pylint: disable-next=unused-import
 from datetime import date, datetime
@@ -35,7 +37,7 @@ class AddParticipationModal(ui.Modal):
     Modal for adding a Participation.
 
     Attributes:
-        prontuario (ui.TextInput): Input field for the prontuario.
+        registration (ui.TextInput): Input field for the registration.
         project (ui.TextInput): Input field for the project title.
         date (ui.TextInput): Input field for the entering date in the project.
 
@@ -45,19 +47,22 @@ class AddParticipationModal(ui.Modal):
     """
 
     registration = ui.TextInput(
-        label="Prontuário:", placeholder="SPXXXXXXX", min_length=9, max_length=9
+        label="Prontuário",
+        placeholder=" Digite o prontuário (SPXXXXX)",
+        min_length=9,
+        max_length=9,
     )
 
     project_title = ui.TextInput(
-        label="Título do projeto:",
-        placeholder="Ex: IFSP Vislab",
+        label="Título do projeto",
+        placeholder="Digite o título do projeto",
         min_length=5,
         max_length=100,
     )
 
     today = str(date.today()).split(sep="-")
     date = ui.TextInput(
-        label="Data de entrada:",
+        label="Data de entrada",
         placeholder=f"{today[2]}/{today[1]}/{today[0]}",
         min_length=10,
         max_length=10,
@@ -95,8 +100,8 @@ class AddParticipationModal(ui.Modal):
                 self.participation_service.create(
                     Participation(
                         str(uuid4()),
-                        self.registration.value,
-                        project.project_id,
+                        self.registration.value.upper(),
+                        project.project_id.upper(),
                         datetime.strptime(self.date.value, "%d/%m/%Y").date(),
                         project.end_date,
                     )
@@ -149,7 +154,7 @@ class ParticipationCog(commands.Cog):
 
     @app_commands.command(
         name="adicionar-participação",
-        description="registra a participação de um aluno em um projeto.",
+        description="comando para registrar a participação de um aluno em um projeto via modal.",
     )
     async def add_participation_modal(self, interaction: discord.Interaction):
         """

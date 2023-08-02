@@ -1,4 +1,7 @@
 """ 
+termination_statement
+============
+
 Classes:
     - TerminationStatementCog: Cog that manages the interactions 
     related to the termination statement
@@ -50,7 +53,7 @@ class TerminationStatementCog(commands.Cog):
 
     @app_commands.command(
         name="termo-encerramento",
-        description="Gera um termo de encerramento das atividades em um projeto.",
+        description="gera um termo de encerramento das atividades em um projeto.",
     )
     async def open_termination_statement_form(self, interaction: discord.Interaction):
         """
@@ -140,7 +143,7 @@ class TerminationStatementForm(ui.Modal):
         label="Data para o encerramento",
         min_length=10,
         max_length=10,
-        placeholder="dd/mm/aaaa",
+        placeholder="Digite a data de encerramento (dd/mm/aaaa)",
         style=discord.TextStyle.short,
     )
     termination_reason = ui.TextInput(

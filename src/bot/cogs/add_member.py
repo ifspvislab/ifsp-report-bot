@@ -9,7 +9,7 @@ Classes:
     - SendModal: Command to display the AddMemberModal
 Function:
     - setup: Add SendModal class to list of cogs to be able to use.
-
+    
 """
 
 from uuid import uuid4
@@ -34,7 +34,7 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
         - on_submit: Listen the modal submit event to add members
 
     Attributes:
-        - prontuario: Represente the field prontuário
+        - registration: Represente the field registration
         - name: Represente the field name
         - email: Represente the field email
         - discord_id: Represente the field discord id
@@ -47,10 +47,14 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
         self.member_service = member_service
         self.coordinator_service = coordinator_service
 
-    registration = ui.TextInput(label="prontuario", placeholder="SPXXXXX", max_length=9)
-    name = ui.TextInput(label="name", placeholder="nome", min_length=5, max_length=100)
-    email = ui.TextInput(label="email", placeholder="nome@email.com")
-    discord_id = ui.TextInput(label="discord id", placeholder="discord id")
+    registration = ui.TextInput(
+        label="Prontuário", placeholder="Digite o prontuário (SPXXXXX)", max_length=9
+    )
+    name = ui.TextInput(
+        label="Name", placeholder="Digite o nome", min_length=5, max_length=100
+    )
+    email = ui.TextInput(label="Email", placeholder="Digite o email (nome@email.com)")
+    discord_id = ui.TextInput(label="Discord ID", placeholder="Digite o Discord ID")
 
     async def on_submit(self, interaction: Interaction, /):
         """
@@ -67,7 +71,7 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
             self.email.value,
         )
         self.member_service.add_member(member)
-        await interaction.response.send_message("Membro cadastrado com sucesso.")
+        await interaction.response.send_message("Membro cadastrado com sucesso!")
         logger.info(
             "Membro %s adicionado por %s",
             member.registration,
@@ -103,8 +107,8 @@ class MemberCog(commands.Cog):
         self.coordinator_service = coordinator_service
 
     @app_commands.command(
-        name="adicionar_membro",
-        description="manda um modal para adicionar o membro",
+        name="adicionar-membro",
+        description="comando para registrar membro via modal",
     )
     @app_commands.describe(
         member="Usuário do servidor que deseja adicionar como membro"

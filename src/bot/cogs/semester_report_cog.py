@@ -1,4 +1,7 @@
 """
+semester_report
+============
+
 Classes:
     - SemesterReportCog: The cog that handles all interactions related to the semester report.
     - SemesterReportForm: A form that allows the user to send the needed data to create
@@ -56,7 +59,7 @@ class SemesterReportCog(commands.Cog):
 
     @app_commands.command(
         name="relatorio-semestral",
-        description="Abre o formulário para gerar um relatório de ensino semestral",
+        description="comando para abrir o formulário para gerar um relatório de ensino semestral",
     )
     async def open_semester_report_form(self, interaction: discord.Interaction):
         """
@@ -150,14 +153,11 @@ class SemesterReportForm(ui.Modal):
 
     """
 
-    placeholder1 = "Aqui, você deve inserir as atividades"
-    placeholder1 += " planejadas até o presente momento."
+    placeholder1 = "Digite as atividades planejadas até o presente momento."
 
-    placeholder2 = "Aqui, você deve inserir quais as atividades"
-    placeholder2 += " foram realizadas até o presente momento."
+    placeholder2 = "Digite quais as atividades foram realizadas até o presente momento."
 
-    placeholder3 = "Aqui, você deve discorrer sobre quais foram"
-    placeholder3 += " os resultados obtidos das atividades realizadas."
+    placeholder3 = "Digite quais foram os resultados obtidos das atividades realizadas."
 
     planned_activities = ui.TextInput(
         label="Atividades planejadas",

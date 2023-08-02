@@ -84,7 +84,7 @@ class AttendanceCog(commands.Cog):
 
     @app_commands.command(
         name="cadastrar-presenca",
-        description="Cadastra uma nova presença na folha de frequência",
+        description="cadastra uma nova presença na folha de frequência",
     )
     async def add_student_attendance(self, interaction: discord.Interaction) -> None:
         """
@@ -102,7 +102,7 @@ class AttendanceCog(commands.Cog):
                 interaction.user.name,
             )
             await interaction.response.send_message(
-                "Você não tem permissão para adicionar novas presenças"
+                "Você não tem permissão para adicionar novas presenças."
             )
 
         else:
@@ -237,7 +237,7 @@ class AttendanceSheetForm(ui.Modal):
 
     day_field = ui.TextInput(
         label="Dia da presença",
-        placeholder="Dia do mês (ex: 01, 16 etc.)",
+        placeholder="Dia do mês",
         required=False,
     )
     entry_time_field = ui.TextInput(
@@ -290,7 +290,7 @@ class AttendanceSheetForm(ui.Modal):
 
             log_msg = f"Success: user {interaction.user.name} created a new attendance"
             logger.info(log_msg)
-            await interaction.response.send_message("Tudo certo! Presença cadastrada")
+            await interaction.response.send_message("Presença cadastrada com sucesso!")
 
         except ServerNotFound as exception:
             # Splitting string to not exceed 100 chars

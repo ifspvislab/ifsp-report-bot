@@ -21,7 +21,7 @@ class LogCommand(commands.Cog):
     def __init__(self, log_service: LogService):
         self.log_service = log_service
 
-    @app_commands.command(name="log", description="Create the log file")
+    @app_commands.command(name="log", description="Cria o arquivo log")
     @app_commands.describe(
         start_date="Data inicial para a procura de registros. Ex:01/09/2023",
         end_date="Data final para a procura de registros. Ex:01/09/2023",

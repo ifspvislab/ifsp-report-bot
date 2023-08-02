@@ -1,11 +1,13 @@
 """
-add_coordinator_modal.py
+add_coordinator
+============
 
-Este módulo contém a definição da classe AddCoordinatorModal, 
-que é um modal para adicionar um coordenador.
+This module displays the definition of AddCoordinatorModal class, 
+that is a modal to add a coordinator. 
 
 Classes:
-    AddCoordinatorModal: Um modal para adicionar um coordenador.
+    - AddCoordinatorModal: a modal that add a coordinator.
+
 """
 
 from uuid import uuid4
@@ -33,7 +35,7 @@ class AddCoordinatorModal(ui.Modal):
     Modal for adding a Coordinator.
 
     Attributes:
-        prontuario (ui.TextInput): Input field for the prontuario.
+        registration (ui.TextInput): Input field for the registration.
         discord_id (ui.TextInput): Input field for the Discord ID.
         name (ui.TextInput): Input field for the name.
         email (ui.TextInput): Input field for the email.
@@ -45,21 +47,21 @@ class AddCoordinatorModal(ui.Modal):
     """
 
     registration = ui.TextInput(
-        label="Prontuário:",
+        label="Prontuário",
         style=discord.TextStyle.short,
-        placeholder="Digite o prontuário",
+        placeholder="Digite o prontuário (SPXXXXX)",
         required=True,
         max_length=9,
     )
     discord_id = ui.TextInput(
-        label="Discord id:",
+        label="Discord ID",
         style=discord.TextStyle.short,
-        placeholder="Digite o Discord Id",
+        placeholder="Digite o Discord ID",
         required=True,
         max_length=30,
     )
     name = ui.TextInput(
-        label="Nome:",
+        label="Nome",
         style=discord.TextStyle.short,
         placeholder="Digite o nome",
         required=True,
@@ -67,9 +69,9 @@ class AddCoordinatorModal(ui.Modal):
         max_length=100,
     )
     email = ui.TextInput(
-        label="Email:",
+        label="Email",
         style=discord.TextStyle.short,
-        placeholder="Digite o email",
+        placeholder="Digite o email (nome@email.com)",
         required=True,
         min_length=5,
         max_length=50,
@@ -137,7 +139,8 @@ class CoordinatorCog(commands.Cog):
         self.coordinator_service = coordinator_service
 
     @app_commands.command(
-        name="adicionar-coordenador", description="comando para registrar coordenador via modal"
+        name="adicionar-coordenador",
+        description="comando para registrar coordenador via modal",
     )
     async def add_coordinator(self, interaction: discord.Interaction):
         """Verification and call for pop up the modal"""
