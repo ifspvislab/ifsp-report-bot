@@ -101,13 +101,13 @@ class ProjectService:
 
     def verify_coordinator(self, coordinator_id):
         """
-            Verifies if the coordinator exists.
+        Verifies if the coordinator exists.
 
-            Args:
-                coordinator_id (str): The coordinator to verify.
+        Args:
+            coordinator_id (str): The coordinator to verify.
 
-            Raises:
-                InvalidCoordinator: If the coordinator does not manage any projects.
+        Raises:
+            InvalidCoordinator: If the coordinator does not manage any projects.
         """
         exists = False
 

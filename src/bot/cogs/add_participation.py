@@ -83,7 +83,7 @@ class AddParticipationModal(ui.Modal):
 
         try:
             project = self.project_service.find_project_by_type(
-                "project_title", self.project_title.value
+                "project_title", self.project_title.value.upper()
             )
             if project is None:
                 logger.error("O projeto inserido inexiste nos registros.")
@@ -91,23 +91,20 @@ class AddParticipationModal(ui.Modal):
                     "O projeto inexiste nos registros!"
                 )
 
-            else:
-                self.participation_service.create(
-                    Participation(
-                        str(uuid4()),
-                        self.registration.value,
-                        project.project_id,
-                        datetime.strptime(self.date.value, "%d/%m/%Y").date(),
-                        project.end_date,
-                    )
+            self.participation_service.create(
+                Participation(
+                    str(uuid4()),
+                    self.registration.value.upper(),
+                    project.project_id,
+                    datetime.strptime(self.date.value, "%d/%m/%Y").date(),
+                    project.end_date,
                 )
-                logger.info(
-                    "Participation sucesssfully created by %s", interaction.user.name
-                )
+            )
+            logger.info(
+                "Participation sucesssfully created by %s", interaction.user.name
+            )
 
-                await interaction.response.send_message(
-                    "Participação criada com sucesso!"
-                )
+            await interaction.response.send_message("Participação criada com sucesso!")
         except (
             ParticipationAlreadyExists,
             DateError,
@@ -137,16 +134,6 @@ class ParticipationCog(commands.Cog):
         self.coordinator_service = coordinator_service
         self.project_service = project_service
 
-    async def add_participation_modal_error(self, interaction: discord.Interaction):
-        """Treating error if it's not a coordinator."""
-        logger.warning(
-            "Usuário %s sem autorização tentou adicionar participação.",
-            interaction.user.name,
-        )
-        await interaction.response.send_message(
-            "Você não está autorizado a utilizar esse comando! Peça a um coordenador."
-        )
-
     @app_commands.command(
         name="adicionar-participação",
         description="registra a participação de um aluno em um projeto.",
@@ -159,7 +146,13 @@ class ParticipationCog(commands.Cog):
             "discord_id", interaction.user.id
         )
         if coordinator is None:
-            self.add_participation_modal_error(discord.Interaction)
+            logger.warning(
+                "Usuário %s sem autorização tentou adicionar participação.",
+                interaction.user.name,
+            )
+            await interaction.response.send_message(
+                "Você não está autorizado a utilizar esse comando! Peça a um coordenador."
+            )
         else:
             modal = AddParticipationModal(
                 self.participation_service, self.project_service

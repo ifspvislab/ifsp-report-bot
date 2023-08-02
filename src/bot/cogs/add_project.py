@@ -115,13 +115,15 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
                     str(uuid4()),
                     self.coordinator_id.value,
                     self.discord_server_id.value,
-                    self.project_title.value,
+                    self.project_title.value.upper(),
                     self.start_date.value,
                     self.end_date.value,
                 )
             )
 
-            await interaction.response.send_message("O projeto foi adicionado com sucesso!")
+            await interaction.response.send_message(
+                "O projeto foi adicionado com sucesso!"
+            )
 
         except (
             EqualOrSmallerDateError,

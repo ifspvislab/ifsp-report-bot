@@ -3,8 +3,6 @@ validation module
 """
 from validate_email_address import validate_email
 
-from data import Member
-
 
 class RegistrationError(Exception):
     """
@@ -24,9 +22,9 @@ class DiscordIdError(Exception):
     """
 
 
-class MemberError(Exception):
+class DateFormatError(Exception):
     """
-    Exception raised when an member isn't encountered.
+    Exception raised when an invalid data format is inserted.
     """
 
 
@@ -60,7 +58,8 @@ def verify_email(value):
 
 
 def verify_discord_id(value):
-    """Verify the correctness of the Discord ID.
+    """
+    Verify the correctness of the Discord ID.
 
     Args:
         value (str): The Discord ID value to be verified.
@@ -70,22 +69,3 @@ def verify_discord_id(value):
     """
     if not value.isnumeric():
         raise DiscordIdError("Discord ID inválido")
-
-
-def verify_member_exists(value, membros: list[Member]):
-    """
-    Verify if the member exists in the registers.
-    Args:
-        value(str): The registration to be verified.
-        membros: A list with all members in the registers.
-
-    Raises:
-        MemberError: If the member isn't in the registers.
-    """
-
-    members = membros
-    for member in members:
-        if member.registration == value:
-            return None
-
-    raise MemberError("O membro inexiste nos registros!")

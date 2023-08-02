@@ -10,7 +10,7 @@ from data import MemberData, Participation, ParticipationData
 
 from .member_service import MemberService
 from .project_service import ProjectService
-from .validation import verify_member_exists, verify_registration_format
+from .validation import verify_registration_format
 
 
 class ParticipationAlreadyExists(Exception):
@@ -28,6 +28,12 @@ class OpenParticipation(Exception):
 class DateError(Exception):
     """
     Exception raised when an invalid date is encountered.
+    """
+
+
+class MemberError(Exception):
+    """
+    Exception raised when an member isn't encountered.
     """
 
 
@@ -60,11 +66,11 @@ class ParticipationService:
         self.member_data = member_data
         self.participation_data = participation_data
 
-        self.database = self.participation_data.load_participations()
-        self.members = self.member_data.load_members()
-
         self.member_service = member_service
         self.project_service = project_service
+
+        self.database = self.participation_data.load_participations()
+        self.members = self.member_service.database
 
     def find_participations_by_type(
         self, attr_type, value
@@ -129,6 +135,22 @@ class ParticipationService:
                 "A data inserida é inválida! Ela fica após o fim do projeto."
             )
 
+    def verify_member_exists(self, registration):
+        """
+        Verify if the member exists in the registers.
+        Args:
+            registration(str): The registration to be verified.
+
+        Raises:
+            MemberError: If the member isn't in the registers.
+        """
+
+        for member in self.members:
+            if member.registration == registration:
+                return None
+
+        raise MemberError("O membro inexiste nos registros!")
+
     def create(self, participation: Participation):
         """
         Add a new participation to the database.
@@ -136,7 +158,7 @@ class ParticipationService:
         :param participation: The participation dataclass.
         """
         verify_registration_format(participation.registration)
-        verify_member_exists(participation.registration, self.members)
+        self.verify_member_exists(participation.registration)
         self.verify_date(participation.initial_date, participation.project_id)
         self.check_ocurrence(
             participation.project_id,
