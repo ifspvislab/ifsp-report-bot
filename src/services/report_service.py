@@ -206,7 +206,7 @@ class ReportService:
         """
 
         coordinator = self.coordinator_service.find_coordinator_by_type(
-            "coord_id", project.coordinator_id
+            "discord_id", project.coordinator_discord_id
         )
 
         if coordinator is None:

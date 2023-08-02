@@ -96,7 +96,7 @@ class MemberService:
         member = Member(
             member.member_id,
             member.registration,
-            member.discord_id,
+            int(member.discord_id),
             member.name,
             member.email,
         )

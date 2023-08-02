@@ -85,7 +85,7 @@ class CoordinatorService:
         coordinator = Coordinator(
             coordenador.coord_id,
             coordenador.registration,
-            coordenador.discord_id,
+            int(coordenador.discord_id),
             coordenador.name,
             coordenador.email,
         )

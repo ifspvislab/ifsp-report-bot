@@ -101,20 +101,22 @@ class ProjectService:
 
     def verify_coordinator(self, coordinator_id):
         """
-        #     Verifies if the coordinator exists.
+            Verifies if the coordinator exists.
 
-        #     Args:
-        #         coordinator_id (str): The coordinator to verify.
+            Args:
+                coordinator_id (str): The coordinator to verify.
 
-        #     Raises:
-        #         InvalidCoordinator: If the coordinator does not manage any projects.
-        #"""
-        discord_id = coordinator_id
-        coordinators = self.coordinators
+            Raises:
+                InvalidCoordinator: If the coordinator does not manage any projects.
+        """
+        exists = False
 
-        for coordinator in coordinators:
-            if str(coordinator.discord_id) != str(discord_id):
-                raise InvalidCoordinator("O coordenador não está cadastrado no bot!")
+        for coordinator in self.coordinators:
+            if coordinator.discord_id == coordinator_id:
+                exists = True
+
+        if exists:
+            raise InvalidCoordinator("O coordenador não está cadastrado no bot!")
 
     def verify_data(self, start_date, end_date):
         """
@@ -221,7 +223,7 @@ class ProjectService:
             DiscordServerIdError: If the Discord Server ID is invalid.
             ProjectAlreadyExists: If a project with the same title and dates already exists.
         """
-        self.verify_coordinator(projeto.coordinator_id)
+        self.verify_coordinator(projeto.coordinator_discord_id)
         self.verify_data(projeto.start_date, projeto.end_date)
         self.verify_intervalo_data(projeto.start_date, projeto.end_date)
         self.verify_data_atual(projeto.end_date)
@@ -229,8 +231,8 @@ class ProjectService:
         self.verify_projeto(projeto.project_title, projeto.start_date, projeto.end_date)
         project = Project(
             projeto.project_id,
-            projeto.coordinator_id,
-            projeto.discord_server_id,
+            int(projeto.coordinator_discord_id),
+            int(projeto.discord_server_id),
             projeto.project_title,
             projeto.start_date,
             projeto.end_date,

@@ -61,7 +61,7 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
 
         member = data.Member(
             str(uuid4()),
-            self.registration.value,
+            self.registration.value.upper(),
             self.discord_id.value,
             self.name.value,
             self.email.value,

@@ -121,7 +121,7 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
                 )
             )
 
-            await interaction.response.send_message("O projeto foi adicionado!")
+            await interaction.response.send_message("O projeto foi adicionado com sucesso!")
 
         except (
             EqualOrSmallerDateError,
@@ -150,9 +150,8 @@ class ProjectCog(commands.Cog):
         self.project_service = project_service
 
     @app_commands.command(
-        name="cadastrar-projeto", description="cadastrar projeto via modal"
+        name="adicionar-projeto", description="cadastrar projeto via modal"
     )
-    @app_commands.check(is_admin)
     async def add_project(self, interaction: discord.Interaction):
         """
         Command to add a project via modal.
@@ -160,25 +159,18 @@ class ProjectCog(commands.Cog):
         Args:
             interaction (discord.Interaction): The interaction object.
         """
-        modal = AddProjectModal(self.project_service)
-        await interaction.response.send_modal(modal)
+        if is_admin(interaction.user.id):
+            modal = AddProjectModal(self.project_service)
+            await interaction.response.send_modal(modal)
 
-        logger.info("cadastrar-projeto command user %s", interaction.user.name)
+            logger.info("adicionar-projeto command user %s", interaction.user.name)
+            return
 
-    @add_project.error
-    async def add_project_error(self, interaction: discord.Interaction, error):
-        """
-        Error handler for the add_project command.
-
-        Args:
-            interaction (discord.Interaction): The interaction object.
-            error: The error that occurred.
-
-        Returns:
-             None
-        """
         await interaction.response.send_message(
-            "Apenas o admin pode executar esse comando!"
+            "Você não tem permissão para adicionar projetos."
         )
-
-        print(error)
+        logger.error(
+            "Usuário (discord_id: %s)"
+            + "tentou adicionar um projeto, porém não possui permissão.",
+            interaction.user.id,
+        )

@@ -44,7 +44,7 @@ class AddCoordinatorModal(ui.Modal):
 
     """
 
-    prontuario = ui.TextInput(
+    registration = ui.TextInput(
         label="Prontuário:",
         style=discord.TextStyle.short,
         placeholder="Digite o prontuário",
@@ -95,7 +95,7 @@ class AddCoordinatorModal(ui.Modal):
             self.coordinator_service.create(
                 Coordinator(
                     str(uuid4()),
-                    self.prontuario.value,
+                    self.registration.value.upper(),
                     self.discord_id.value,
                     self.name.value,
                     self.email.value,
@@ -137,21 +137,23 @@ class CoordinatorCog(commands.Cog):
         self.coordinator_service = coordinator_service
 
     @app_commands.command(
-        name="cadastrar-coordenador", description="registrar coordenador via modal"
+        name="adicionar-coordenador", description="comando para registrar coordenador via modal"
     )
-    @app_commands.check(is_admin)
     async def add_coordinator(self, interaction: discord.Interaction):
         """Verification and call for pop up the modal"""
-        modal = AddCoordinatorModal(self.coordinator_service)
-        await interaction.response.send_modal(modal)
 
-        logger.info("cadastrar-coordenador command user %s", interaction.user.name)
+        if is_admin(interaction.user.id):
+            modal = AddCoordinatorModal(self.coordinator_service)
+            await interaction.response.send_modal(modal)
 
-    @add_coordinator.error
-    async def add_coordinator_error(self, interaction: discord.Interaction, error):
-        """Treating error if it's not the admin"""
+            logger.info("adicionar-coordenador command user %s", interaction.user.name)
+            return
+
         await interaction.response.send_message(
-            "Peça ao administrador para executar este comando, você não está autorizado!"
+            "Você não tem permissão para adicionar coordenador."
         )
-
-        print(error)
+        logger.error(
+            "Usuário (discord_id: %s)"
+            + "tentou adicionar coordenador, porém não possui permissão.",
+            interaction.user.id,
+        )
