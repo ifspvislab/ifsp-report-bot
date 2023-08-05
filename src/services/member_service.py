@@ -36,8 +36,6 @@ logger = settings.logging.getLogger(__name__)
 class MemberAlreadyExists(Exception):
     """Exception raised when a member already exists."""
 
-    print(Exception)
-
 
 class MemberService:
     """Class for managing member data.

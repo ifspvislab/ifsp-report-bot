@@ -136,7 +136,8 @@ class ParticipationService:
         :param participation: The participation dataclass.
         """
         verify_registration_format(participation.registration)
-        verify_member_exists(participation.registration, self.members)
+        members = self.member_data.load_members()
+        verify_member_exists(participation.registration, members)
         self.verify_date(participation.initial_date, participation.project_id)
         self.check_ocurrence(
             participation.project_id,

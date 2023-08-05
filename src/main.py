@@ -53,7 +53,12 @@ def main():
     )
     log_data = LogData()
     log_service = LogService(
-        log_data, member_data, participation_data, project_service, member_service
+        log_data,
+        member_data,
+        participation_data,
+        project_service,
+        member_service,
+        participation_service
     )
     start_bot(
         student_service,

@@ -9,6 +9,7 @@ from data import Log, LogData, MemberData, ParticipationData
 from reports import LogReport, LogReportData
 
 from .member_service import MemberService
+from .participation_service import ParticipationService
 from .project_service import ProjectService
 from .validation import verify_discord_id
 
@@ -48,6 +49,7 @@ class LogService:
         participations_data: ParticipationData,
         project_service: ProjectService,
         member_service: MemberService,
+        participation_service: ParticipationService
     ):
         """
         Initialize the LogService.
@@ -65,23 +67,7 @@ class LogService:
         self.participations_data = participations_data
         self.project_service = project_service
         self.member_service = member_service
-
-    def check_student_in_project(self, member_id: int) -> bool:
-        """
-        Check if a student with the given ID is in the project.
-
-        Args:
-            member_id (int): The ID of the student.
-
-        Returns:
-            bool: True if the student is in the project, False otherwise.
-        """
-        self.database = self.members_data.load_members()
-
-        for members in self.database:
-            if members.discord_id == member_id:
-                return True
-        return False
+        self.participation_service = participation_service
 
     def datetime_format(self, date: str) -> datetime:
         """
@@ -152,8 +138,11 @@ class LogService:
             student_id (int): The ID of the student associated with the log entry.
             date (datetime, optional): The date of the log entry.
         """
-        if self.check_student_in_project(member_id=student_id):
-            member = self.member_service.find_member_by_type("discord_id", student_id)
+        # pylint: disable=line-too-long
+        member = self.member_service.find_member_by_type("discord_id", student_id)
+        if (
+            self.participation_service.find_participations_by_type("registration", member.registration)
+        ) is not None:
             date_string = self.get_event_date(datetime_obj=date)
             log_action = f"{date_string} - {action}"
             log = Log(
@@ -213,7 +202,7 @@ class LogService:
 
         if discord_id is not None:
             verify_discord_id(discord_id)
-            if not self.check_student_in_project(int(discord_id)):
+            if self.member_service.find_member_by_type("discord_id", int(discord_id)) is None:
                 raise IdDoesNotExist("ID não corresponde a nenhum estudante")
 
         if start_date is None and end_date is None:

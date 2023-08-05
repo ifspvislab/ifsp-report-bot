@@ -82,12 +82,16 @@ class Events(commands.Cog):
         Event handler for interaction events.
         Logs the user and the interaction name.
         """
-        action = f"{interaction.user} - Interaction: {interaction.data['name']}"
-        self.log_service.generate_log(
-            action=action,
-            student_id=interaction.user.id,
-            date=interaction.created_at,
-        )
+        try:
+            action = f"{interaction.user} - Interaction: {interaction.data['name']}"
+
+            self.log_service.generate_log(
+                action=action,
+                student_id=interaction.user.id,
+                date=interaction.created_at,
+            )
+        except KeyError:
+            return
 
     @Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
