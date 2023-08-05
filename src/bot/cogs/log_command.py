@@ -26,7 +26,9 @@ class LogCommand(commands.Cog):
     Cog that handles log commands.
     """
 
-    def __init__(self, log_service: LogService, coordinator_service: CoordinatorService):
+    def __init__(
+        self, log_service: LogService, coordinator_service: CoordinatorService
+    ):
         self.log_service = log_service
         self.coordinator_service = coordinator_service
 
@@ -55,25 +57,33 @@ class LogCommand(commands.Cog):
         Returns:
             None
         """
-        if self.coordinator_service.find_coordinator_by_type("discord_id", interaction.user.id):
+        if self.coordinator_service.find_coordinator_by_type(
+            "discord_id", interaction.user.id
+        ):
             try:
                 log_report = self.log_service.generate_log_report(
                     interaction.guild.id, discord_id, start_date, end_date
                 )
                 await interaction.response.send_message(
-                    file=discord.File(BytesIO(log_report.generate()), filename="log.pdf"),
+                    file=discord.File(
+                        BytesIO(log_report.generate()), filename="log.pdf"
+                    ),
                     ephemeral=True,
                 )
                 logger.info(
                     "Log File successfully created by '%s'",
                     interaction.user.name,
                 )
-            except (IdDoesNotExist,
-                    NoStartDate,
-                    InvalidReportSize,
-                    IncorrectDateFilter,
-                    DiscordIdError) as exception:
+            except (
+                IdDoesNotExist,
+                NoStartDate,
+                InvalidReportSize,
+                IncorrectDateFilter,
+                DiscordIdError,
+            ) as exception:
                 await interaction.response.send_message(exception)
 
         else:
-            await interaction.response.send_message("Apenas o coordenador tem acesso ao comando")
+            await interaction.response.send_message(
+                "Apenas o coordenador tem acesso ao comando"
+            )

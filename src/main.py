@@ -58,7 +58,7 @@ def main():
         participation_data,
         project_service,
         member_service,
-        participation_service
+        participation_service,
     )
     start_bot(
         student_service,

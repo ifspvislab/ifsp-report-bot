@@ -137,7 +137,8 @@ class CoordinatorCog(commands.Cog):
         self.coordinator_service = coordinator_service
 
     @app_commands.command(
-        name="adicionar-coordenador", description="comando para registrar coordenador via modal"
+        name="adicionar-coordenador",
+        description="comando para registrar coordenador via modal",
     )
     async def add_coordinator(self, interaction: discord.Interaction):
         """Verification and call for pop up the modal"""

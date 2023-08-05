@@ -49,7 +49,7 @@ class LogService:
         participations_data: ParticipationData,
         project_service: ProjectService,
         member_service: MemberService,
-        participation_service: ParticipationService
+        participation_service: ParticipationService,
     ):
         """
         Initialize the LogService.
@@ -141,7 +141,9 @@ class LogService:
         # pylint: disable=line-too-long
         member = self.member_service.find_member_by_type("discord_id", student_id)
         if (
-            self.participation_service.find_participations_by_type("registration", member.registration)
+            self.participation_service.find_participations_by_type(
+                "registration", member.registration
+            )
         ) is not None:
             date_string = self.get_event_date(datetime_obj=date)
             log_action = f"{date_string} - {action}"
@@ -202,7 +204,10 @@ class LogService:
 
         if discord_id is not None:
             verify_discord_id(discord_id)
-            if self.member_service.find_member_by_type("discord_id", int(discord_id)) is None:
+            if (
+                self.member_service.find_member_by_type("discord_id", int(discord_id))
+                is None
+            ):
                 raise IdDoesNotExist("ID não corresponde a nenhum estudante")
 
         if start_date is None and end_date is None:

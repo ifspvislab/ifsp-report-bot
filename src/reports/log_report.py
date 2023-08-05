@@ -87,22 +87,23 @@ class LogReport:
 
         for participation in self.data.participations:
             if participation.project_id == str(self.data.project_id):
-                members = [member for member in self.data.members if (
-                    participation.registration == member.registration
-                )
+                members = [
+                    member
+                    for member in self.data.members
+                    if (participation.registration == member.registration)
                 ]
                 self.content.extend(
                     [Paragraph(member.name, events_header_style) for member in members]
                 )
 
-                logs = [log for log in self.data.logs if (
-                    log.registration == participation.registration
-                    )
+                logs = [
+                    log
+                    for log in self.data.logs
+                    if (log.registration == participation.registration)
                 ]
                 self.content.extend(
                     [Paragraph(log.action, events_text_style) for log in logs]
                 )
-
 
     def generate_date_report(self):
         """
@@ -119,24 +120,28 @@ class LogReport:
         for participation in self.data.participations:
             if participation.project_id == str(self.data.project_id):
                 members = [
-                    member for member in self.data.members if (
-                    participation.registration == member.registration
-                    )
+                    member
+                    for member in self.data.members
+                    if (participation.registration == member.registration)
                 ]
                 self.content.extend(
                     [Paragraph(member.name, events_header_style) for member in members]
                 )
 
                 # pylint: disable=line-too-long
-                logs = [log for log in self.data.logs if (
-                    log.registration == participation.registration
-                    and self.data.start_date <= datetime.strptime(log.date, "%d/%m/%Y %H:%M") <= self.data.end_date + timedelta(days=1)
+                logs = [
+                    log
+                    for log in self.data.logs
+                    if (
+                        log.registration == participation.registration
+                        and self.data.start_date
+                        <= datetime.strptime(log.date, "%d/%m/%Y %H:%M")
+                        <= self.data.end_date + timedelta(days=1)
                     )
                 ]
                 self.content.extend(
                     [Paragraph(log.action, events_text_style) for log in logs]
                 )
-
 
     def generate_id_report(self):
         """
@@ -153,9 +158,11 @@ class LogReport:
         for participation in self.data.participations:
             if participation.project_id == self.data.project_id:
                 members = [
-                    member for member in self.data.members if (
-                    participation.registration == member.registration
-                    and member.discord_id == int(self.data.discord_id)
+                    member
+                    for member in self.data.members
+                    if (
+                        participation.registration == member.registration
+                        and member.discord_id == int(self.data.discord_id)
                     )
                 ]
                 self.content.extend(
@@ -163,9 +170,11 @@ class LogReport:
                 )
 
                 logs = [
-                    log for log in self.data.logs if (
-                    log.registration == participation.registration
-                    and log.discord_id == int(self.data.discord_id)
+                    log
+                    for log in self.data.logs
+                    if (
+                        log.registration == participation.registration
+                        and log.discord_id == int(self.data.discord_id)
                     )
                 ]
                 self.content.extend(
@@ -187,9 +196,11 @@ class LogReport:
         for participation in self.data.participations:
             if participation.project_id == self.data.project_id:
                 members = [
-                    member for member in self.data.members if (
-                    participation.registration == member.registration
-                    and member.discord_id == int(self.data.discord_id)
+                    member
+                    for member in self.data.members
+                    if (
+                        participation.registration == member.registration
+                        and member.discord_id == int(self.data.discord_id)
                     )
                 ]
                 self.content.extend(
@@ -198,10 +209,14 @@ class LogReport:
 
                 # pylint: disable=line-too-long
                 logs = [
-                    log for log in self.data.logs if (
-                    log.registration == participation.registration
-                    and log.discord_id == int(self.data.discord_id)
-                    and self.data.start_date <= datetime.strptime(log.date, "%d/%m/%Y %H:%M") <= self.data.end_date + timedelta(days=1)
+                    log
+                    for log in self.data.logs
+                    if (
+                        log.registration == participation.registration
+                        and log.discord_id == int(self.data.discord_id)
+                        and self.data.start_date
+                        <= datetime.strptime(log.date, "%d/%m/%Y %H:%M")
+                        <= self.data.end_date + timedelta(days=1)
                     )
                 ]
                 self.content.extend(
