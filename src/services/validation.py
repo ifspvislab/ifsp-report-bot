@@ -3,7 +3,7 @@ validation module
 """
 from validate_email_address import validate_email
 
-from data import Member, Project
+from data import Member
 
 
 class CoordinatorRegistrationError(Exception):
@@ -34,6 +34,7 @@ class MemberError(Exception):
     """
     Exception raised when an member isn't encountered.
     """
+
 
 def verify_coordinator_registration_format(coordinator_id):
     """
