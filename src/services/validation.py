@@ -36,7 +36,7 @@ class MemberError(Exception):
     """
 
 
-def verify_coordinator_registration_format(coordinator_id):
+def verify_coordinator_registration_format(coordinator_registration):
     """
     Verify the correctness of a prontuario.
 
@@ -44,10 +44,10 @@ def verify_coordinator_registration_format(coordinator_id):
     :raises CoordinatorRegistrationError: If the registration is incorrect.
     """
     if not (
-        coordinator_id[:1].isalpha()
-        and coordinator_id[2:-2].isnumeric()
-        and coordinator_id[-1].isalnum()
-        and len(coordinator_id) == 9
+        coordinator_registration[:1].isalpha()
+        and coordinator_registration[2:-2].isnumeric()
+        and coordinator_registration[-1].isalnum()
+        and len(coordinator_registration) == 9
     ):
         raise CoordinatorRegistrationError("Prontuário do Coordenador incorreto")
 

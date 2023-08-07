@@ -101,7 +101,7 @@ class ProjectService:
 
         return None
 
-    def verify_coordinator(self, coordinator_id):
+    def verify_coordinator(self, coordinator_registration):
         """
         Verifies if the coordinator exists.
 
@@ -114,7 +114,7 @@ class ProjectService:
         exists = False
 
         for coordinator in self.coordinators:
-            if coordinator.discord_id == coordinator_id:
+            if coordinator.discord_id == coordinator_registration:
                 exists = True
 
         if exists:
@@ -225,8 +225,8 @@ class ProjectService:
             DiscordServerIdError: If the Discord Server ID is invalid.
             ProjectAlreadyExists: If a project with the same title and dates already exists.
         """
-        verify_coordinator_registration_format(projeto.coordinator_id)
-        self.verify_coordinator(projeto.coordinator_id)
+        verify_coordinator_registration_format(projeto.coordinator_registration)
+        self.verify_coordinator(projeto.coordinator_registration)
         self.verify_data(projeto.start_date, projeto.end_date)
         self.verify_intervalo_data(projeto.start_date, projeto.end_date)
         self.verify_data_atual(projeto.end_date)
@@ -234,7 +234,7 @@ class ProjectService:
         self.verify_projeto(projeto.project_title, projeto.start_date, projeto.end_date)
         project = Project(
             projeto.project_id,
-            projeto.coordinator_id,
+            projeto.coordinator_registration,
             int(projeto.discord_server_id),
             projeto.project_title,
             projeto.start_date,

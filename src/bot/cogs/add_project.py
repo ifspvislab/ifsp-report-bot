@@ -41,7 +41,7 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
     This modal adds a project.
 
     Attributes:
-        coordinator_id (ui.TextInput): Input field for the coordinator registration.
+        coordinator_registration (ui.TextInput): Input field for the coordinator registration.
         discord_server_id (ui.TextInput): Input field for the discord_server_id.
         title (ui.TextInput): Input field for the title.
         start_date (ui.TextInput): Input field for the start_date.
@@ -52,7 +52,7 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
         on_submit(interaction): Manipulate the submit event when adding a project.
     """
 
-    coordinator_id = ui.TextInput(
+    coordinator_registration = ui.TextInput(
         label="Coordenador",
         style=discord.TextStyle.short,
         placeholder="Digite o Prontuário (SPXXXXX) do Coordenador",
@@ -114,7 +114,7 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
             self.project_service.create(
                 Project(
                     str(uuid4()),
-                    self.coordinator_id.value.upper(),
+                    self.coordinator_registration.value.upper(),
                     self.discord_server_id.value,
                     self.project_title.value.upper(),
                     self.start_date.value,
