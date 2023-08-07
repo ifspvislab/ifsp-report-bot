@@ -3,12 +3,18 @@ validation module
 """
 from validate_email_address import validate_email
 
-from data import Member
+from data import Member, Project
+
+
+class CoordinatorRegistrationError(Exception):
+    """
+    Exception raised when an incorrect coordinator registration is encountered.
+    """
 
 
 class RegistrationError(Exception):
     """
-    Exception raised when an incorrect prontuario is encountered.
+    Exception raised when an incorrect registration is encountered.
     """
 
 
@@ -29,6 +35,21 @@ class MemberError(Exception):
     Exception raised when an member isn't encountered.
     """
 
+def verify_coordinator_registration_format(coordinator_id):
+    """
+    Verify the correctness of a prontuario.
+
+    :param value: The registration value to be verified.
+    :raises CoordinatorRegistrationError: If the registration is incorrect.
+    """
+    if not (
+        coordinator_id[:1].isalpha()
+        and coordinator_id[2:-2].isnumeric()
+        and coordinator_id[-1].isalnum()
+        and len(coordinator_id) == 9
+    ):
+        raise CoordinatorRegistrationError("Prontuário do Coordenador incorreto")
+
 
 def verify_registration_format(registration):
     """
@@ -43,7 +64,7 @@ def verify_registration_format(registration):
         and registration[-1].isalnum()
         and len(registration) == 9
     ):
-        raise RegistrationError("ERRO: Prontuario incorreto")
+        raise RegistrationError("Prontuário incorreto")
 
 
 def verify_email(value):

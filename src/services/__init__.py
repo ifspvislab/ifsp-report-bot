@@ -56,4 +56,4 @@ from .termination_service import (
     TerminationStatementService,
     YearOutOfRange,
 )
-from .validation import DiscordIdError, EmailError, MemberError, RegistrationError
+from .validation import DiscordIdError, EmailError, MemberError, RegistrationError, CoordinatorRegistrationError

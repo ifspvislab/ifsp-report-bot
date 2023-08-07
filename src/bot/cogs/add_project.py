@@ -22,6 +22,7 @@ from discord.ext import commands
 import settings
 from data import Project
 from services import (
+    CoordinatorRegistrationError,
     DiscordServerIdError,
     EqualOrSmallerDateError,
     InvalidCoordinator,
@@ -40,7 +41,7 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
     This modal adds a project.
 
     Attributes:
-        coordinator_id (ui.TextInput): Input field for the coordinator_id.
+        coordinator_id (ui.TextInput): Input field for the coordinator registration.
         discord_server_id (ui.TextInput): Input field for the discord_server_id.
         title (ui.TextInput): Input field for the title.
         start_date (ui.TextInput): Input field for the start_date.
@@ -54,9 +55,9 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
     coordinator_id = ui.TextInput(
         label="Coordenador",
         style=discord.TextStyle.short,
-        placeholder="Digite o Discord Id do Coordenador",
+        placeholder="Digite o Prontuário (SPXXXXX) do Coordenador",
         required=True,
-        max_length=30,
+        max_length=9,
     )
     discord_server_id = ui.TextInput(
         label="Discord Server ID",
@@ -113,7 +114,7 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
             self.project_service.create(
                 Project(
                     str(uuid4()),
-                    self.coordinator_id.value,
+                    self.coordinator_id.value.upper(),
                     self.discord_server_id.value,
                     self.project_title.value.upper(),
                     self.start_date.value,
@@ -126,6 +127,7 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
             )
 
         except (
+            CoordinatorRegistrationError,
             EqualOrSmallerDateError,
             InvalidCoordinator,
             InvalidTimeInterval,
