@@ -20,8 +20,6 @@ from datetime import datetime, timedelta
 import settings
 from data import CoordinatorData, Project, ProjectData
 
-from .validation import verify_coordinator_registration_format
-
 logger = settings.logging.getLogger(__name__)
 
 
@@ -101,7 +99,7 @@ class ProjectService:
 
         return None
 
-    def verify_coordinator(self, coordinator_registration):
+    def verify_coordinator(self, coordinator_id):
         """
         Verifies if the coordinator exists.
 
@@ -114,13 +112,13 @@ class ProjectService:
         exists = False
 
         for coordinator in self.coordinators:
-            if coordinator.discord_id == coordinator_registration:
+            if coordinator.discord_id == coordinator_id:
                 exists = True
 
         if exists:
             raise InvalidCoordinator("O coordenador não está cadastrado no bot!")
 
-    def verify_data(self, start_date, end_date):
+    def verify_date(self, start_date, end_date):
         """
         Verifies if the end date is greater than the start date.
 
@@ -139,7 +137,7 @@ class ProjectService:
                 "A data de fim é menor ou igual a data de início!"
             )
 
-    def verify_intervalo_data(self, start_date, end_date):
+    def verify_date_range(self, start_date, end_date):
         """
         Verifies if the time interval between the start and end dates is greater than 1 month.
 
@@ -160,7 +158,7 @@ class ProjectService:
                 "O intervalo de tempo entre a data de início e a data de fim é menor que 1 mês!"
             )
 
-    def verify_data_atual(self, end_date):
+    def verify_current_date(self, end_date):
         """
         Verifies if the end date is greater than the current date.
 
@@ -188,7 +186,7 @@ class ProjectService:
         if not value.isnumeric():
             raise DiscordServerIdError("Discord Server ID inválido.")
 
-    def verify_projeto(self, project_title, start_date, end_date):
+    def verify_project(self, project_title, start_date, end_date):
         """
         Verifies if a project with the same title and dates already exists.
 
@@ -225,16 +223,15 @@ class ProjectService:
             DiscordServerIdError: If the Discord Server ID is invalid.
             ProjectAlreadyExists: If a project with the same title and dates already exists.
         """
-        verify_coordinator_registration_format(projeto.coordinator_registration)
-        self.verify_coordinator(projeto.coordinator_registration)
-        self.verify_data(projeto.start_date, projeto.end_date)
-        self.verify_intervalo_data(projeto.start_date, projeto.end_date)
-        self.verify_data_atual(projeto.end_date)
+        self.verify_coordinator(projeto.coordinator_id)
+        self.verify_date(projeto.start_date, projeto.end_date)
+        self.verify_date_range(projeto.start_date, projeto.end_date)
+        self.verify_current_date(projeto.end_date)
         self.verify_discord_server_id(projeto.discord_server_id)
-        self.verify_projeto(projeto.project_title, projeto.start_date, projeto.end_date)
+        self.verify_project(projeto.project_title, projeto.start_date, projeto.end_date)
         project = Project(
             projeto.project_id,
-            projeto.coordinator_registration,
+            projeto.coordinator_id,
             int(projeto.discord_server_id),
             projeto.project_title,
             projeto.start_date,

@@ -20,7 +20,7 @@ class Project:
 
     Attributes:
         project_id (str): the project's uuid.
-        coordinator_registration (str): the projects's coordinator registration.
+        coordinator_id (str): the projects's coordinator id.
         discord_server_id (int): the project's Discord Server ID.
         project_title (str): the project's title.
         start_date (int): the project's start date.
@@ -28,7 +28,7 @@ class Project:
     """
 
     project_id: str
-    coordinator_registration: str
+    coordinator_id: str
     discord_server_id: int
     project_title: str
     start_date: date
@@ -105,7 +105,7 @@ class ProjectData:
 
         with open("assets/data/projects.csv", "a", encoding="UTF-8") as project_data:
             project_data.write(
-                f"{project.project_id},{project.coordinator_registration},"
+                f"{project.project_id},{project.coordinator_id},"
                 + f"{project.discord_server_id},{project.project_title},"
                 + f"{project.start_date},{project.end_date}\n"
             )

@@ -53,8 +53,12 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
     name = ui.TextInput(
         label="Name", placeholder="Digite o nome", min_length=5, max_length=100
     )
-    email = ui.TextInput(label="Email", placeholder="Digite o email (nome@email.com)")
-    discord_id = ui.TextInput(label="Discord ID", placeholder="Digite o Discord ID")
+    email = ui.TextInput(
+        label="Email", placeholder="Digite o email (nome@email.com)", max_length=50
+    )
+    discord_id = ui.TextInput(
+        label="Discord ID", placeholder="Digite o Discord ID", max_length=30
+    )
 
     async def on_submit(self, interaction: Interaction, /):
         """

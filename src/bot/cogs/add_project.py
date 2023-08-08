@@ -22,7 +22,6 @@ from discord.ext import commands
 import settings
 from data import Project
 from services import (
-    CoordinatorRegistrationError,
     DiscordServerIdError,
     EqualOrSmallerDateError,
     InvalidCoordinator,
@@ -41,7 +40,7 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
     This modal adds a project.
 
     Attributes:
-        coordinator_registration (ui.TextInput): Input field for the coordinator registration.
+        coordinator_id (ui.TextInput): Input field for the coordinator registration.
         discord_server_id (ui.TextInput): Input field for the discord_server_id.
         title (ui.TextInput): Input field for the title.
         start_date (ui.TextInput): Input field for the start_date.
@@ -52,7 +51,7 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
         on_submit(interaction): Manipulate the submit event when adding a project.
     """
 
-    coordinator_registration = ui.TextInput(
+    coordinator_id = ui.TextInput(
         label="Coordenador",
         style=discord.TextStyle.short,
         placeholder="Digite o Prontuário (SPXXXXX) do Coordenador",
@@ -114,7 +113,7 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
             self.project_service.create(
                 Project(
                     str(uuid4()),
-                    self.coordinator_registration.value.upper(),
+                    self.coordinator_id.value.upper(),
                     self.discord_server_id.value,
                     self.project_title.value.upper(),
                     self.start_date.value,
@@ -122,12 +121,9 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
                 )
             )
 
-            await interaction.response.send_message(
-                "O projeto foi adicionado com sucesso!"
-            )
+            await interaction.response.send_message("Projeto cadastrado com sucesso!")
 
         except (
-            CoordinatorRegistrationError,
             EqualOrSmallerDateError,
             InvalidCoordinator,
             InvalidTimeInterval,
