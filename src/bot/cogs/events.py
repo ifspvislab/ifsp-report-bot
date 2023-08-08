@@ -30,6 +30,7 @@ class Events(commands.Cog):
                 f"{message.author} - {message.channel} - {message.attachments[0].url}"
             )
             self.log_service.generate_log(
+                project_id=self.log_service.get_project_server_id(message.guild.id),
                 action=action,
                 student_id=message.author.id,
                 date=message.created_at,
@@ -37,6 +38,7 @@ class Events(commands.Cog):
         else:
             action = f"{message.author} - {message.channel} - {message.content}"
             self.log_service.generate_log(
+                project_id=self.log_service.get_project_server_id(message.guild.id),
                 action=action,
                 student_id=message.author.id,
                 date=message.created_at,
@@ -53,6 +55,7 @@ class Events(commands.Cog):
 
         action = f"{message.author} - {message.channel} - Deleted: {message.content}"
         self.log_service.generate_log(
+            project_id=self.log_service.get_project_server_id(message.guild.id),
             action=action,
             student_id=message.author.id,
             date=message.created_at,
@@ -71,6 +74,7 @@ class Events(commands.Cog):
         # pylint: disable=line-too-long
         action = f"{before.author} - {before.channel} - Before: {before.content} - After: {after.content}"
         self.log_service.generate_log(
+            project_id=self.log_service.get_project_server_id(before.guild.id),
             action=action,
             student_id=before.author.id,
             date=before.created_at,
@@ -86,6 +90,7 @@ class Events(commands.Cog):
             action = f"{interaction.user} - Interaction: {interaction.data['name']}"
 
             self.log_service.generate_log(
+                project_id=self.log_service.get_project_server_id(interaction.guild.id),
                 action=action,
                 student_id=interaction.user.id,
                 date=interaction.created_at,
@@ -103,6 +108,9 @@ class Events(commands.Cog):
             f"{user} - Reaction: {reaction.emoji} - Reacted: {reaction.message.content}"
         )
         self.log_service.generate_log(
+            project_id=self.log_service.get_project_server_id(
+                reaction.message.guild.id
+            ),
             action=action,
             student_id=user.id,
         )

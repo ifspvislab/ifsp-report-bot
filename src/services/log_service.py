@@ -11,7 +11,6 @@ from reports import LogReport, LogReportData
 from .member_service import MemberService
 from .participation_service import ParticipationService
 from .project_service import ProjectService
-from .validation import verify_discord_id
 
 logger = settings.logging.getLogger(__name__)
 
@@ -54,12 +53,16 @@ class LogService:
         """
         Initialize the LogService.
 
+        This class manages log information for a specific context,
+        such as projects, members, and participations.
+
         Args:
             log_data (LogData): The data object for log information.
             members_data (MemberData): The data object for member information.
             participations_data (ParticipationData): The data object for participation information.
             project_service (ProjectService): The service object for project-related operations.
             member_service (MemberService): The service object for member-related operations.
+            participation_service: The service object for participation operations.
         """
         self.database = []
         self.log_data = log_data
@@ -129,7 +132,9 @@ class LogService:
             date = datetime_obj.astimezone(zone).strftime("%d/%m/%Y %H:%M")
         return date
 
-    def generate_log(self, action: str, student_id: int, date: datetime = None):
+    def generate_log(
+        self, action: str, student_id: int, project_id: str, date: datetime = None
+    ) -> None:
         """
         Generate a log entry.
 
@@ -148,6 +153,7 @@ class LogService:
             date_string = self.get_event_date(datetime_obj=date)
             log_action = f"{date_string} - {action}"
             log = Log(
+                project_id=project_id,
                 registration=member.registration,
                 discord_id=student_id,
                 date=date_string,
@@ -155,7 +161,7 @@ class LogService:
             )
             self.log_data.add_log(log)
 
-    def check_size_log_report(self, report: LogReport):
+    def check_size_log_report(self, report: LogReport) -> bool:
         """
         Check the size of a log report.
 
@@ -174,11 +180,28 @@ class LogService:
             )
         return True
 
+    def get_project_server_id(self, server_id: int) -> str | None:
+        """
+        Retrieves the project ID associated with the given Discord server ID.
+
+        Args:
+            server_id (int): The Discord server ID to search for.
+
+        Returns:
+            str: The associated project ID if found, otherwise an empty string.
+        """
+        project = self.project_service.find_project_by_type(
+            "discord_server_id", server_id
+        )
+        if project is not None:
+            return project.project_id
+        return None
+
     # pylint: disable=inconsistent-return-statements
     def generate_log_report(
         self,
         server_id: int,
-        discord_id: str = None,
+        discord_id: int = None,
         start_date: str = None,
         end_date: str = None,
     ) -> LogReport:
@@ -198,14 +221,9 @@ class LogService:
             IdDoesNotExist: If the provided student ID does not exist.
             NoStartDate: If no start date is provided when an end date is.
         """
-        project = self.project_service.find_project_by_type(
-            "discord_server_id", server_id
-        )
-
         if discord_id is not None:
-            verify_discord_id(discord_id)
             if (
-                self.member_service.find_member_by_type("discord_id", int(discord_id))
+                self.member_service.find_member_by_type("discord_id", discord_id)
                 is None
             ):
                 raise IdDoesNotExist("ID não corresponde a nenhum estudante")
@@ -216,18 +234,18 @@ class LogService:
                     members=self.members_data.load_members(),
                     participations=self.participations_data.load_participations(),
                     logs=self.log_data.load_logs(),
-                    project_id=project.project_id,
+                    project_id=self.get_project_server_id(server_id),
                     value=3,
                     start_date=None,
                     end_date=None,
-                    discord_id=str(discord_id),
+                    discord_id=discord_id,
                 )
             else:
                 data = LogReportData(
                     members=self.members_data.load_members(),
                     participations=self.participations_data.load_participations(),
                     logs=self.log_data.load_logs(),
-                    project_id=project.project_id,
+                    project_id=self.get_project_server_id(server_id),
                     value=1,
                     start_date=None,
                     end_date=None,
@@ -249,11 +267,11 @@ class LogService:
                     members=self.members_data.load_members(),
                     participations=self.participations_data.load_participations(),
                     logs=self.log_data.load_logs(),
-                    project_id=project.project_id,
+                    project_id=self.get_project_server_id(server_id),
                     value=4,
                     start_date=self.datetime_format(start_date),
                     end_date=self.datetime_format(end_date),
-                    discord_id=str(discord_id),
+                    discord_id=discord_id,
                 )
 
             else:
@@ -261,7 +279,7 @@ class LogService:
                     members=self.members_data.load_members(),
                     participations=self.participations_data.load_participations(),
                     logs=self.log_data.load_logs(),
-                    project_id=project.project_id,
+                    project_id=self.get_project_server_id(server_id),
                     value=2,
                     start_date=self.datetime_format(start_date),
                     end_date=self.datetime_format(end_date),

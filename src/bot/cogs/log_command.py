@@ -4,7 +4,7 @@ Cog for handling log commands.
 from io import BytesIO
 
 import discord
-from discord import app_commands
+from discord import Member, app_commands
 from discord.ext import commands
 
 import settings
@@ -29,6 +29,7 @@ class LogCommand(commands.Cog):
     def __init__(
         self, log_service: LogService, coordinator_service: CoordinatorService
     ):
+        super().__init__()
         self.log_service = log_service
         self.coordinator_service = coordinator_service
 
@@ -36,14 +37,14 @@ class LogCommand(commands.Cog):
     @app_commands.describe(
         start_date="Data inicial para a procura de registros. Ex:01/09/2023",
         end_date="Data final para a procura de registros. Ex:01/09/2023",
-        discord_id="Registros apenas com o ID inserido",
+        member="Apenas registros do membro inserido",
     )
     async def log_file(
         self,
         interaction: discord.Interaction,
         start_date: str = None,
         end_date: str = None,
-        discord_id: str = None,
+        member: Member = None,
     ):
         """
         Command for creating a log file.
@@ -61,9 +62,14 @@ class LogCommand(commands.Cog):
             "discord_id", interaction.user.id
         ):
             try:
-                log_report = self.log_service.generate_log_report(
-                    interaction.guild.id, discord_id, start_date, end_date
-                )
+                if member is not None:
+                    log_report = self.log_service.generate_log_report(
+                        interaction.guild.id, member.id, start_date, end_date
+                    )
+                else:
+                    log_report = self.log_service.generate_log_report(
+                        interaction.guild.id, member, start_date, end_date
+                    )
                 await interaction.response.send_message(
                     file=discord.File(
                         BytesIO(log_report.generate()), filename="log.pdf"

@@ -15,11 +15,14 @@ class Log:
     Data class to represent a log entry.
 
     Attributes:
-    - discord_id: The Discord ID of the log creator.
-    - date: The date of the log entry.
-    - action: The action or description of the log.
+    project_id (str): The ID of the associated project.
+    registration (str): The registration information.
+    discord_id (int): The Discord ID of the log creator.
+    date (str): The date of the log entry.
+    action (str): The action or description of the log.
     """
 
+    project_id: str
     registration: str
     discord_id: int
     date: str
@@ -43,15 +46,15 @@ class LogData:
         """
         fields = [field.strip() for field in row.split(sep=",")]
         action = ",".join(fields[3:])
-        log = Log(fields[0], int(fields[1]), fields[2], str(action))
+        log = Log(fields[0], fields[1], int(fields[2]), fields[3], str(action))
         return log
 
-    def load_logs(self) -> list[dict]:
+    def load_logs(self) -> list[Log]:
         """
-        Loads log entries from the logs.csv file.
+        Load log entries from the logs.csv file.
 
         Returns:
-        - A list of dictionaries representing the log entries.
+            list[Log]: A list of Log objects representing the log entries.
         """
         with open("assets/data/logs.csv", "r", encoding="utf-8") as file:
             logs = []
@@ -64,9 +67,22 @@ class LogData:
         Adds a log entry to the logs.csv file.
 
         Args:
-        - log: A object containing the log data in the order [discord_id, date, action].
+        - log: A object containing the log data in the order
+        [
+            project_id,
+            registration,
+            discord_id,
+            date,
+            action
+        ].
         """
-        log_list = [log.registration, log.discord_id, log.date, log.action]
+        log_list = [
+            log.project_id,
+            log.registration,
+            log.discord_id,
+            log.date,
+            log.action,
+        ]
         with open("assets/data/logs.csv", "a", newline="", encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile, delimiter=",")
             writer.writerow(log_list)

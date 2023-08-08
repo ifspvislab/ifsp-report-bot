@@ -37,7 +37,7 @@ class LogReportData:
     value: int
     start_date: datetime
     end_date: datetime
-    discord_id: str
+    discord_id: int
 
 
 class LogReport:
@@ -99,7 +99,10 @@ class LogReport:
                 logs = [
                     log
                     for log in self.data.logs
-                    if (log.registration == participation.registration)
+                    if (
+                        log.registration == participation.registration
+                        and log.project_id == self.data.project_id
+                    )
                 ]
                 self.content.extend(
                     [Paragraph(log.action, events_text_style) for log in logs]
@@ -128,12 +131,12 @@ class LogReport:
                     [Paragraph(member.name, events_header_style) for member in members]
                 )
 
-                # pylint: disable=line-too-long
                 logs = [
                     log
                     for log in self.data.logs
                     if (
                         log.registration == participation.registration
+                        and log.project_id == self.data.project_id
                         and self.data.start_date
                         <= datetime.strptime(log.date, "%d/%m/%Y %H:%M")
                         <= self.data.end_date + timedelta(days=1)
@@ -162,7 +165,7 @@ class LogReport:
                     for member in self.data.members
                     if (
                         participation.registration == member.registration
-                        and member.discord_id == int(self.data.discord_id)
+                        and member.discord_id == self.data.discord_id
                     )
                 ]
                 self.content.extend(
@@ -174,7 +177,8 @@ class LogReport:
                     for log in self.data.logs
                     if (
                         log.registration == participation.registration
-                        and log.discord_id == int(self.data.discord_id)
+                        and log.project_id == self.data.project_id
+                        and log.discord_id == self.data.discord_id
                     )
                 ]
                 self.content.extend(
@@ -200,20 +204,20 @@ class LogReport:
                     for member in self.data.members
                     if (
                         participation.registration == member.registration
-                        and member.discord_id == int(self.data.discord_id)
+                        and member.discord_id == self.data.discord_id
                     )
                 ]
                 self.content.extend(
                     [Paragraph(member.name, events_header_style) for member in members]
                 )
 
-                # pylint: disable=line-too-long
                 logs = [
                     log
                     for log in self.data.logs
                     if (
                         log.registration == participation.registration
-                        and log.discord_id == int(self.data.discord_id)
+                        and log.project_id == self.data.project_id
+                        and log.discord_id == self.data.discord_id
                         and self.data.start_date
                         <= datetime.strptime(log.date, "%d/%m/%Y %H:%M")
                         <= self.data.end_date + timedelta(days=1)
