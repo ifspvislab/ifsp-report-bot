@@ -22,12 +22,6 @@ class DiscordIdError(Exception):
     """
 
 
-class DateFormatError(Exception):
-    """
-    Exception raised when an invalid data format is inserted.
-    """
-
-
 def verify_registration_format(registration):
     """
     Verify the correctness of a prontuario.

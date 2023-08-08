@@ -37,6 +37,12 @@ class MemberError(Exception):
     """
 
 
+class ProjectError(Exception):
+    """
+    Exception raised when an project isn't encountered.
+    """
+
+
 class ParticipationService:
     """
     Class for managing participation data.
@@ -71,6 +77,7 @@ class ParticipationService:
 
         self.database = self.participation_data.load_participations()
         self.members = self.member_service.database
+        self.projects = self.project_service.database
 
     def find_participations_by_type(
         self, attr_type, value
@@ -93,13 +100,30 @@ class ParticipationService:
             return participations
         return None
 
+    def search_project(self, project_initial_date, project_title):
+        """
+        Checks if a project with the given information exists in the database.
+
+        :param project_initial_date: The initial date of the project being searched.
+        :param project_title: The title of the project being searched.
+        :raises ProjectError: If a project with the given initial date and title doesn't exists.
+        """
+        for project in self.projects:
+            if (
+                project_initial_date == project.start_date
+                and project_title == project.project_title
+            ):
+                return project
+
+        raise ProjectError("Projeto inexiste nos registros!")
+
     def check_ocurrence(self, project_id, registration, initial_date):
         """
         Check if a participation with the given registration in the given project is open.
 
-        :param value: The project to check for existence.
-        :param second_value: The registation to check for existence.
-        :param third_value: The entry date to check if the participation is open.
+        :param project_id: The project to check for existence.
+        :param registration: The registation to check for existence.
+        :param initial_date: The entry date to check if the participation is open.
         :raises ParticipationAlreadyExists: If a participation with the given prontuario
         and project already exists.
         """
@@ -118,8 +142,8 @@ class ParticipationService:
         Verifies if the date is valid.
 
         Args:
-            value(date): The date to be verified.
-            value_(str): A project title, to search in the registers.
+            initial_date(date): The date to be verified.
+            project_id(str): A project title, to search in the registers.
 
         Raises:
             DateError: If the date is invalid.

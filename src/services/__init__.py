@@ -30,6 +30,7 @@ from .participation_service import (
     MemberError,
     ParticipationAlreadyExists,
     ParticipationService,
+    ProjectError,
 )
 from .project_service import (
     DiscordServerIdError,
