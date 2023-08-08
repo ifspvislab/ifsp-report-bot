@@ -31,6 +31,7 @@ from services import (
     ProjectService,
     is_admin,
 )
+from services.validation import verify_registration_format
 
 logger = settings.logging.getLogger(__name__)
 
@@ -51,12 +52,12 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
         on_submit(interaction): Manipulate the submit event when adding a project.
     """
 
-    coordinator_id = ui.TextInput(
-        label="Coordenador",
+    registration_coordinator_id = ui.TextInput(
+        label="Prontuário do Coordenador:",
         style=discord.TextStyle.short,
-        placeholder="Insira o Discord ID do Coordenador",
+        placeholder="Digite o prontuário",
         required=True,
-        max_length=30,
+        max_length=9,
     )
     discord_server_id = ui.TextInput(
         label="Discord Server ID",
@@ -110,10 +111,15 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
         """
 
         try:
+            verify_registration_format(self.registration_coordinator_id.value)
+            coordinator_id = self.project_service.verify_coordinator(
+                self.registration_coordinator_id.value
+            )
+
             self.project_service.create(
                 Project(
                     str(uuid4()),
-                    self.coordinator_id.value,
+                    coordinator_id,
                     self.discord_server_id.value,
                     self.project_title.value,
                     self.start_date.value,

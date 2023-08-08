@@ -18,7 +18,9 @@ Classes:
 from datetime import datetime, timedelta
 
 import settings
-from data import CoordinatorData, Project, ProjectData
+from data import Project, ProjectData
+
+from .coordinator_service import CoordinatorService
 
 logger = settings.logging.getLogger(__name__)
 
@@ -68,7 +70,7 @@ class ProjectService:
     def __init__(
         self,
         project_data: ProjectData,
-        coordinator_data: CoordinatorData,
+        coordinator_service: CoordinatorService,
     ):
         """
         Initializes the ProjectService instance.
@@ -77,10 +79,10 @@ class ProjectService:
             project_data (ProjectData): The project data object for managing project data.
         """
         self.project_data = project_data
-        self.coordinator_data = coordinator_data
+        self.coordinator_service = coordinator_service
 
         self.database = self.project_data.load_projects()
-        self.coordinators = self.coordinator_data.load_coordinators()
+        self.coordinators = self.coordinator_service.database
 
     def find_project_by_type(self, attr_type, value):
         """
@@ -99,24 +101,24 @@ class ProjectService:
 
         return None
 
-    def verify_coordinator(self, coordinator_id):
+    def verify_coordinator(self, registration_coordinator_id):
         """
         Verifies if the coordinator exists.
 
         Args:
-            coordinator_id (str): The coordinator to verify.
+            registration_coordinator_id (str): The coordinator to verify.
 
         Raises:
             InvalidCoordinator: If the coordinator does not manage any projects.
         """
-        exists = False
+        coordinator = self.coordinator_service.find_coordinator_by_type(
+            "registration", registration_coordinator_id
+        )
 
-        for coordinator in self.coordinators:
-            if coordinator.discord_id == coordinator_id:
-                exists = True
-
-        if exists:
+        if coordinator is None:
             raise InvalidCoordinator("O coordenador não está cadastrado no bot!")
+
+        return coordinator.coord_id
 
     def verify_data(self, start_date, end_date):
         """
@@ -223,7 +225,7 @@ class ProjectService:
             DiscordServerIdError: If the Discord Server ID is invalid.
             ProjectAlreadyExists: If a project with the same title and dates already exists.
         """
-        self.verify_coordinator(projeto.coordinator_discord_id)
+
         self.verify_data(projeto.start_date, projeto.end_date)
         self.verify_intervalo_data(projeto.start_date, projeto.end_date)
         self.verify_data_atual(projeto.end_date)
@@ -231,7 +233,7 @@ class ProjectService:
         self.verify_projeto(projeto.project_title, projeto.start_date, projeto.end_date)
         project = Project(
             projeto.project_id,
-            int(projeto.coordinator_discord_id),
+            projeto.coordinator_id,
             int(projeto.discord_server_id),
             projeto.project_title,
             projeto.start_date,

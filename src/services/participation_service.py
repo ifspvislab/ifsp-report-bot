@@ -60,11 +60,11 @@ class ParticipationService:
         self.member_data = member_data
         self.participation_data = participation_data
 
-        self.database = self.participation_data.load_participations()
-        self.members = self.member_data.load_members()
-
         self.member_service = member_service
         self.project_service = project_service
+
+        self.members = self.member_service.database
+        self.database = self.participation_data.load_participations()
 
     def find_participations_by_type(
         self, attr_type, value
@@ -143,6 +143,5 @@ class ParticipationService:
             participation.registration,
             participation.initial_date,
         )
-
         self.participation_data.add_participation(participation)
         self.database.append(participation)

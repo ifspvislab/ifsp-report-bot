@@ -28,7 +28,7 @@ class Project:
     """
 
     project_id: str
-    coordinator_discord_id: str
+    coordinator_id: str
     discord_server_id: int
     project_title: str
     start_date: date
@@ -65,7 +65,7 @@ class ProjectData:
         fields = [field.strip() for field in row.split(sep=",")]
         project = Project(
             fields[0],
-            int(fields[1]),
+            fields[1],
             int(fields[2]),
             fields[3],
             datetime.strptime(fields[4], "%d/%m/%Y").date(),
@@ -105,7 +105,7 @@ class ProjectData:
 
         with open("assets/data/projects.csv", "a", encoding="UTF-8") as project_data:
             project_data.write(
-                f"{project.project_id},{project.coordinator_discord_id}," +
-                f"{project.discord_server_id}," +
-                f"{project.project_title},{project.start_date},{project.end_date}\n"
+                f"{project.project_id},{project.coordinator_id},"
+                + f"{project.discord_server_id},"
+                + f"{project.project_title},{project.start_date},{project.end_date}\n"
             )
