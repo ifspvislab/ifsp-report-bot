@@ -25,24 +25,26 @@ class Events(commands.Cog):
         if not message.guild or message.author.bot:
             return
 
-        if len(message.attachments) > 0:
-            action = (
-                f"{message.author} - {message.channel} - {message.attachments[0].url}"
-            )
-            self.log_service.generate_log(
-                project_id=self.log_service.get_project_server_id(message.guild.id),
-                action=action,
-                student_id=message.author.id,
-                date=message.created_at,
-            )
-        else:
-            action = f"{message.author} - {message.channel} - {message.content}"
-            self.log_service.generate_log(
-                project_id=self.log_service.get_project_server_id(message.guild.id),
-                action=action,
-                student_id=message.author.id,
-                date=message.created_at,
-            )
+        if self.log_service.get_project_server_id(message.guild.id) is not None:
+
+            if len(message.attachments) > 0:
+                action = f"{message.author} - {message.channel} - {message.attachments[0].url}"
+                self.log_service.generate_log(
+                    project_id=self.log_service.get_project_server_id(message.guild.id),
+                    action=action,
+                    student_id=message.author.id,
+                    date=message.created_at,
+                )
+            else:
+                action = f"{message.author} - {message.channel} - {message.content}"
+                self.log_service.generate_log(
+                    project_id=self.log_service.get_project_server_id(message.guild.id),
+                    action=action,
+                    student_id=message.author.id,
+                    date=message.created_at,
+                )
+
+        return
 
     @Cog.listener()
     async def on_message_delete(self, message: discord.Message) -> None:
@@ -53,13 +55,19 @@ class Events(commands.Cog):
         if not message.guild or message.author.bot:
             return
 
-        action = f"{message.author} - {message.channel} - Deleted: {message.content}"
-        self.log_service.generate_log(
-            project_id=self.log_service.get_project_server_id(message.guild.id),
-            action=action,
-            student_id=message.author.id,
-            date=message.created_at,
-        )
+        if self.log_service.get_project_server_id(message.guild.id) is not None:
+
+            action = (
+                f"{message.author} - {message.channel} - Deleted: {message.content}"
+            )
+            self.log_service.generate_log(
+                project_id=self.log_service.get_project_server_id(message.guild.id),
+                action=action,
+                student_id=message.author.id,
+                date=message.created_at,
+            )
+
+        return
 
     @Cog.listener()
     async def on_message_edit(
@@ -69,16 +77,18 @@ class Events(commands.Cog):
         Event handler for message edit events.
         Logs the author, channel, and the before and after message content.
         """
-        if before.author.bot or before.content == after.content:
-            return
-        # pylint: disable=line-too-long
-        action = f"{before.author} - {before.channel} - Before: {before.content} - After: {after.content}"
-        self.log_service.generate_log(
-            project_id=self.log_service.get_project_server_id(before.guild.id),
-            action=action,
-            student_id=before.author.id,
-            date=before.created_at,
-        )
+        if self.log_service.get_project_server_id(before.guild.id) is not None:
+            if before.author.bot or before.content == after.content:
+                return
+            # pylint: disable=line-too-long
+            action = f"{before.author} - {before.channel} - Before: {before.content} - After: {after.content}"
+            self.log_service.generate_log(
+                project_id=self.log_service.get_project_server_id(before.guild.id),
+                action=action,
+                student_id=before.author.id,
+                date=before.created_at,
+            )
+        return
 
     @Cog.listener()
     async def on_interaction(self, interaction: discord.Interaction):
@@ -87,14 +97,18 @@ class Events(commands.Cog):
         Logs the user and the interaction name.
         """
         try:
-            action = f"{interaction.user} - Interaction: {interaction.data['name']}"
+            if self.log_service.get_project_server_id(interaction.guild.id) is not None:
+                action = f"{interaction.user} - Interaction: {interaction.data['name']}"
 
-            self.log_service.generate_log(
-                project_id=self.log_service.get_project_server_id(interaction.guild.id),
-                action=action,
-                student_id=interaction.user.id,
-                date=interaction.created_at,
-            )
+                self.log_service.generate_log(
+                    project_id=self.log_service.get_project_server_id(
+                        interaction.guild.id
+                    ),
+                    action=action,
+                    student_id=interaction.user.id,
+                    date=interaction.created_at,
+                )
+            return
         except KeyError:
             return
 
@@ -104,13 +118,15 @@ class Events(commands.Cog):
         Event handler for reaction add events.
         Logs the user, reacted emoji, and the reacted message's content.
         """
-        action = (
-            f"{user} - Reaction: {reaction.emoji} - Reacted: {reaction.message.content}"
-        )
-        self.log_service.generate_log(
-            project_id=self.log_service.get_project_server_id(
-                reaction.message.guild.id
-            ),
-            action=action,
-            student_id=user.id,
-        )
+        if (
+            self.log_service.get_project_server_id(reaction.message.guild.id)
+            is not None
+        ):
+            action = f"{user} - Reaction: {reaction.emoji} - Reacted: {reaction.message.content}"
+            self.log_service.generate_log(
+                project_id=self.log_service.get_project_server_id(
+                    reaction.message.guild.id
+                ),
+                action=action,
+                student_id=user.id,
+            )

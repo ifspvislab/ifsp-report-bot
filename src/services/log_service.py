@@ -97,7 +97,7 @@ class LogService:
         """
         return zoneinfo.ZoneInfo("America/Sao_Paulo")
 
-    def filter_date_validation(self, date: str) -> None:
+    def filter_date_validation(self, date: str):
         """
         Validates the date filter based on the provided start and end dates.
 
@@ -141,25 +141,31 @@ class LogService:
         Args:
             action (str): The action associated with the log entry.
             student_id (int): The ID of the student associated with the log entry.
+            project_id (str): The ID of the project associated with the log entry.
             date (datetime, optional): The date of the log entry.
         """
         # pylint: disable=line-too-long
-        member = self.member_service.find_member_by_type("discord_id", student_id)
-        if (
-            self.participation_service.find_participations_by_type(
+        try:
+            member = self.member_service.find_member_by_type("discord_id", student_id)
+            participation = self.participation_service.find_participations_by_type(
                 "registration", member.registration
             )
-        ) is not None:
-            date_string = self.get_event_date(datetime_obj=date)
-            log_action = f"{date_string} - {action}"
-            log = Log(
-                project_id=project_id,
-                registration=member.registration,
-                discord_id=student_id,
-                date=date_string,
-                action=log_action,
-            )
-            self.log_data.add_log(log)
+            if (
+                participation[0].project_id == project_id
+                and participation[0] is not None
+            ):
+                date_string = self.get_event_date(datetime_obj=date)
+                log_action = f"{date_string} - {action}"
+                log = Log(
+                    project_id=project_id,
+                    registration=member.registration,
+                    discord_id=student_id,
+                    date=date_string,
+                    action=log_action,
+                )
+                self.log_data.add_log(log)
+        except AttributeError:
+            return
 
     def check_size_log_report(self, report: LogReport) -> bool:
         """

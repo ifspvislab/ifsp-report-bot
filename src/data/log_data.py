@@ -45,7 +45,7 @@ class LogData:
         - A dictionary representing a Log object.
         """
         fields = [field.strip() for field in row.split(sep=",")]
-        action = ",".join(fields[3:])
+        action = ",".join(fields[4:])
         log = Log(fields[0], fields[1], int(fields[2]), fields[3], str(action))
         return log
 
