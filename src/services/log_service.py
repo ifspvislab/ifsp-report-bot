@@ -147,12 +147,11 @@ class LogService:
         # pylint: disable=line-too-long
         try:
             member = self.member_service.find_member_by_type("discord_id", student_id)
-            participation = self.participation_service.find_participations_by_type(
-                "registration", member.registration
-            )
             if (
-                participation[0].project_id == project_id
-                and participation[0] is not None
+                self.participation_service.find_participations_by_type(
+                    "registration", member.registration
+                )
+                is not None
             ):
                 date_string = self.get_event_date(datetime_obj=date)
                 log_action = f"{date_string} - {action}"
