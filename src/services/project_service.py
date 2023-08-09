@@ -231,7 +231,7 @@ class ProjectService:
         self.verify_projeto(projeto.project_title, projeto.start_date, projeto.end_date)
         project = Project(
             projeto.project_id,
-            int(projeto.coordinator_discord_id),
+            projeto.coordinator_discord_id,
             int(projeto.discord_server_id),
             projeto.project_title,
             projeto.start_date,
