@@ -104,6 +104,7 @@ class ProjectData:
         """
 
         with open("assets/data/projects.csv", "a", encoding="UTF-8") as project_data:
+            # pylint: disable=line-too-long
             project_data.write(
                 f"{project.project_id},{project.coordinator_id},"
                 + f"{project.discord_server_id},"

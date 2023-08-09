@@ -99,7 +99,7 @@ def start_bot(
 
         # updates the bot's command representation
         await bot.add_cog(Events(log_service))
-        await bot.add_cog(LogCommand(log_service))
+        await bot.add_cog(LogCommand(log_service, coordinator_service))
         await bot.add_cog(
             SemesterReportCog(
                 member_service,
