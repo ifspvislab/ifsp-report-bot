@@ -26,8 +26,10 @@ from .log_service import (
 from .member_service import MemberService
 from .participation_service import (
     DateError,
+    MemberError,
     ParticipationAlreadyExists,
     ParticipationService,
+    ProjectError,
 )
 from .project_service import (
     DiscordServerIdError,
@@ -55,4 +57,4 @@ from .termination_service import (
     TerminationStatementService,
     YearOutOfRange,
 )
-from .validation import DiscordIdError, EmailError, MemberError, RegistrationError
+from .validation import DiscordIdError, EmailError, RegistrationError

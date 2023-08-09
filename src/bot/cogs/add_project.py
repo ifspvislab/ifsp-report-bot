@@ -121,7 +121,7 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
                     str(uuid4()),
                     coordinator_id,
                     self.discord_server_id.value,
-                    self.project_title.value,
+                    self.project_title.value.upper(),
                     self.start_date.value,
                     self.end_date.value,
                 )

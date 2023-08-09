@@ -23,6 +23,7 @@ from services import (
     MemberError,
     ParticipationAlreadyExists,
     ParticipationService,
+    ProjectError,
     ProjectService,
     RegistrationError,
 )
@@ -57,8 +58,15 @@ class AddParticipationModal(ui.Modal):
 
     today = str(date.today()).split(sep="-")
     date = ui.TextInput(
-        label="Data de entrada:",
-        placeholder=f"{today[2]}/{today[1]}/{today[0]}",
+        label="Data de entrada do aluno no projeto:",
+        placeholder=f"Insira nesse formato: {today[2]}/{today[1]}/{today[0]}",
+        min_length=10,
+        max_length=10,
+    )
+
+    project_date = ui.TextInput(
+        label="Data de início do projeto:",
+        placeholder=f"Insira nesse formato: {today[2]}/{today[1]}/{today[0]}",
         min_length=10,
         max_length=10,
     )
@@ -82,16 +90,12 @@ class AddParticipationModal(ui.Modal):
         """
 
         try:
-            project = self.project_service.find_project_by_type(
-                "project_title", self.project_title.value
+            project = self.participation_service.search_project(
+                datetime.strptime(self.project_date.value, "%d/%m/%Y").date(),
+                self.project_title.value.upper(),
             )
-            if project is None:
-                logger.error("O projeto inserido inexiste nos registros.")
-                await interaction.response.send_message(
-                    "O projeto inexiste nos registros!"
-                )
 
-            else:
+            if project:
                 self.participation_service.create(
                     Participation(
                         str(uuid4()),
@@ -113,9 +117,15 @@ class AddParticipationModal(ui.Modal):
             DateError,
             RegistrationError,
             MemberError,
+            ProjectError,
         ) as erro:
             logger.error("%s", erro)
             await interaction.response.send_message(f"{erro}")
+        except ValueError as error:
+            logger.error("%s", error)
+            await interaction.response.send_message(
+                "Formato de data inválido. Siga o formato DD/MM/YYYY."
+            )
 
 
 class ParticipationCog(commands.Cog):
@@ -148,18 +158,17 @@ class ParticipationCog(commands.Cog):
         coordinator = self.coordinator_service.find_coordinator_by_type(
             "discord_id", interaction.user.id
         )
-        if coordinator is None:
-            logger.warning(
-                "Usuário %s sem autorização tentou adicionar participação.",
-                interaction.user.name,
-            )
-            await interaction.response.send_message(
-                "Você não está autorizado a utilizar esse comando! Peça a um coordenador."
-            )
-        else:
+        if coordinator:
             modal = AddParticipationModal(
                 self.participation_service, self.project_service
             )
             await interaction.response.send_modal(modal)
+            logger.info("adicionar-participação command user %s", interaction.user.name)
 
-        logger.info("adicionar-participação command user %s", interaction.user.name)
+        logger.warning(
+            "Usuário %s sem autorização tentou adicionar participação.",
+            interaction.user.name,
+        )
+        await interaction.response.send_message(
+            "Você não está autorizado a utilizar esse comando! Peça a um coordenador."
+        )
