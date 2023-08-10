@@ -31,7 +31,7 @@ from services import (
     ProjectService,
     is_admin,
 )
-from services.validation import verify_registration_format
+from services.validation import RegistrationError, verify_registration_format
 
 logger = settings.logging.getLogger(__name__)
 
@@ -136,6 +136,7 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
             InvalidEndDate,
             DiscordServerIdError,
             ProjectAlreadyExists,
+            RegistrationError,
         ) as exception:
             logger.error(
                 "An error occurred while creating a new project: %s", str(exception)
