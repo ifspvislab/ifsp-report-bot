@@ -29,32 +29,45 @@ def main():
     """
 
     coordinator_data = CoordinatorData()
-    project_data = ProjectData()
-    project_service = ProjectService(project_data, coordinator_data)
     coordinator_service = CoordinatorService(coordinator_data)
+
+    project_data = ProjectData()
+    project_service = ProjectService(project_data, coordinator_service)
+
     member_data = MemberData()
     member_service = MemberService(member_data)
+
     student_service = StudentService()
+
     participation_data = ParticipationData()
     participation_service = ParticipationService(
         participation_data, member_data, project_service, member_service
     )
+
     report_service = ReportService(
         participation_data,
         participation_service,
         coordinator_service,
         coordinator_data,
     )
+
     termination_service = TerminationStatementService(
         member_service,
         project_service,
         participation_service,
         coordinator_service,
     )
+
     log_data = LogData()
     log_service = LogService(
-        log_data, member_data, participation_data, project_service, member_service
+        log_data,
+        member_data,
+        participation_data,
+        project_service,
+        member_service,
+        participation_service,
     )
+
     start_bot(
         student_service,
         member_service,

@@ -25,6 +25,7 @@ from services import (
     MemberError,
     ParticipationAlreadyExists,
     ParticipationService,
+    ProjectError,
     ProjectService,
     RegistrationError,
 )
@@ -63,7 +64,14 @@ class AddParticipationModal(ui.Modal):
     today = str(date.today()).split(sep="-")
     date = ui.TextInput(
         label="Data de entrada",
-        placeholder=f"{today[2]}/{today[1]}/{today[0]}",
+        placeholder=f"Insira nesse formato: {today[2]}/{today[1]}/{today[0]}",
+        min_length=10,
+        max_length=10,
+    )
+
+    project_date = ui.TextInput(
+        label="Data de início do projeto",
+        placeholder=f"Insira nesse formato: {today[2]}/{today[1]}/{today[0]}",
         min_length=10,
         max_length=10,
     )
@@ -87,21 +95,17 @@ class AddParticipationModal(ui.Modal):
         """
 
         try:
-            project = self.project_service.find_project_by_type(
-                "project_title", self.project_title.value
+            project = self.participation_service.search_project(
+                datetime.strptime(self.project_date.value, "%d/%m/%Y").date(),
+                self.project_title.value.upper(),
             )
-            if project is None:
-                logger.error("The inserted project does not exist in the records.")
-                await interaction.response.send_message(
-                    "O projeto inexiste nos registros!"
-                )
 
-            else:
+            if project:
                 self.participation_service.create(
                     Participation(
                         str(uuid4()),
                         self.registration.value.upper(),
-                        project.project_id.upper(),
+                        project.project_id,
                         datetime.strptime(self.date.value, "%d/%m/%Y").date(),
                         project.end_date,
                     )
@@ -118,9 +122,15 @@ class AddParticipationModal(ui.Modal):
             DateError,
             RegistrationError,
             MemberError,
+            ProjectError,
         ) as erro:
             logger.error("%s", erro)
             await interaction.response.send_message(f"{erro}")
+        except ValueError as error:
+            logger.error("%s", error)
+            await interaction.response.send_message(
+                "Formato de data inválido. Siga o formato DD/MM/YYYY."
+            )
 
 
 class ParticipationCog(commands.Cog):
@@ -142,16 +152,6 @@ class ParticipationCog(commands.Cog):
         self.coordinator_service = coordinator_service
         self.project_service = project_service
 
-    async def add_participation_modal_error(self, interaction: discord.Interaction):
-        """Treating error if it's not a coordinator."""
-        logger.warning(
-            "User %s tried to add a participation, but does not have permission.",
-            interaction.user.name,
-        )
-        await interaction.response.send_message(
-            "Você não está autorizado a utilizar esse comando! Peça a um coordenador."
-        )
-
     @app_commands.command(
         name="adicionar-participação",
         description="comando para registrar a participação de um aluno em um projeto via modal.",
@@ -163,12 +163,17 @@ class ParticipationCog(commands.Cog):
         coordinator = self.coordinator_service.find_coordinator_by_type(
             "discord_id", interaction.user.id
         )
-        if coordinator is None:
-            self.add_participation_modal_error(discord.Interaction)
-        else:
+        if coordinator:
             modal = AddParticipationModal(
                 self.participation_service, self.project_service
             )
             await interaction.response.send_modal(modal)
+            logger.info("adicionar-participação command user %s", interaction.user.name)
 
-        logger.info("adicionar-participação command user %s", interaction.user.name)
+        logger.warning(
+            "User %s tried to add a participation, but does not have permission.",
+            interaction.user.name,
+        )
+        await interaction.response.send_message(
+            "Você não tem permissão para adicionar participação."
+        )

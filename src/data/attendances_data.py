@@ -51,7 +51,7 @@ class Attendance:
     """
 
     attendance_id: str
-    student_id: str
+    member_id: str
     project_id: str
     day: datetime
     entry_time: time
@@ -118,7 +118,7 @@ class AttendanceData:
         """
         row = ""
         row += f"{attend.attendance_id}"
-        row += f",{attend.student_id}"
+        row += f",{attend.member_id}"
         row += f",{attend.project_id}"
         row += f",{attend.day.strftime('%d/%m/%Y')}"
         row += f",{attend.entry_time.strftime('%H:%M')}"
@@ -158,7 +158,7 @@ class AttendanceData:
                 student_id = data[1]
                 day = data[3]
 
-                if student_id == new_attend.student_id:
+                if student_id == new_attend.member_id:
                     if day == new_attend.day.strftime("%d/%m/%Y"):
                         is_new = False
                         buffer.append(self._attend_to_row(new_attend))

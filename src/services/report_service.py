@@ -145,11 +145,11 @@ class ReportService:
         self.participation_data = participation_data
         self.coordinator_data = coordinator_data
 
-        self.database = self.participation_data.load_participations()
-        self.coordinators = self.coordinator_data.load_coordinators()
-
         self.participation_service = participation_service
         self.coordinator_service = coordinator_service
+
+        self.database = self.participation_service.database
+        self.coordinators = self.coordinator_service.database
 
     def invalid_request_period(self):
         """
@@ -206,7 +206,7 @@ class ReportService:
         """
 
         coordinator = self.coordinator_service.find_coordinator_by_type(
-            "discord_id", project.coordinator_discord_id
+            "coord_id", project.coordinator_id
         )
 
         if coordinator is None:

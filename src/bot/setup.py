@@ -99,7 +99,7 @@ def start_bot(
 
         # updates the bot's command representation
         await bot.add_cog(Events(log_service))
-        await bot.add_cog(LogCommand(log_service))
+        await bot.add_cog(LogCommand(log_service, coordinator_service))
         await bot.add_cog(
             SemesterReportCog(
                 member_service,
@@ -157,14 +157,14 @@ def start_bot(
         student = student_service.find_student_by_discord_id(interaction.user.id)
 
         if student is None:
-            errors.append("Você não tem permissão para gerar relatório mensal")
+            errors.append("Você não tem permissão para gerar relatório mensal.")
             logger.warning(
                 "User %s without permission tried to generate monthy report",
                 interaction.user.name,
             )
 
         if invalid_request_period():
-            errors.append("O período para gerar o relatório mensal inicia no dia 23")
+            errors.append("O período para gerar o relatório mensal inicia no dia 23.")
             logger.warning(
                 "User %s attempted to generate the monthly report outside the allowed period.",
                 interaction.user.name,

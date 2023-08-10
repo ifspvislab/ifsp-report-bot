@@ -10,7 +10,7 @@ from data import MemberData, Participation, ParticipationData
 
 from .member_service import MemberService
 from .project_service import ProjectService
-from .validation import verify_member_exists, verify_registration_format
+from .validation import verify_registration_format
 
 
 class ParticipationAlreadyExists(Exception):
@@ -28,6 +28,18 @@ class OpenParticipation(Exception):
 class DateError(Exception):
     """
     Exception raised when an invalid date is encountered.
+    """
+
+
+class MemberError(Exception):
+    """
+    Exception raised when an member isn't encountered.
+    """
+
+
+class ProjectError(Exception):
+    """
+    Exception raised when an project isn't encountered.
     """
 
 
@@ -60,11 +72,12 @@ class ParticipationService:
         self.member_data = member_data
         self.participation_data = participation_data
 
-        self.database = self.participation_data.load_participations()
-        self.members = self.member_data.load_members()
-
         self.member_service = member_service
         self.project_service = project_service
+
+        self.database = self.participation_data.load_participations()
+        self.members = self.member_service.database
+        self.projects = self.project_service.database
 
     def find_participations_by_type(
         self, attr_type, value
@@ -87,13 +100,30 @@ class ParticipationService:
             return participations
         return None
 
+    def search_project(self, project_initial_date, project_title):
+        """
+        Checks if a project with the given information exists in the database.
+
+        :param project_initial_date: The initial date of the project being searched.
+        :param project_title: The title of the project being searched.
+        :raises ProjectError: If a project with the given initial date and title doesn't exists.
+        """
+        for project in self.projects:
+            if (
+                project_initial_date == project.start_date
+                and project_title == project.project_title
+            ):
+                return project
+
+        raise ProjectError("Projeto inexiste nos registros!")
+
     def check_ocurrence(self, project_id, registration, initial_date):
         """
         Check if a participation with the given registration in the given project is open.
 
-        :param value: The project to check for existence.
-        :param second_value: The registation to check for existence.
-        :param third_value: The entry date to check if the participation is open.
+        :param project_id: The project to check for existence.
+        :param registration: The registation to check for existence.
+        :param initial_date: The entry date to check if the participation is open.
         :raises ParticipationAlreadyExists: If a participation with the given prontuario
         and project already exists.
         """
@@ -112,8 +142,8 @@ class ParticipationService:
         Verifies if the date is valid.
 
         Args:
-            value(date): The date to be verified.
-            value_(str): A project title, to search in the registers.
+            initial_date(date): The date to be verified.
+            project_id(str): A project title, to search in the registers.
 
         Raises:
             DateError: If the date is invalid.
@@ -129,6 +159,22 @@ class ParticipationService:
                 "A data inserida é inválida! Ela fica após o fim do projeto."
             )
 
+    def verify_member_exists(self, registration):
+        """
+        Verify if the member exists in the registers.
+        Args:
+            registration(str): The registration to be verified.
+
+        Raises:
+            MemberError: If the member isn't in the registers.
+        """
+
+        for member in self.members:
+            if member.registration == registration:
+                return None
+
+        raise MemberError("O membro inexiste nos registros!")
+
     def create(self, participation: Participation):
         """
         Add a new participation to the database.
@@ -136,13 +182,12 @@ class ParticipationService:
         :param participation: The participation dataclass.
         """
         verify_registration_format(participation.registration)
-        verify_member_exists(participation.registration, self.members)
+        self.verify_member_exists(participation.registration)
         self.verify_date(participation.initial_date, participation.project_id)
         self.check_ocurrence(
             participation.project_id,
             participation.registration,
             participation.initial_date,
         )
-
         self.participation_data.add_participation(participation)
         self.database.append(participation)

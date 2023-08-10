@@ -81,10 +81,8 @@ class TerminationStatementCog(commands.Cog):
                 project.project_id, participations
             )
 
-            # checar se dados estão certos (padronizar nomes das variáveis)
-            # mudar para int(coordinator_discord_id) no service e no data
             coordinator = self.termination_service.verify_coordinator(
-                "discord_id", project.coordinator_discord_id
+                "discord_id", project.coordinator_id
             )
             await interaction.response.send_modal(
                 TerminationStatementForm(

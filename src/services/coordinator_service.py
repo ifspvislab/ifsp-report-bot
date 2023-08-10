@@ -54,10 +54,10 @@ class CoordinatorService:
 
     def check_ocurrance(self, registration):
         """
-        Check if a coordinator with the given prontuario already exists.
+        Check if a coordinator with the given registration already exists.
 
-        :param prontuario: The prontuario to check for existence.
-        :raises ValueError: If a coordinator with the given prontuario already exists.
+        :param prontuario: The registrationto check for existence.
+        :raises ValueError: If a coordinator with the given registration already exists.
         """
         for coordinator in self.database:
             if registration == coordinator.registration:
@@ -70,7 +70,7 @@ class CoordinatorService:
         Create a new coordinator.
 
         :param coordenador: The Coordinator object representing the new coordinator.
-        :raises ValueError: If a coordinator with the given prontuario already exists.
+        :raises ValueError: If a coordinator with the given pregistration already exists.
         """
         verify_registration_format(coordenador.registration)
         verify_email(coordenador.email)

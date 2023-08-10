@@ -36,8 +36,6 @@ logger = settings.logging.getLogger(__name__)
 class MemberAlreadyExists(Exception):
     """Exception raised when a member already exists."""
 
-    print(Exception)
-
 
 class MemberService:
     """Class for managing member data.
@@ -71,13 +69,13 @@ class MemberService:
         return None
 
     def check_ocurrance(self, registration):
-        """Check if a member with the given prontuario already exists.
+        """Check if a member with the given registration already exists.
 
         Args:
-            value (str): The prontuario value to check.
+            value (str): The registration value to check.
 
         Raises:
-            OccurrenceError: If a member with the same prontuario already exists.
+            OccurrenceError: If a member with the same registration already exists.
         """
 
         if self.find_member_by_type("registration", registration):

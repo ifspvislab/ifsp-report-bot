@@ -3,8 +3,6 @@ validation module
 """
 from validate_email_address import validate_email
 
-from data import Member
-
 
 class RegistrationError(Exception):
     """
@@ -24,18 +22,12 @@ class DiscordIdError(Exception):
     """
 
 
-class MemberError(Exception):
-    """
-    Exception raised when an member isn't encountered.
-    """
-
-
 def verify_registration_format(registration):
     """
-    Verify the correctness of a prontuario.
+    Verify the correctness of a registration.
 
-    :param value: The prontuario value to be verified.
-    :raises ProntuarioError: If the prontuario is incorrect.
+    :param value: The registration value to be verified.
+    :raises RegistrationError: If the registration is incorrect.
     """
     if not (
         registration[:1].isalpha()
@@ -60,7 +52,8 @@ def verify_email(value):
 
 
 def verify_discord_id(value):
-    """Verify the correctness of the Discord ID.
+    """
+    Verify the correctness of the Discord ID.
 
     Args:
         value (str): The Discord ID value to be verified.
@@ -70,22 +63,3 @@ def verify_discord_id(value):
     """
     if not value.isnumeric():
         raise DiscordIdError("Discord ID inválido")
-
-
-def verify_member_exists(value, membros: list[Member]):
-    """
-    Verify if the member exists in the registers.
-    Args:
-        value(str): The registration to be verified.
-        membros: A list with all members in the registers.
-
-    Raises:
-        MemberError: If the member isn't in the registers.
-    """
-
-    members = membros
-    for member in members:
-        if member.registration == value:
-            return None
-
-    raise MemberError("O membro inexiste nos registros!")

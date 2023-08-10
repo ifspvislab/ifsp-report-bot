@@ -51,7 +51,7 @@ class ModalAddMember(ui.Modal, title="Adicionar Membro"):
         label="Prontuário", placeholder="Digite o prontuário (SPXXXXX)", max_length=9
     )
     name = ui.TextInput(
-        label="Name", placeholder="Digite o nome", min_length=5, max_length=100
+        label="Nome", placeholder="Digite o nome", min_length=5, max_length=100
     )
     email = ui.TextInput(
         label="Email", placeholder="Digite o email (nome@email.com)", max_length=50
