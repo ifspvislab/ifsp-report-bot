@@ -3,9 +3,6 @@ This module provides classes and exceptions for managing coordinators.
 
 Classes:
     CoordinatorAlreadyExists: Exception raised when a coordinator already exists.
-    ProntuarioError: Exception raised when an incorrect registration is encountered.
-    EmailError: Exception raised when an invalid email is encountered.
-    DiscordIdError: Exception raised when an invalid Discord ID is encountered.
     CoordinatorService: A service for managing coordinators.
 
 """
@@ -65,7 +62,7 @@ class CoordinatorService:
         for coordinator in self.database:
             if registration == coordinator.registration:
                 raise CoordinatorAlreadyExists(
-                    "ERRO: Já há um coordenador com este prontuário!"
+                    "Já há um coordenador com este prontuário!"
                 )
 
     def create(self, coordenador: Coordinator):
@@ -73,9 +70,6 @@ class CoordinatorService:
         Create a new coordinator.
 
         :param coordenador: The Coordinator object representing the new coordinator.
-        :raises ProntuarioError: If the prontuario is incorrect.
-        :raises EmailError: If the email address is invalid.
-        :raises DiscordIdError: If the Discord ID is invalid.
         :raises ValueError: If a coordinator with the given prontuario already exists.
         """
         verify_registration_format(coordenador.registration)

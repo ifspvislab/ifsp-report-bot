@@ -20,7 +20,7 @@ class Member:
 
     Attributes:
         member_id(str): The ID of the member.
-        prontuario (str): The prontuario of the member.
+        registration (str): The registration of the member.
         discord_id (int): The Discord ID of the member.
         name (str): The name of the member.
         email (str): The email address of the member.

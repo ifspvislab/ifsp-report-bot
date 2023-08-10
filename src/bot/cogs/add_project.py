@@ -135,6 +135,11 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
                 "An error occurred while creating a new project: %s", str(exception)
             )
             await interaction.response.send_message(str(exception))
+        except ValueError as error:
+            logger.error("%s", error)
+            await interaction.response.send_message(
+                "Formato de data inválido. Siga o formato DD/MM/YYYY."
+            )
 
 
 class ProjectCog(commands.Cog):
