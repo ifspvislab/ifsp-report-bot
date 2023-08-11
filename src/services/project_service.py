@@ -236,8 +236,8 @@ class ProjectService:
             projeto.coordinator_id,
             int(projeto.discord_server_id),
             projeto.project_title,
-            projeto.start_date,
-            projeto.end_date,
+            datetime.strptime(projeto.start_date, "%d/%m/%Y").date(),
+            datetime.strptime(projeto.end_date, "%d/%m/%Y").date(),
         )
         self.project_data.add_project(project)
         self.database.append(project)
