@@ -150,11 +150,11 @@ class ParticipationService:
         """
 
         project = self.project_service.find_project_by_type("project_id", project_id)
-        if not initial_date > project.start_date:
+        if initial_date < project.start_date:
             raise DateError(
                 "A data inserida é inválida! Ela fica antes do início do projeto."
             )
-        if not initial_date < project.end_date:
+        if initial_date > project.end_date:
             raise DateError(
                 "A data inserida é inválida! Ela fica após o fim do projeto."
             )
