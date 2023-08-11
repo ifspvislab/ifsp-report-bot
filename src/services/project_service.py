@@ -239,5 +239,5 @@ class ProjectService:
             datetime.strptime(projeto.start_date, "%d/%m/%Y").date(),
             datetime.strptime(projeto.end_date, "%d/%m/%Y").date(),
         )
-        self.project_data.add_project(project)
+        self.project_data.add_project(projeto)
         self.database.append(project)
