@@ -69,13 +69,6 @@ class AddParticipationModal(ui.Modal):
         max_length=10,
     )
 
-    project_date = ui.TextInput(
-        label="Data de início do projeto",
-        placeholder=f"Insira nesse formato: {today[2]}/{today[1]}/{today[0]}",
-        min_length=10,
-        max_length=10,
-    )
-
     def __init__(
         self,
         participation_service: ParticipationService,
@@ -95,10 +88,7 @@ class AddParticipationModal(ui.Modal):
         """
 
         try:
-            project = self.participation_service.search_project(
-                datetime.strptime(self.project_date.value, "%d/%m/%Y").date(),
-                self.project_title.value.upper(),
-            )
+            project = self.project_service.find_project_by_type("discord_server_id", interaction.guild_id)
 
             if project:
                 self.participation_service.create(
@@ -117,6 +107,8 @@ class AddParticipationModal(ui.Modal):
                 await interaction.response.send_message(
                     "Participação criada com sucesso!"
                 )
+            else:
+                raise ProjectError("Servidor não possui projeto cadastrado")
         except (
             ParticipationAlreadyExists,
             DateError,

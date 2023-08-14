@@ -50,12 +50,6 @@ class InvalidEndDate(Exception):
     """
 
 
-class DiscordServerIdError(Exception):
-    """
-    Exception raised when the Discord Server ID is invalid.
-    """
-
-
 class ProjectAlreadyExists(Exception):
     """
     Exception raised when the project already exists.
@@ -175,19 +169,6 @@ class ProjectService:
         if datetime.strptime(end_date, "%d/%m/%Y").date() < current_date:
             raise InvalidEndDate("A data de fim é menor que a data atual!")
 
-    def verify_discord_server_id(self, value):
-        """
-        Verifies if the Discord Server ID is valid (numeric).
-
-        Args:
-            value: The Discord Server ID.
-
-        Raises:
-            DiscordServerIdError: If the Discord Server ID is invalid.
-        """
-        if not value.isnumeric():
-            raise DiscordServerIdError("Discord Server ID inválido.")
-
     def verify_project(self, project_title, start_date, end_date):
         """
         Verifies if a project with the same title and dates already exists.
@@ -229,7 +210,6 @@ class ProjectService:
         self.verify_date(projeto.start_date, projeto.end_date)
         self.verify_date_range(projeto.start_date, projeto.end_date)
         self.verify_current_date(projeto.end_date)
-        self.verify_discord_server_id(projeto.discord_server_id)
         self.verify_project(projeto.project_title, projeto.start_date, projeto.end_date)
         project = Project(
             projeto.project_id,

@@ -100,23 +100,6 @@ class ParticipationService:
             return participations
         return None
 
-    def search_project(self, project_initial_date, project_title):
-        """
-        Checks if a project with the given information exists in the database.
-
-        :param project_initial_date: The initial date of the project being searched.
-        :param project_title: The title of the project being searched.
-        :raises ProjectError: If a project with the given initial date and title doesn't exists.
-        """
-        for project in self.projects:
-            if (
-                project_initial_date == project.start_date
-                and project_title == project.project_title
-            ):
-                return project
-
-        raise ProjectError("Projeto inexiste nos registros!")
-
     def check_ocurrence(self, project_id, registration, initial_date):
         """
         Check if a participation with the given registration in the given project is open.
