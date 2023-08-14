@@ -82,7 +82,7 @@ class TerminationStatementCog(commands.Cog):
             )
 
             coordinator = self.termination_service.verify_coordinator(
-                "discord_id", project.coordinator_id
+                "coord_id", project.coordinator_id
             )
             await interaction.response.send_modal(
                 TerminationStatementForm(
