@@ -88,7 +88,9 @@ class AddParticipationModal(ui.Modal):
         """
 
         try:
-            project = self.project_service.find_project_by_type("discord_server_id", interaction.guild_id)
+            project = self.project_service.find_project_by_type(
+                "discord_server_id", interaction.guild_id
+            )
 
             if project:
                 self.participation_service.create(

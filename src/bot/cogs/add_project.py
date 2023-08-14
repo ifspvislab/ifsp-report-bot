@@ -162,7 +162,12 @@ class ProjectCog(commands.Cog):
         Args:
             interaction (discord.Interaction): The interaction object.
         """
-        if self.project_service.find_project_by_type("discord_server_id", interaction.guild_id) == None:
+        if (
+            self.project_service.find_project_by_type(
+                "discord_server_id", interaction.guild_id
+            )
+            is None
+        ):
             if is_admin(interaction.user.id):
                 modal = AddProjectModal(self.project_service)
                 await interaction.response.send_modal(modal)
@@ -178,7 +183,6 @@ class ProjectCog(commands.Cog):
                 + "tried to add a project, but alredy has a project in the server.",
                 interaction.user.id,
             )
-
 
         await interaction.response.send_message(
             "Você não tem permissão para adicionar projeto."
