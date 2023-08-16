@@ -32,6 +32,7 @@ from .participation_service import (
     ProjectError,
 )
 from .project_service import (
+    DiscordServerIdError,
     EqualOrSmallerDateError,
     InvalidCoordinator,
     InvalidEndDate,

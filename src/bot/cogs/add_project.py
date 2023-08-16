@@ -22,6 +22,7 @@ from discord.ext import commands
 import settings
 from data import Project
 from services import (
+    DiscordServerIdError,
     EqualOrSmallerDateError,
     InvalidCoordinator,
     InvalidEndDate,
@@ -57,6 +58,13 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
         placeholder="Digite o Prontuário (SPXXXXX) do Coordenador",
         required=True,
         max_length=9,
+    )
+    discord_server_id = ui.TextInput(
+        label="Discord Server ID",
+        style=discord.TextStyle.short,
+        placeholder="Digite o Discord Server ID",
+        required=True,
+        max_length=30,
     )
     project_title = ui.TextInput(
         label="Título",
@@ -112,7 +120,7 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
                 Project(
                     str(uuid4()),
                     coordinator_id,
-                    interaction.guild_id,
+                    self.discord_server_id.value,
                     self.project_title.value.upper(),
                     self.start_date.value,
                     self.end_date.value,
@@ -122,6 +130,7 @@ class AddProjectModal(ui.Modal, title="Adicionar Projeto"):
             await interaction.response.send_message("Projeto cadastrado com sucesso!")
 
         except (
+            DiscordServerIdError,
             EqualOrSmallerDateError,
             InvalidCoordinator,
             InvalidTimeInterval,
@@ -162,27 +171,13 @@ class ProjectCog(commands.Cog):
         Args:
             interaction (discord.Interaction): The interaction object.
         """
-        if (
-            self.project_service.find_project_by_type(
-                "discord_server_id", interaction.guild_id
-            )
-            is None
-        ):
-            if is_admin(interaction.user.id):
-                modal = AddProjectModal(self.project_service)
-                await interaction.response.send_modal(modal)
 
-                logger.info("adicionar-projeto command user %s", interaction.user.name)
-                return
-        else:
-            await interaction.response.send_message(
-                "Já existe um projeto cadastrado nesse servidor."
-            )
-            logger.error(
-                "User (discord_id: %s)"
-                + "tried to add a project, but alredy has a project in the server.",
-                interaction.user.id,
-            )
+        if is_admin(interaction.user.id):
+            modal = AddProjectModal(self.project_service)
+            await interaction.response.send_modal(modal)
+
+            logger.info("adicionar-projeto command user %s", interaction.user.name)
+            return
 
         await interaction.response.send_message(
             "Você não tem permissão para adicionar projeto."
