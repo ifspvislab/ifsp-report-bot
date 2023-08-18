@@ -163,11 +163,11 @@ class ParticipationCog(commands.Cog):
             )
             await interaction.response.send_modal(modal)
             logger.info("adicionar-participação command user %s", interaction.user.name)
-
-        logger.warning(
-            "User %s tried to add a participation, but does not have permission.",
-            interaction.user.name,
-        )
-        await interaction.response.send_message(
-            "Você não tem permissão para adicionar participação."
-        )
+        else:
+            logger.warning(
+                "User %s tried to add a participation, but does not have permission.",
+                interaction.user.name,
+            )
+            await interaction.response.send_message(
+                "Você não tem permissão para adicionar participação."
+            )
