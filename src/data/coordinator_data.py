@@ -8,6 +8,7 @@ Classes:
     CoordinatorData: A class for managing coordinator data.
 
 """
+import os
 from dataclasses import dataclass
 
 
@@ -46,6 +47,8 @@ class CoordinatorData:
         Adds a new coordinator to the coordinators.csv file.
     """
 
+    coordinators_file_path = "assets/data/coordinators.csv"
+
     def _row_to_coordinator(self, row: str):
         """
         Converts a row of data from the coordinators.csv file into a dictionary.
@@ -70,7 +73,13 @@ class CoordinatorData:
         :return: A list of dictionaries, where each dictionary represents a coordinator.
         :rtype: list[dict]
         """
-        with open("assets/data/coordinators.csv", "r", encoding="utf-8") as file:
+
+        if not os.path.exists(self.coordinators_file_path):
+            # pylint: disable=unused-variable
+            with open(self.coordinators_file_path, "w", encoding="utf-8") as new_file:
+                pass
+
+        with open(self.coordinators_file_path, "r", encoding="utf-8") as file:
             coordinators = []
             for row in file:
                 coordinators.append(self._row_to_coordinator(row))
@@ -91,7 +100,7 @@ class CoordinatorData:
         """
 
         with open(
-            "assets/data/coordinators.csv", "a", encoding="UTF-8"
+            self.coordinators_file_path, "a", encoding="UTF-8"
         ) as coordinator_data:
             coordinator_data.write(
                 f"{coord.coord_id},{coord.registration},"
