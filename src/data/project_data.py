@@ -85,10 +85,11 @@ class ProjectData:
         """
 
         if not os.path.exists(self.projects_file_path):
+            # pylint: disable=unused-variable
             with open(self.projects_file_path, "w", encoding="utf-8") as new_file:
                 pass
 
-        with open("assets/data/projects.csv", "r", encoding="utf-8") as file:
+        with open(self.projects_file_path, "r", encoding="utf-8") as file:
             projects = []
             for row in file:
                 projects.append(self._row_to_project(row))
