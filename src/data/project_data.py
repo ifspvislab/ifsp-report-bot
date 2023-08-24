@@ -9,6 +9,7 @@ Classes:
 
 """
 
+import os
 from dataclasses import dataclass
 from datetime import date, datetime
 
@@ -51,6 +52,8 @@ class ProjectData:
         Adds a new project to the projects.csv file.
     """
 
+    projects_file_path = "assets/data/projects.csv"
+
     def _row_to_project(self, row: str) -> dict:
         """
         Convert a row of project data to a dictionary.
@@ -81,6 +84,10 @@ class ProjectData:
         :rtype: list[dict]
         """
 
+        if not os.path.exists(self.projects_file_path):
+            with open(self.projects_file_path, "w", encoding="utf-8") as new_file:
+                pass
+
         with open("assets/data/projects.csv", "r", encoding="utf-8") as file:
             projects = []
             for row in file:
@@ -103,7 +110,7 @@ class ProjectData:
         :type end_date: int
         """
 
-        with open("assets/data/projects.csv", "a", encoding="UTF-8") as project_data:
+        with open(self.projects_file_path, "a", encoding="UTF-8") as project_data:
             # pylint: disable=line-too-long
             project_data.write(
                 f"{project.project_id},{project.coordinator_id},"
