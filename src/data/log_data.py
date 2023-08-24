@@ -6,6 +6,7 @@ Class:
 """
 
 import csv
+import os
 from dataclasses import dataclass
 
 
@@ -34,6 +35,8 @@ class LogData:
     Class for log management and member ID validation.
     """
 
+    logs_file_path = "assets/data/logs.csv"
+
     def _row_to_log(self, row: str) -> dict:
         """
         Converts a row from the logs.csv file into a Log object.
@@ -56,7 +59,13 @@ class LogData:
         Returns:
             list[Log]: A list of Log objects representing the log entries.
         """
-        with open("assets/data/logs.csv", "r", encoding="utf-8") as file:
+
+        if not os.path.exists(self.logs_file_path):
+            # pylint: disable=unused-variable
+            with open(self.logs_file_path, "w", encoding="utf-8") as new_file:
+                pass
+
+        with open(self.logs_file_path, "r", encoding="utf-8") as file:
             logs = []
             for row in file:
                 logs.append(self._row_to_log(row))
@@ -83,6 +92,6 @@ class LogData:
             log.date,
             log.action,
         ]
-        with open("assets/data/logs.csv", "a", newline="", encoding="utf-8") as csvfile:
+        with open(self.logs_file_path, "a", newline="", encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile, delimiter=",")
             writer.writerow(log_list)

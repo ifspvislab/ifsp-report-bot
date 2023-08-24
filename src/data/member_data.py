@@ -11,6 +11,8 @@ Classes:
     - :class:`MemberData`: Class for managing member data.
 
 """
+
+import os
 from dataclasses import dataclass
 
 
@@ -49,6 +51,8 @@ class MemberData:
         - ``load_members() -> list[dict]``: Load members from the CSV file.
     """
 
+    members_file_path = "assets/data/members.csv"
+
     # pylint: disable=duplicate-code
     def _row_to_member(self, row: str) -> Member:
         """
@@ -75,7 +79,7 @@ class MemberData:
         :type member: Member
 
         """
-        with open("assets/data/members.csv", "a", encoding="UTF-8") as member_data:
+        with open(self.members_file_path, "a", encoding="UTF-8") as member_data:
             member_data.write(
                 f"{member.member_id},{member.registration},"
                 + f"{member.discord_id},{member.name},{member.email}\n"
@@ -91,7 +95,13 @@ class MemberData:
         :rtype: list[dict]
 
         """
-        with open("assets/data/members.csv", "r", encoding="utf-8") as file:
+
+        if not os.path.exists(self.members_file_path):
+            # pylint: disable=unused-variable
+            with open(self.members_file_path, "w", encoding="utf-8") as new_file:
+                pass
+
+        with open(self.members_file_path, "r", encoding="utf-8") as file:
             members = []
             for row in file:
                 members.append(self._row_to_member(row))

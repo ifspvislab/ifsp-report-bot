@@ -24,7 +24,7 @@ Variables:
 
 """
 
-
+import os
 from dataclasses import dataclass
 from datetime import datetime, time
 
@@ -62,6 +62,8 @@ class AttendanceData:
     """
     Class for unifying all functions that work with .csv files
     """
+
+    attendances_file_path = "assets/data/attendances.csv"
 
     def _strtime_to_time(self, strtime: str) -> time:
         """
@@ -132,7 +134,13 @@ class AttendanceData:
         :return: The list of all saved Attendences
         :rtype: list[Attendance]
         """
-        with open("assets/data/attendances.csv", "r", encoding="utf-8") as file:
+
+        if not os.path.exists(self.attendances_file_path):
+            # pylint: disable=unused-variable
+            with open(self.attendances_file_path, "w", encoding="utf-8") as new_file:
+                pass
+
+        with open(self.attendances_file_path, "r", encoding="utf-8") as file:
             attendances = []
             for row in file:
                 attendances.append(self._row_to_attend(row))
@@ -152,7 +160,7 @@ class AttendanceData:
         buffer = []
         is_new = True
 
-        with open("assets/data/attendances.csv", "r", encoding="utf8") as file:
+        with open(self.attendances_file_path, "r", encoding="utf8") as file:
             for row in file:
                 data = row.split(",")
                 student_id = data[1]
@@ -169,5 +177,5 @@ class AttendanceData:
         if is_new:
             buffer.append(self._attend_to_row(new_attend))
 
-        with open("assets/data/attendances.csv", "w", encoding="utf8") as file:
+        with open(self.attendances_file_path, "w", encoding="utf8") as file:
             file.writelines(buffer)

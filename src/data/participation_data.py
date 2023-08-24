@@ -2,6 +2,7 @@
 Participation Data
 """
 
+import os
 from dataclasses import dataclass
 from datetime import date, datetime
 
@@ -26,6 +27,8 @@ class ParticipationData:
 
     def __init__(self) -> None:
         pass
+
+    participations_file_path = "assets/data/participations.csv"
 
     def row_to_participation(self, row: str) -> Participation:
         """
@@ -55,8 +58,13 @@ class ParticipationData:
         :rtype: list.
         """
 
+        if not os.path.exists(self.participations_file_path):
+            # pylint: disable=unused-variable
+            with open(self.participations_file_path, "w", encoding="utf-8") as new_file:
+                pass
+
         participations = []
-        with open("assets/data/participations.csv", "r", encoding="utf-8") as file:
+        with open(self.participations_file_path, "r", encoding="utf-8") as file:
             for row in file:
                 participations.append(self.row_to_participation(row))
         return participations
@@ -71,7 +79,7 @@ class ParticipationData:
         initial_date = datetime.strftime(participation.initial_date, "%d/%m/%Y")
         final_date = datetime.strftime(participation.final_date, "%d/%m/%Y")
         with open(
-            "assets/data/participations.csv", "a", encoding="UTF-8"
+            self.participations_file_path, "a", encoding="UTF-8"
         ) as participation_data:
             participation_data.write(
                 f"{participation.participation_id},{participation.registration},"
