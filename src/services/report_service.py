@@ -164,15 +164,15 @@ class ReportService:
         current_date = datetime.now().date()
         current_month = current_date.month
         current_day = current_date.day
-        july_day_range = range(23, 32)
+        august_day_range = range(23, 32)
         december_day_range = range(1, 11)
 
         if not (
-            (current_month == 7 and current_day in july_day_range)
+            (current_month == 8 and current_day in august_day_range)
             or (current_month == 12 and current_day in december_day_range)
         ):
             raise InvalidRequestPeriod(
-                "O período de submissões ocorre entre os dias 23 a 31 de julho e"
+                "O período de submissões ocorre entre os dias 23 a 31 de agosto e"
                 " 1 a 10 de dezembro."
             )
 
