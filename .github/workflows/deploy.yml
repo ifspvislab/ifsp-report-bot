@@ -1,6 +1,5 @@
 name: deploy
 
-
 env:
   SERVER_URL: ${{ secrets.SERVER_URL }}
   PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
