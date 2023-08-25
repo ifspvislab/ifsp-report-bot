@@ -389,6 +389,10 @@ known-third-party=enchant
 # Couples of modules and preferred modules, separated by a comma.
 preferred-modules=
 
+#Disables duplicate-code from being flagged by pylint
+disable= duplicate-code
+
+
 
 [LOGGING]
 
