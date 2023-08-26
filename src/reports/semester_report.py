@@ -56,6 +56,7 @@ class SemesterReportData:
         next_month = datetime.now() + timedelta(days=30)
         return datetime(next_month.year, next_month.month, 5)
 
+
 class SemesterReport:
     """
     Class for generating a semester report.
