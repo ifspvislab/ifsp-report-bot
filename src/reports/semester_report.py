@@ -11,7 +11,7 @@ Classes:
 """
 import locale
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 
 from reportlab.lib import colors
@@ -46,18 +46,15 @@ class SemesterReportData:
     performed_activities: str
     results: str
 
-    def current_date(self) -> datetime:
+    def day_05_of_next_month(self) -> datetime:
         """
-        Returns the current date of submission
+        Returns the date representing the 5th day of the next month.
 
         Returns:
-            datetime: The current date of submission
+            datetime: The date of the 5th day in the next month.
         """
-        submission_date = datetime.now()
-        return datetime(
-            submission_date.year, submission_date.month, submission_date.day
-        )
-
+        next_month = datetime.now() + timedelta(days=30)
+        return datetime(next_month.year, next_month.month, 5)
 
 class SemesterReport:
     """
@@ -88,19 +85,19 @@ class SemesterReport:
         self.data = data
         self.content = []
 
+    # pylint: disable=inconsistent-return-statements
     @staticmethod
-    def current_semester() -> datetime:
+    def current_semester() -> str:
         """
         Returns the current semester of submission, 1st or 2nd
         Returns:
-            datetime: The current semester of submission, 1st or 2nd
+            str: The current semester of submission, 1st or 2nd
         """
         current_month = datetime.now().month
-        if current_month <= 6:
-            semester = "1º"
-            return semester
-        semester = "2º"
-        return semester
+        if current_month == 8:
+            return "1º"
+        if current_month == 12:
+            return "2º"
 
     def generate(self):
         """
@@ -176,7 +173,7 @@ class SemesterReport:
         )
         student_name_par = Paragraph(self.data.student_name, styles.table_content_style)
         submission_date_par = Paragraph(
-            self.data.current_date().strftime("%d/%m/%Y"),
+            self.data.day_05_of_next_month().strftime("%d/%m/%Y"),
             styles.table_content_style,
         )
 
