@@ -21,16 +21,9 @@ from discord.ext import commands
 
 import settings
 from data import Project
-from services import (
-    DiscordServerIdError,
-    EqualOrSmallerDateError,
-    InvalidCoordinator,
-    InvalidEndDate,
-    InvalidTimeInterval,
-    ProjectAlreadyExists,
-    ProjectService,
-    is_admin,
-)
+from services import (DiscordServerIdError, EqualOrSmallerDateError,
+                      InvalidCoordinator, InvalidEndDate, InvalidTimeInterval,
+                      ProjectAlreadyExists, ProjectService, is_admin)
 from services.validation import RegistrationError, verify_registration_format
 
 logger = settings.logging.getLogger(__name__)

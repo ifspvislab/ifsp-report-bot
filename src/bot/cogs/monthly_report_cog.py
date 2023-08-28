@@ -1,11 +1,11 @@
 """
-semester_report
-============
+monthly_report_cog.py
+
+This module defines classes for modal forms used in Discord bot interactions.
 
 Classes:
-    - SemesterReportCog: The cog that handles all interactions related to the semester report.
-    - SemesterReportForm: A form that allows the user to send the needed data to create
-    the semester report.
+- MonthyReportForm: Represents a monthly report form for generating monthly reports.
+
 """
 from io import BytesIO
 
@@ -15,22 +15,23 @@ from discord.ext import commands
 
 import settings
 from data import Member, Project
-from services import (CoordinatorService, MemberService, ParticipationService,
-                      ProjectService, ReportService)
-from services.report_service import (CoordinatorDoesNotExist, InvalidMember,
-                                     InvalidRequestPeriod,
-                                     ParticipationDoesNotExisInServer,
-                                     ParticipationDoesNotExist,
-                                     ProjectDoesNotExist)
+from services import (CoordinatorService, MemberService, MonthlyReportService,
+                      ParticipationService, ProjectService)
+from services.monthly_report_service import (CoordinatorDoesNotExist,
+                                             InvalidMember,
+                                             InvalidRequestPeriod,
+                                             ParticipationDoesNotExisInServer,
+                                             ParticipationDoesNotExist,
+                                             ProjectDoesNotExist)
 
 logger = settings.logging.getLogger(__name__)
 
 
-class SemesterReportCog(commands.Cog):
+class MonthlyReportCog(commands.Cog):
     """
-    Command to display the SemesterReportForm
+    Command to display the MonthlyReportForm
     Methods:
-        - send_modal: Sends the SemesterReportForm as a modal in response to an interaction.
+        - send_modal: Sends the MonthlyReportForm as a modal in response to an interaction.
     """
 
     # pylint: disable=too-many-arguments
@@ -38,24 +39,24 @@ class SemesterReportCog(commands.Cog):
         self,
         member_service: MemberService,
         project_service: ProjectService,
-        report_service: ReportService,
+        monthly_report_service: MonthlyReportService,
         coordinator_service: CoordinatorService,
         participation_service: ParticipationService,
     ):
         super().__init__()
         self.member_service = member_service
         self.project_service = project_service
-        self.report_service = report_service
+        self.monthly_report_service = monthly_report_service
         self.coordinator_service = coordinator_service
         self.participation_service = participation_service
 
     @app_commands.command(
-        name="relatorio-semestral",
-        description="comando para abrir o formulário para gerar um relatório de ensino semestral",
+        name="relatorio-mensal",
+        description="comando para abrir o formulário para gerar um relatório de ensino mensal",
     )
-    async def open_semester_report_form(self, interaction: discord.Interaction):
+    async def open_monthly_report_form(self, interaction: discord.Interaction):
         """
-        Command 'relatorio-semestral' to open the semester report form.
+        Command 'relatorio-mensal' to open the monthly report form.
 
         :param interaction: The Discord interaction object.
         :type interaction: discord.Interaction
@@ -79,21 +80,25 @@ class SemesterReportCog(commands.Cog):
                     "Este servidor não está cadastrado como projeto."
                 )
 
-            invalid_request_period = self.report_service.invalid_request_period()
+            invalid_request_period = (
+                self.monthly_report_service.invalid_request_period()
+            )
 
-            valid_member_for_request = self.report_service.verifiy_member_validity(
-                student,
-                project,
+            valid_member_for_request = (
+                self.monthly_report_service.verifiy_member_validity(
+                    student,
+                    project,
+                )
             )
 
             if valid_member_for_request and not invalid_request_period:
-                logger.info("Semester report user %s", interaction.user.name)
+                logger.info("Monthly report user %s", interaction.user.name)
                 # pylint: disable=too-many-function-args
                 await interaction.response.send_modal(
-                    SemesterReportForm(
+                    MonthlyReportForm(
                         student,
                         project,
-                        self.report_service,
+                        self.monthly_report_service,
                         self.coordinator_service,
                         self.participation_service,
                     )
@@ -107,21 +112,21 @@ class SemesterReportCog(commands.Cog):
 
         except ParticipationDoesNotExisInServer as exception:
             logger.error(
-                "User %s tried to generate the semester report in the wrong project server",
+                "User %s tried to generate the monthly report in the wrong project server",
                 interaction.user.name,
             )
             await interaction.response.send_message(exception)
 
         except InvalidMember as exception:
             logger.error(
-                "User %s without permission tried to generate the semester report",
+                "User %s without permission tried to generate the monthly report",
                 interaction.user.name,
             )
             await interaction.response.send_message(exception)
 
         except InvalidRequestPeriod as exception:
             logger.error(
-                "User %s tried to generate semester report outside of the allowed period",
+                "User %s tried to generate monthly report outside of the allowed period",
                 interaction.user.name,
             )
             await interaction.response.send_message(exception)
@@ -137,11 +142,11 @@ class SemesterReportCog(commands.Cog):
             await interaction.response.send_message(exception)
 
 
-class SemesterReportForm(ui.Modal):
+class MonthlyReportForm(ui.Modal):
     """
-    Class representing a semester report form.
+    Class representing a monthly report form.
 
-    This class defines a modal form for generating semester reports.
+    This class defines a modal form for generating monthly reports.
 
     """
 
@@ -155,22 +160,22 @@ class SemesterReportForm(ui.Modal):
         label="Atividades planejadas",
         style=discord.TextStyle.paragraph,
         placeholder=placeholder1,
-        min_length=300,
-        max_length=600,
+        min_length=200,
+        max_length=500,
     )
     performed_activities = ui.TextInput(
         label="Atividades realizadas",
         style=discord.TextStyle.paragraph,
         placeholder=placeholder2,
-        min_length=300,
-        max_length=600,
+        min_length=200,
+        max_length=500,
     )
     results = ui.TextInput(
         label="Resultados obtidos",
         style=discord.TextStyle.paragraph,
         placeholder=placeholder3,
-        min_length=300,
-        max_length=600,
+        min_length=200,
+        max_length=500,
     )
 
     # pylint: disable=too-many-arguments
@@ -178,12 +183,12 @@ class SemesterReportForm(ui.Modal):
         self,
         member: Member,
         project: Project,
-        report_service: ReportService,
+        monthly_report_service: MonthlyReportService,
         coordinator_service: CoordinatorService,
         participation_service: ParticipationService,
     ) -> None:
         """
-        Initialize the SemesterReportForm instance.
+        Initialize the MonthlyReportForm instance.
 
         :param member_service: An instance of the MemberService class.
         :type member_service: MemberService
@@ -193,29 +198,29 @@ class SemesterReportForm(ui.Modal):
         :type coordinator_service: CoordinatorService
         :param participation_service: An instance of the ParticipationService class.
         :type participation_service: ParticipationService
-        :param report_service: An instance of the ReportService class.
-        :type report_service: ReportService
+        :param monthlyreport_service: An instance of the MonthlyReportService class.
+        :type monthly_report_service: MonthlyReportService
         """
-        super().__init__(title="Relatório Semestral")
+        super().__init__(title="Relatório Mensal")
         self.member = member
         self.project = project
         self.coordinator_service = coordinator_service
         self.participation_service = participation_service
-        self.report_service = report_service
+        self.monthly_report_service = monthly_report_service
 
     async def on_submit(self, interaction: discord.Interaction, /):
         """
         Handle the submit event of the form.
 
         This method is called when the user submits the form.
-        It generates the semester report based on the form data and sends it to the user.
+        It generates the monthly report based on the form data and sends it to the user.
 
         :param interaction: The Discord interaction object.
         :type interaction: discord.Interaction
 
         """
 
-        valid_data_for_report = self.report_service.verifiy_member_validity(
+        valid_data_for_report = self.monthly_report_service.verifiy_member_validity(
             self.member,
             self.project,
         )
@@ -224,7 +229,7 @@ class SemesterReportForm(ui.Modal):
 
             project_title, coordinator_name, student_name = valid_data_for_report
 
-            generated_report = self.report_service.generate_semester_report(
+            generated_report = self.monthly_report_service.generate_monthly_report(
                 project_title=project_title,
                 project_manager=coordinator_name,
                 student_name=student_name,
@@ -235,7 +240,7 @@ class SemesterReportForm(ui.Modal):
 
             report = generated_report
 
-            name_of_report, content = self.report_service.generate_report_info(
+            name_of_report, content = self.monthly_report_service.generate_report_info(
                 student_name
             )
 

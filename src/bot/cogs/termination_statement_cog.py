@@ -19,16 +19,10 @@ from discord import app_commands, ui
 from discord.ext import commands
 
 import settings
-from services import (
-    CoordinatorNotFound,
-    MemberNotFound,
-    OutofRangeTerminationDate,
-    ParticipationNotFound,
-    ParticipationNotFoundInServer,
-    ProjectNotFound,
-    SlashAbsence,
-    TerminationStatementService,
-)
+from services import (CoordinatorNotFound, MemberNotFound,
+                      OutofRangeTerminationDate, ParticipationNotFound,
+                      ParticipationNotFoundInServer, ProjectNotFound,
+                      SlashAbsence, TerminationStatementService)
 
 locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
 

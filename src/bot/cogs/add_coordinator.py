@@ -18,14 +18,8 @@ from discord.ext import commands
 
 import settings
 from data import Coordinator
-from services import (
-    CoordinatorAlreadyExists,
-    CoordinatorService,
-    DiscordIdError,
-    EmailError,
-    RegistrationError,
-    is_admin,
-)
+from services import (CoordinatorAlreadyExists, CoordinatorService,
+                      DiscordIdError, EmailError, RegistrationError, is_admin)
 
 logger = settings.logging.getLogger(__name__)
 
