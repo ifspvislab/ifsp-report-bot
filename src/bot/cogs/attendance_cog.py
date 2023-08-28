@@ -23,11 +23,19 @@ from discord.ext import commands, tasks
 
 import settings
 from data import MONTHS, Member
-from services import (AttendanceService, MemberService, ParticipationService,
-                      ProjectService)
-from services.attendance_service import (DayOutOfRange, EntryTimeAfterExitTime,
-                                         InvalidDate, InvalidTime,
-                                         TimeOutOfRange)
+from services import (
+    AttendanceService,
+    MemberService,
+    ParticipationService,
+    ProjectService,
+)
+from services.attendance_service import (
+    DayOutOfRange,
+    EntryTimeAfterExitTime,
+    InvalidDate,
+    InvalidTime,
+    TimeOutOfRange,
+)
 
 logger = settings.logging.getLogger(__name__)
 

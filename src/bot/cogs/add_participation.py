@@ -19,9 +19,16 @@ from discord.ext import commands
 
 import settings
 from data import Participation
-from services import (CoordinatorService, DateError, MemberError,
-                      ParticipationAlreadyExists, ParticipationService,
-                      ProjectError, ProjectService, RegistrationError)
+from services import (
+    CoordinatorService,
+    DateError,
+    MemberError,
+    ParticipationAlreadyExists,
+    ParticipationService,
+    ProjectError,
+    ProjectService,
+    RegistrationError,
+)
 
 logger = settings.logging.getLogger(__name__)
 

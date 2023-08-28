@@ -10,8 +10,7 @@ Classes:
 import settings
 from data import Coordinator, CoordinatorData
 
-from .validation import (verify_discord_id, verify_email,
-                         verify_registration_format)
+from .validation import verify_discord_id, verify_email, verify_registration_format
 
 logger = settings.logging.getLogger(__name__)
 

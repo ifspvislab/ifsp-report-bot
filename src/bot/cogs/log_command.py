@@ -8,8 +8,14 @@ from discord import Member, app_commands
 from discord.ext import commands
 
 import settings
-from services import (CoordinatorService, IdDoesNotExist, IncorrectDateFilter,
-                      InvalidReportSize, LogService, NoStartDate)
+from services import (
+    CoordinatorService,
+    IdDoesNotExist,
+    IncorrectDateFilter,
+    InvalidReportSize,
+    LogService,
+    NoStartDate,
+)
 from services.validation import DiscordIdError
 
 logger = settings.logging.getLogger(__name__)

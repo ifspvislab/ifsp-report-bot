@@ -12,14 +12,29 @@ import discord
 from discord.ext import commands
 
 import settings
-from services import (CoordinatorService, LogService, MemberService,
-                      MonthlyReportService, ParticipationService,
-                      ProjectService, ReportService,
-                      TerminationStatementService)
+from services import (
+    CoordinatorService,
+    LogService,
+    MemberService,
+    MonthlyReportService,
+    ParticipationService,
+    ProjectService,
+    ReportService,
+    TerminationStatementService,
+)
 
-from .cogs import (AttendanceCog, CoordinatorCog, Events, LogCommand,
-                   MemberCog, MonthlyReportCog, ParticipationCog, ProjectCog,
-                   SemesterReportCog, TerminationStatementCog)
+from .cogs import (
+    AttendanceCog,
+    CoordinatorCog,
+    Events,
+    LogCommand,
+    MemberCog,
+    MonthlyReportCog,
+    ParticipationCog,
+    ProjectCog,
+    SemesterReportCog,
+    TerminationStatementCog,
+)
 
 logger = settings.logging.getLogger(__name__)
 

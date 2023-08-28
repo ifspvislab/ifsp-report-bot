@@ -5,12 +5,17 @@ This module contains the main function to start the IFSP Report Bot.
 """
 
 from bot import start_bot
-from data import (CoordinatorData, LogData, MemberData, ParticipationData,
-                  ProjectData)
-from services import (CoordinatorService, LogService,
-                      MemberService, MonthlyReportService,
-                      ParticipationService, ProjectService, ReportService,
-                      TerminationStatementService)
+from data import CoordinatorData, LogData, MemberData, ParticipationData, ProjectData
+from services import (
+    CoordinatorService,
+    LogService,
+    MemberService,
+    MonthlyReportService,
+    ParticipationService,
+    ProjectService,
+    ReportService,
+    TerminationStatementService,
+)
 
 
 def main():
@@ -31,7 +36,6 @@ def main():
 
     member_data = MemberData()
     member_service = MemberService(member_data)
-
 
     participation_data = ParticipationData()
     participation_service = ParticipationService(

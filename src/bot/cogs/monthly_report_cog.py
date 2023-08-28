@@ -15,14 +15,21 @@ from discord.ext import commands
 
 import settings
 from data import Member, Project
-from services import (CoordinatorService, MemberService, MonthlyReportService,
-                      ParticipationService, ProjectService)
-from services.monthly_report_service import (CoordinatorDoesNotExist,
-                                             InvalidMember,
-                                             InvalidRequestPeriod,
-                                             ParticipationDoesNotExisInServer,
-                                             ParticipationDoesNotExist,
-                                             ProjectDoesNotExist)
+from services import (
+    CoordinatorService,
+    MemberService,
+    MonthlyReportService,
+    ParticipationService,
+    ProjectService,
+)
+from services.monthly_report_service import (
+    CoordinatorDoesNotExist,
+    InvalidMember,
+    InvalidRequestPeriod,
+    ParticipationDoesNotExisInServer,
+    ParticipationDoesNotExist,
+    ProjectDoesNotExist,
+)
 
 logger = settings.logging.getLogger(__name__)
 
