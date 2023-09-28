@@ -10,10 +10,10 @@ from services import (
     CoordinatorService,
     LogService,
     MemberService,
+    MonthlyReportService,
     ParticipationService,
     ProjectService,
     ReportService,
-    StudentService,
     TerminationStatementService,
 )
 
@@ -37,14 +37,19 @@ def main():
     member_data = MemberData()
     member_service = MemberService(member_data)
 
-    student_service = StudentService()
-
     participation_data = ParticipationData()
     participation_service = ParticipationService(
         participation_data, member_data, project_service, member_service
     )
 
     report_service = ReportService(
+        participation_data,
+        participation_service,
+        coordinator_service,
+        coordinator_data,
+    )
+
+    monthly_report_service = MonthlyReportService(
         participation_data,
         participation_service,
         coordinator_service,
@@ -69,7 +74,8 @@ def main():
     )
 
     start_bot(
-        student_service,
+        # student_service,
+        monthly_report_service,
         member_service,
         coordinator_service,
         project_service,

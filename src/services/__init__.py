@@ -24,6 +24,7 @@ from .log_service import (
     NoStartDate,
 )
 from .member_service import MemberService
+from .monthly_report_service import MonthlyReportService
 from .participation_service import (
     DateError,
     MemberError,
@@ -42,7 +43,6 @@ from .project_service import (
     ProjectService,
 )
 from .report_service import ReportService
-from .student_service import StudentService
 from .termination_service import (
     CoordinatorNotFound,
     InvalidDayForMonth,
